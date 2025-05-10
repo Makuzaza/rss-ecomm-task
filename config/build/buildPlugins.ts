@@ -7,6 +7,7 @@ import CopyPlugin from "copy-webpack-plugin";
 import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
 // types
 import { BuildOptions } from "./types/types";
+import dotenv from "dotenv";
 
 export function buildPlugins({
   mode,
@@ -16,16 +17,23 @@ export function buildPlugins({
   const isDev = mode === "development";
   const isProd = mode === "production";
 
+  const env = dotenv.config().parsed || {};
+  const envKeys = Object.entries(env).reduce((acc, [key, value]) => {
+    acc[`process.env.${key}`] = JSON.stringify(value);
+    return acc;
+  }, {} as Record<string, string>);
+
   const plugins: Configuration["plugins"] = [
     new HtmlWebpackPlugin({
       template: paths.html,
       favicon: path.resolve(paths.public, "favicon.ico"),
     }),
+    new webpack.DefinePlugin(envKeys),
   ];
 
-  if (isDev) {
-    plugins.push(new ForkTsCheckerWebpackPlugin());
-  }
+  // if (isDev) {
+  //   plugins.push(new ForkTsCheckerWebpackPlugin());
+  // }
 
   if (isProd) {
     plugins.push(
