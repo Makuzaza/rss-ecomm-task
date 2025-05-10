@@ -24,9 +24,9 @@ The following NPM scripts are available for development and maintenance:
 A new project named `rss-ecommerce` was successfully created in the [CommerceTools Merchant Center](https://mc.commercetools.com/).
 
 Configured settings:
-- **Currency**: EUR
+- **Currency**: EUR, $Doll$
 - **Language**: en
-- **Country**: DE
+- **Country**: EU, US
 - **Zone**: Europe
 
 Other configurations such as Taxes, Channels, and Shipping Methods are intentionally not set at this stage, as they will be handled in later sprints.
