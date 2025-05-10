@@ -34,16 +34,19 @@ export function buildPlugins({
         chunkFilename: "css/[name].[contenthash:8].css",
       })
     );
-    plugins.push(
-      new CopyPlugin({
-        patterns: [
-          {
-            from: path.resolve(paths.public, "locales"),
-            to: path.resolve(paths.output, "locales"),
-          },
-        ],
-      })
-    );
+
+    // CopyPlugin
+
+    // plugins.push(
+    //   new CopyPlugin({
+    //     patterns: [
+    //       {
+    //         from: path.resolve(paths.public, "locales"),
+    //         to: path.resolve(paths.output, "locales"),
+    //       },
+    //     ],
+    //   })
+    // );
 
     if (analyzer) {
       plugins.push(new BundleAnalyzerPlugin());
