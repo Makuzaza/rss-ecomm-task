@@ -136,4 +136,4 @@ dist
 .pnp.*
 
 # webpack build
-.build/
+build/
