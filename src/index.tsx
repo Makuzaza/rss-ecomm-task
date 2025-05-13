@@ -2,6 +2,8 @@ import { createRoot } from "react-dom/client";
 import { App } from "./components/App";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { LazyAbout } from "@/pages/about/About.lazy";
+import Login from "@/pages/login/Login";
+import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
 
 const root = document.getElementById("root");
@@ -28,6 +30,22 @@ const router = createBrowserRouter([
       {
         path: "/shop",
         element: <h1>Shop</h1>,
+      },
+      {
+        path: "/login",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <Login />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/register",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <Register />
+          </Suspense>
+        ),
       },
     ],
   },
