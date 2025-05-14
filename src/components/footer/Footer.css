@@ -78,14 +78,9 @@
   .social-item:hover {
     cursor: pointer;
     transform: scale(1.1);
-    box-shadow: 0 0.8em 0.8em -0.4em var(--box-shadow-hover);
   }
 
   .social-item:hover svg {
     fill: rgb(152, 194, 196)
-  }
-
-  .developer .social-item-link:hover {
-    color: var(--box-shadow-hover);
   }
 }
