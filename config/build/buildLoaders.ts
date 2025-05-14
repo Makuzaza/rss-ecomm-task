@@ -41,6 +41,15 @@ export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
     },
   };
 
+    // Regular CSS loader (for normal CSS files)
+    const cssLoader = {
+      test: /\.css$/i,
+      use: [
+        isDev ? "style-loader" : MiniCssExtractPlugin.loader,
+        "css-loader"
+      ],
+    };
+
   const scssLoader = {
     test: /\.s[ac]ss$/i,
     use: [
@@ -92,5 +101,5 @@ export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
     ],
   };
 
-  return [assetLoader, scssLoader, tsLoader, svgrLoader];
+  return [assetLoader, cssLoader, scssLoader, tsLoader, svgrLoader];
 }
