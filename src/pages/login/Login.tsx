@@ -24,9 +24,25 @@ const Login = () => {
 
     if (!password) {
       newErrors.password = "Password is required";
+    }
+    if (!/[A-Z]/.test(password)) {
+      newErrors.password = "Password must contain at least one uppercase letter (A-Z)";
       valid = false;
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    }
+    if (!/[a-z]/.test(password)) {
+      newErrors.password = "Password must contain at least one lowercase letter (a-z)";
+      valid = false;
+    }
+    if (!/[0-9]/.test(password)) {
+      newErrors.password = "Password must contain at least one digit (0-9)";
+      valid = false;
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      newErrors.password = "Password must contain at least one special character (!@#$%^&*)";
+      valid = false;
+    }
+    if (password !== password.trim()) {
+      newErrors.password = "Password must not contain leading or trailing whitespace";
       valid = false;
     }
 
