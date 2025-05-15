@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Register.css"; 
+import { useNavigate } from "react-router-dom"; 
+import { getAnonimusToken } from "@/api/getAnonimusToken";
+import { singnUp } from "@/api/singnUp";
+import { getLoginToken } from "@/api/login";
+import { adminClient, spaClient } from "@/shared/clients";
+
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -152,6 +158,8 @@ const Register = () => {
     return valid;
   };
 
+  const navigate = useNavigate();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -160,12 +168,47 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log("Registration submitted:", formData);
-      // CommerceTools
+    if (!validateForm()) return;
+
+    console.log("API:", process.env.CT_API_URL);
+    const anonymousToken = await getAnonimusToken(
+      adminClient.clientId,
+      adminClient.clientSecret,
+      adminClient.projectKey,
+      adminClient.authUrl
+    );
+
+    if (!anonymousToken) {
+      alert("Failed to get anonymous token");
+      return;
     }
+    
+    const userData = { ...formData };
+    delete userData.confirmPassword;
+
+    // Registration first step
+    const signupRes = await singnUp(userData, anonymousToken);
+
+    if (!signupRes.ok) {
+      const error = await signupRes.json();
+      alert(`Signup failed: ${error.message}`);
+      return;
+    }
+
+    //  Authorization (withPasswordFlow) second step 
+    const tokenRes = await getLoginToken(userData.email, userData.password);
+
+    if (!tokenRes.ok) {
+      const error = await tokenRes.json();
+      alert(`Login failed: ${error.message}`);
+      return;
+    }
+
+    const tokens = await tokenRes.json();
+    localStorage.setItem("token", tokens.access_token);
+    navigate("/shop");
   };
 
   return (

@@ -60,6 +60,6 @@ export function buildPlugins({
       plugins.push(new BundleAnalyzerPlugin());
     }
   }
-
+    console.log("ENV keys passed to DefinePlugin:", envKeys);
   return plugins;
 }

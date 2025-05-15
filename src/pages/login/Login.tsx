@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Login.css";
+import { spaClient } from "../../shared/clients";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -52,17 +54,54 @@ const Login = () => {
       }
     }
     
+    
     setErrors(newErrors);
     return valid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      // logic here
-      console.log("Login submitted:", { email, password });
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  try {
+    const body = new URLSearchParams();
+    body.append("grant_type", "password");
+    body.append("username", email);
+    body.append("password", password);
+    body.append("client_id", spaClient.clientId); // твой SPA clientId
+
+    const response = await fetch(
+      "https://auth.europe-west1.gcp.commercetools.com/oauth/api-rs-school/customers/token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: body.toString(),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Login error:", error);
+      alert(error.error_description || "Login failed");
+      return;
     }
-  };
+
+    const data = await response.json();
+    console.log("Login successful:", data);
+
+    // Сохраняем токен, например, в localStorage
+    localStorage.setItem("access_token", data.access_token);
+
+    // Перенаправление (если используешь react-router)
+    // navigate("/"); // если ты хочешь куда-то перенаправить
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    alert("Something went wrong during login.");
+  }
+};
 
   return (
     <div className="login-container">
