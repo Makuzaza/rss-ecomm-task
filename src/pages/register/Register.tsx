@@ -153,6 +153,7 @@ const Register = () => {
   };
 
   const apiClient = useApiClient();
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -164,33 +165,39 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log("Registration submitted:", formData);
-        try {
-          const result = await apiClient.registerCustomer({
-            email: formData.email,
-            password: formData.password,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            dateOfBirth: formData.dateOfBirth,
-            addresses: [
-              {
-                streetName: formData.street,
-                city: formData.city,
-                postalCode: formData.postalCode,
-                country: formData.country,
-              },
-            ],
-            defaultShippingAddress: 0,
-            defaultBillingAddress: 0,
-          });
+    setFormError(null); 
 
-          console.log("Registration successful:", result);
-          // Handle successful registration (e.g., redirect to login page)
-        } catch (err) {
-          console.error("Registration failed:", err);
+    if (validateForm()) {
+      try {
+        const result = await apiClient.registerCustomer({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          dateOfBirth: formData.dateOfBirth,
+          addresses: [
+            {
+              streetName: formData.street,
+              city: formData.city,
+              postalCode: formData.postalCode,
+              country: formData.country,
+            },
+          ],
+          defaultShippingAddress: 0,
+          defaultBillingAddress: 0,
+        });
+
+        console.log("Registration successful:", result);
+        // redirect or show success
+
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setFormError(err.message);
+        } else {
+          setFormError("Unexpected error occurred.");
         }
       }
+    }
   };
 
   return (
@@ -363,6 +370,7 @@ const Register = () => {
           <button type="submit" className="login-button">
             Register
           </button>
+          {formError && <p className="error-message">{formError}</p>}
         </form>
 
         <div className="signup-link">

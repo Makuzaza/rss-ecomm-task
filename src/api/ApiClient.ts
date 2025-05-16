@@ -5,6 +5,7 @@ import {
   CustomerSignInResult,
   MyCustomerDraft,
 } from "@commercetools/platform-sdk";
+import { CommerceToolsError } from "../moduls/interfaces";
 
 export class ApiClient {
   private BASE_URI = "https://api.europe-west1.gcp.commercetools.com";
@@ -58,7 +59,7 @@ export class ApiClient {
 
   public async registerCustomer(customerData: MyCustomerDraft): Promise<CustomerSignInResult> {
     const apiRoot = this.getApiRoot();
-    
+
     try {
       const { body } = await apiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
@@ -69,11 +70,19 @@ export class ApiClient {
 
       return body;
     } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
+        const err = error as CommerceToolsError;
+
+        const duplicateEmail = err.body.errors?.find(
+          (e) => e.code === "DuplicateField" && e.field === "email"
+        );
+
+        if (duplicateEmail) {
+          throw new Error("A customer with this email already exists.");
+        }
+
+        throw new Error(err.body.message || "Registration failed. Try again.");
     }
   }
 }
-
 // Singleton instance
 export const apiClient = new ApiClient();
