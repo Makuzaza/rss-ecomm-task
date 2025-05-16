@@ -67,7 +67,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // if (!validateForm()) return;
+    if (!validateForm()) return;
 
     const customerData = await apiClient.getCustomersByLastName(email);
 

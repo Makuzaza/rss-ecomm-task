@@ -97,8 +97,8 @@ export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
 
   return [
     assetLoader,
-    cssLoader,
     cssModulesLoader,
+    cssLoader,
     scssModulesLoader,
     scssLoader,
     tsLoader,
