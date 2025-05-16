@@ -64,15 +64,24 @@ const Login = () => {
     return valid;
   };
 
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
 
     if (!validateForm()) return;
 
-    const customerData = await apiClient.getCustomersByLastName(email);
+    try {
+      const { accessToken } = await apiClient.loginCustomer(email, password);
+      localStorage.setItem("accessToken", accessToken);
+      console.log("Login successful. Token:", accessToken);
+      // navigate("/shop");
 
-    console.log("Login submitted:", { email, password });
-    console.log("Customer data:", customerData);
+    } catch (err) {
+      console.error("Login error:", err);
+      setLoginError(err instanceof Error ? err.message : "Unexpected login error.");
+    }
   };
 
   return (
@@ -125,6 +134,7 @@ const Login = () => {
           <button type="submit" className="login-button">
             Sign In
           </button>
+          {loginError && <p className="error-message">{loginError}</p>}
         </form>
 
         <div className="signup-link">
