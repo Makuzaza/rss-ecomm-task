@@ -166,7 +166,6 @@ const Register = () => {
     e.preventDefault();
     if (validateForm()) {
       console.log("Registration submitted:", formData);
-      if (validateForm()) {
         try {
           const result = await apiClient.registerCustomer({
             email: formData.email,
@@ -192,7 +191,6 @@ const Register = () => {
           console.error("Registration failed:", err);
         }
       }
-    }
   };
 
   return (
