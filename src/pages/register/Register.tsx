@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Register.css"; 
+import { useApiClient } from "@/api/ApiClientContext";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -30,18 +31,17 @@ const Register = () => {
   });
 
   const countries = [
-    "United States",
-    "Canada",
-    "United Kingdom",
-    "Australia",
-    "Germany",
-    "France",
-    "Spain",
-    "Italy",
-    "India",
-    "China",
-    "Japan",
-    "Brazil"
+    { name: "United States", code: "US" },
+    { name: "Canada", code: "CA" },
+    { name: "United Kingdom", code: "GB" },
+    { name: "Germany", code: "DE" },
+    { name: "France", code: "FR" },
+    { name: "Spain", code: "ES" },
+    { name: "Italy", code: "IT" },
+    { name: "India", code: "IN" },
+    { name: "China", code: "CN" },
+    { name: "Japan", code: "JP" },
+    { name: "Brazil", code: "BR" },
   ];
 
   const validateForm = () => {
@@ -143,7 +143,7 @@ const Register = () => {
     if (!formData.country) {
       newErrors.country = "Country is required";
       valid = false;
-    } else if (!countries.includes(formData.country)) {
+    } else if (!countries.some((c) => c.code === formData.country)){
       newErrors.country = "Please select a valid country";
       valid = false;
     }
@@ -151,6 +151,8 @@ const Register = () => {
     setErrors(newErrors);
     return valid;
   };
+
+  const apiClient = useApiClient();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -160,11 +162,36 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       console.log("Registration submitted:", formData);
-      // CommerceTools
+      if (validateForm()) {
+        try {
+          const result = await apiClient.registerCustomer({
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            dateOfBirth: formData.dateOfBirth,
+            addresses: [
+              {
+                streetName: formData.street,
+                city: formData.city,
+                postalCode: formData.postalCode,
+                country: formData.country,
+              },
+            ],
+            defaultShippingAddress: 0,
+            defaultBillingAddress: 0,
+          });
+
+          console.log("Registration successful:", result);
+          // Handle successful registration (e.g., redirect to login page)
+        } catch (err) {
+          console.error("Registration failed:", err);
+        }
+      }
     }
   };
 
@@ -324,9 +351,9 @@ const Register = () => {
               className={errors.country ? "input-error" : ""}
             >
               <option value="">Select a country</option>
-              {countries.map(country => (
-                <option key={country} value={country}>
-                  {country}
+              {countries.map(({ name, code }) => (
+                <option key={code} value={code}>
+                  {name}
                 </option>
               ))}
             </select>

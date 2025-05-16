@@ -2,6 +2,8 @@ import { ClientBuilder, type Client } from "@commercetools/ts-client";
 import {
   createApiBuilderFromCtpClient,
   ApiRoot,
+  CustomerSignInResult,
+  MyCustomerDraft,
 } from "@commercetools/platform-sdk";
 
 export class ApiClient {
@@ -50,6 +52,24 @@ export class ApiClient {
       return body;
     } catch (error) {
       console.error("API Error:", error);
+      throw error;
+    }
+  }
+
+  public async registerCustomer(customerData: MyCustomerDraft): Promise<CustomerSignInResult> {
+    const apiRoot = this.getApiRoot();
+    
+    try {
+      const { body } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .signup()
+        .post({ body: customerData })
+        .execute();
+
+      return body;
+    } catch (error) {
+      console.error("Registration error:", error);
       throw error;
     }
   }
