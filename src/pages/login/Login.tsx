@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useApiClient } from "@/api/ApiClientContext";
 import "./Login.css";
 
 const Login = () => {
+  // API CLIENT
+  const apiClient = useApiClient();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({
@@ -27,15 +31,17 @@ const Login = () => {
       valid = false;
     } else {
       if (password.length < 6) {
-      newErrors.password = "Password must be at least 8 characters";
-      valid = false;
+        newErrors.password = "Password must be at least 8 characters";
+        valid = false;
       }
       if (!/[A-Z]/.test(password)) {
-        newErrors.password = "Password must contain at least one uppercase letter (A-Z)";
+        newErrors.password =
+          "Password must contain at least one uppercase letter (A-Z)";
         valid = false;
       }
       if (!/[a-z]/.test(password)) {
-        newErrors.password = "Password must contain at least one lowercase letter (a-z)";
+        newErrors.password =
+          "Password must contain at least one lowercase letter (a-z)";
         valid = false;
       }
       if (!/[0-9]/.test(password)) {
@@ -43,25 +49,30 @@ const Login = () => {
         valid = false;
       }
       if (!/[^A-Za-z0-9]/.test(password)) {
-        newErrors.password = "Password must contain at least one special character (!@#$%^&*)";
-      valid = false;
+        newErrors.password =
+          "Password must contain at least one special character (!@#$%^&*)";
+        valid = false;
       }
       if (password !== password.trim()) {
-        newErrors.password = "Password must not contain leading or trailing whitespace";
+        newErrors.password =
+          "Password must not contain leading or trailing whitespace";
         valid = false;
       }
     }
-    
+
     setErrors(newErrors);
     return valid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      // logic here
-      console.log("Login submitted:", { email, password });
-    }
+
+    // if (!validateForm()) return;
+
+    const customerData = await apiClient.getCustomersByLastName(email);
+
+    console.log("Login submitted:", { email, password });
+    console.log("Customer data:", customerData);
   };
 
   return (
@@ -81,7 +92,9 @@ const Login = () => {
               className={errors.email ? "input-error" : ""}
               placeholder="Enter your email"
             />
-            {errors.email && <span className="error-message">{errors.email}</span>}
+            {errors.email && (
+              <span className="error-message">{errors.email}</span>
+            )}
           </div>
 
           <div className="form-group">
