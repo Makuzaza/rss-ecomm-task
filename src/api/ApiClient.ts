@@ -11,7 +11,7 @@ export class ApiClient {
   private BASE_URI = "https://api.europe-west1.gcp.commercetools.com";
   private OAUTH_URI = "https://auth.europe-west1.gcp.commercetools.com";
   private PROJECT_KEY = "api-rs-school";
-  
+
   private readonly ADMIN_CREDENTIALS = { // Admin client (scope)
     clientId: "wkSBIH57z7eootNrTs-fx54U",
     clientSecret: "aDRhkOUKc51Z3-_cp45A_asnITocAjzM",
@@ -39,12 +39,25 @@ export class ApiClient {
       .build();
   }
 
-  private getApiRoot(): ApiRoot {
-    return createApiBuilderFromCtpClient(this.client);
+  private getApiRoot(isAdmin: boolean = false): ApiRoot {
+    return createApiBuilderFromCtpClient(this.buildClient(isAdmin));
+  }
+
+  private buildClient(isAdmin: boolean): Client {
+    const credentials = isAdmin ? this.ADMIN_CREDENTIALS : this.SPA_CREDENTIALS;
+
+    return new ClientBuilder()
+      .defaultClient(
+        this.BASE_URI,
+        credentials,
+        this.OAUTH_URI,
+        this.PROJECT_KEY
+      )
+      .build();
   }
 
   async getCustomersByLastName(lastName: string) {
-    const apiRoot = this.getApiRoot();
+    const apiRoot = this.getApiRoot(true); // Admin client
 
     try {
       const { body } = await apiRoot
@@ -64,7 +77,7 @@ export class ApiClient {
   }
 
   public async registerCustomer(customerData: MyCustomerDraft): Promise<CustomerSignInResult> {
-    const apiRoot = this.getApiRoot();
+    const apiRoot = this.getApiRoot(false);
 
     try {
       const { body } = await apiRoot
