@@ -73,14 +73,12 @@ const Login = () => {
     if (!validateForm()) return;
 
     try {
-      const { accessToken } = await apiClient.loginCustomer(email, password);
-      localStorage.setItem("accessToken", accessToken);
-      console.log("Login successful. Token:", accessToken);
+      await apiClient.loginCustomer(email, password);
+      console.log("Login successful");
       // navigate("/shop");
-
     } catch (err) {
       console.error("Login error:", err);
-      setLoginError(err instanceof Error ? err.message : "Unexpected login error.");
+      setLoginError(err instanceof Error ? err.message : "Unexpected error");
     }
   };
 

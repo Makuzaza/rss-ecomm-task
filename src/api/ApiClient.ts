@@ -5,7 +5,7 @@ import {
   CustomerSignInResult,
   MyCustomerDraft,
 } from "@commercetools/platform-sdk";
-import { CommerceToolsError } from "../moduls/interfaces";
+import { CommerceToolsError } from "../@types/interfaces";
 
 export class ApiClient {
   private BASE_URI = "https://api.europe-west1.gcp.commercetools.com";
@@ -103,7 +103,7 @@ export class ApiClient {
     }
   }
 
-  public async loginCustomer(email: string, password: string): Promise<{ accessToken: string }> {
+  public async loginCustomer(email: string, password: string): Promise<void> {
     const formData = new URLSearchParams();
     formData.append("grant_type", "password");
     formData.append("username", email);
@@ -137,7 +137,7 @@ export class ApiClient {
       throw new Error(errorMessage);
     }
 
-    return { accessToken: data.access_token };
+    localStorage.setItem("accessToken", data.access_token);
   }
 }
 // Singleton instance
