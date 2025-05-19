@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
 import { validateEmail, validatePassword } from "@/utils/loginValidation";
-// CSS
 import "./Login.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
-  // API CLIENT
+  // API Client
   const apiClient = useApiClient();
 
   const navigate = useNavigate();
@@ -22,12 +22,12 @@ const Login = () => {
   });
 
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Validate field in real-time
     if (name === "email") {
       setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
     } else if (name === "password") {
@@ -37,7 +37,6 @@ const Login = () => {
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Re-validate on blur
     if (name === "email") {
       setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
     } else if (name === "password") {
@@ -45,11 +44,14 @@ const Login = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
 
-    // Validate all fields before submission
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
 
@@ -95,18 +97,28 @@ const Login = () => {
             )}
           </div>
 
-          <div className="form-group">
+          <div className="form-group password-input-container">
             <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={errors.password ? "input-error" : ""}
-              placeholder="Enter your password"
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.password ? "input-error" : ""}
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={togglePasswordVisibility}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && (
               <span className="error-message">{errors.password}</span>
             )}
