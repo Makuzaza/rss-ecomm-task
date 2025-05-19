@@ -40,6 +40,12 @@ const Register = () => {
   });
 
   const [formError, setFormError] = useState<string | null>(null);
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    hasUpper: false,
+    hasLower: false,
+    hasNumber: false,
+  });
 
   const countries = [
     { name: "United States", code: "US" },
@@ -61,6 +67,16 @@ const Register = () => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const updatedForm = { ...prev, [name]: value };
+
+      if (name === "password") {
+        setPasswordValidation({
+          minLength: value.length >= 8,
+          hasUpper: /[A-Z]/.test(value),
+          hasLower: /[a-z]/.test(value),
+          hasNumber: /\d/.test(value),
+        });
+      }
+
       const error = validateField(
         name as keyof RegisterFormFields,
         value,
@@ -132,6 +148,13 @@ const Register = () => {
       }
     }
   };
+
+  // Check if all password requirements are met
+  const allPasswordRequirementsMet =
+    passwordValidation.minLength &&
+    passwordValidation.hasUpper &&
+    passwordValidation.hasLower &&
+    passwordValidation.hasNumber;
 
   return (
     <div className="login-container">
@@ -215,6 +238,32 @@ const Register = () => {
                   {errors[id as keyof RegisterFormFields]}
                 </span>
               )}
+              {id === "password" &&
+                formData.password &&
+                !allPasswordRequirementsMet && (
+                  <div className="password-hints">
+                    <span
+                      className={passwordValidation.minLength ? "valid" : ""}
+                    >
+                      • Minimum 8 characters
+                    </span>
+                    <span
+                      className={passwordValidation.hasUpper ? "valid" : ""}
+                    >
+                      • At least 1 uppercase letter
+                    </span>
+                    <span
+                      className={passwordValidation.hasLower ? "valid" : ""}
+                    >
+                      • At least 1 lowercase letter
+                    </span>
+                    <span
+                      className={passwordValidation.hasNumber ? "valid" : ""}
+                    >
+                      • At least 1 number
+                    </span>
+                  </div>
+                )}
             </div>
           ))}
 
