@@ -3,9 +3,8 @@ import webpack from "webpack";
 import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
 import { buildWebpack } from "./config/build/buildWebpack";
 import { BuildMode, BuildPaths } from "./config/build/types/types";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
-type Mode = "production" | "development";
 const env = dotenv.config().parsed;
 
 interface EnvVariables {
@@ -24,7 +23,7 @@ export default (env: EnvVariables) => {
   };
 
   const config: webpack.Configuration = buildWebpack({
-    port: env.port ?? 5000,
+    port: env.port,
     mode: env.mode ?? "development",
     paths,
     analyzer: env.analyzer,
