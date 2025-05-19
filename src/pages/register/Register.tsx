@@ -1,9 +1,15 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import "./Register.css"; 
+import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
+import { validateRegisterForm } from "@/utils/formValitation";
+
+// CSS
+import "./Register.css";
 
 const Register = () => {
+  // useNavigate hook
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -14,7 +20,7 @@ const Register = () => {
     street: "",
     city: "",
     postalCode: "",
-    country: ""
+    country: "",
   });
 
   const [errors, setErrors] = useState({
@@ -27,7 +33,7 @@ const Register = () => {
     street: "",
     city: "",
     postalCode: "",
-    country: ""
+    country: "",
   });
 
   const countries = [
@@ -45,127 +51,27 @@ const Register = () => {
   ];
 
   const validateForm = () => {
-    let valid = true;
-    const newErrors = {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      firstName: "",
-      lastName: "",
-      dateOfBirth: "",
-      street: "",
-      city: "",
-      postalCode: "",
-      country: ""
-    };
-
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-      valid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-      valid = false;
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-      valid = false;
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-      valid = false;
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = "Password must contain at least one uppercase, one lowercase letter and one number";
-      valid = false;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords don't match";
-      valid = false;
-    }
-
-    if (!formData.firstName) {
-      newErrors.firstName = "First name is required";
-      valid = false;
-    } else if (!/^[a-zA-Z]+$/.test(formData.firstName)) {
-      newErrors.firstName = "First name can only contain letters";
-      valid = false;
-    }
-
-    if (!formData.lastName) {
-      newErrors.lastName = "Last name is required";
-      valid = false;
-    } else if (!/^[a-zA-Z]+$/.test(formData.lastName)) {
-      newErrors.lastName = "Last name can only contain letters";
-      valid = false;
-    }
-
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = "Date of birth is required";
-      valid = false;
-    } else {
-      const dob = new Date(formData.dateOfBirth);
-      const today = new Date();
-      let age = today.getFullYear() - dob.getFullYear();
-      const monthDiff = today.getMonth() - dob.getMonth();
-      
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-        age--;
-      }
-      
-      if (age < 13) {
-        newErrors.dateOfBirth = "You must be at least 13 years old";
-        valid = false;
-      }
-    }
-
-    if (!formData.street.trim()) {
-      newErrors.street = "Street address is required";
-      valid = false;
-    }
-
-    if (!formData.city) {
-      newErrors.city = "City is required";
-      valid = false;
-    } else if (!/^[a-zA-Z\s]+$/.test(formData.city)) {
-      newErrors.city = "City can only contain letters and spaces";
-      valid = false;
-    }
-
-    if (!formData.postalCode) {
-      newErrors.postalCode = "Postal code is required";
-      valid = false;
-    } else if (!/^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/.test(formData.postalCode) && 
-               !/^\d{5}(-\d{4})?$/.test(formData.postalCode)) {
-      newErrors.postalCode = "Postal code is invalid";
-      valid = false;
-    }
-
-    if (!formData.country) {
-      newErrors.country = "Country is required";
-      valid = false;
-    } else if (!countries.some((c) => c.code === formData.country)){
-      newErrors.country = "Please select a valid country";
-      valid = false;
-    }
-
-    setErrors(newErrors);
-    return valid;
+    const { isValid, errors } = validateRegisterForm(formData, countries);
+    setErrors(errors);
+    return isValid;
   };
 
   const apiClient = useApiClient();
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null); 
+    setFormError(null);
 
     if (validateForm()) {
       try {
@@ -188,8 +94,9 @@ const Register = () => {
         });
 
         console.log("Registration successful:", result);
-        // redirect or show success
 
+        // redirect to main page
+        navigate("/");
       } catch (err: unknown) {
         if (err instanceof Error) {
           setFormError(err.message);
@@ -218,7 +125,9 @@ const Register = () => {
               className={errors.email ? "input-error" : ""}
               placeholder="Enter your email"
             />
-            {errors.email && <span className="error-message">{errors.email}</span>}
+            {errors.email && (
+              <span className="error-message">{errors.email}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -232,7 +141,9 @@ const Register = () => {
               className={errors.password ? "input-error" : ""}
               placeholder="Enter your password"
             />
-            {errors.password && <span className="error-message">{errors.password}</span>}
+            {errors.password && (
+              <span className="error-message">{errors.password}</span>
+            )}
           </div>
 
           <div className="form-group">

@@ -1,11 +1,14 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
 import "./Login.css";
 
 const Login = () => {
   // API CLIENT
   const apiClient = useApiClient();
+
+  // useNavigate hook
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -75,7 +78,7 @@ const Login = () => {
     try {
       await apiClient.loginCustomer(email, password);
       console.log("Login successful");
-      // navigate("/shop");
+      navigate("/");
     } catch (err) {
       console.error("Login error:", err);
       setLoginError(err instanceof Error ? err.message : "Unexpected error");

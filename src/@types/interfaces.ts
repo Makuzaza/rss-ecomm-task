@@ -9,3 +9,16 @@ export interface CommerceToolsError {
     }[];
   };
 }
+
+export type RegisterFormFields = {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+};
