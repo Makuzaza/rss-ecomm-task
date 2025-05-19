@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
-import { validateRegisterForm, validateField } from "@/utils/formValitation";
-// data
+import {
+  validateRegisterForm,
+  validateField,
+} from "@/utils/registerValitation";
 import europeanCountriesData from "@/data/europeanCountries.json";
-// types
 import { RegisterFormFields, СountriesList } from "@/@types/interfaces";
-// CSS
 import "./Register.css";
 
 const Register = () => {
