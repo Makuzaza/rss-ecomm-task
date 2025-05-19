@@ -2,14 +2,17 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
 import { validateRegisterForm, validateField } from "@/utils/formValitation";
-import { RegisterFormFields } from "@/@types/interfaces";
-
+// data
+import europeanCountriesData from "@/data/europeanCountries.json";
+// types
+import { RegisterFormFields, СountriesList } from "@/@types/interfaces";
 // CSS
 import "./Register.css";
 
 const Register = () => {
   const navigate = useNavigate();
   const apiClient = useApiClient();
+  const europeanCountries: СountriesList[] = europeanCountriesData;
 
   const [formData, setFormData] = useState<RegisterFormFields>({
     email: "",
@@ -47,20 +50,6 @@ const Register = () => {
     hasNumber: false,
   });
 
-  const countries = [
-    { name: "United States", code: "US" },
-    { name: "Canada", code: "CA" },
-    { name: "United Kingdom", code: "GB" },
-    { name: "Germany", code: "DE" },
-    { name: "France", code: "FR" },
-    { name: "Spain", code: "ES" },
-    { name: "Italy", code: "IT" },
-    { name: "India", code: "IN" },
-    { name: "China", code: "CN" },
-    { name: "Japan", code: "JP" },
-    { name: "Brazil", code: "BR" },
-  ];
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -81,7 +70,7 @@ const Register = () => {
         name as keyof RegisterFormFields,
         value,
         updatedForm,
-        countries
+        europeanCountries
       );
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -99,7 +88,7 @@ const Register = () => {
       name as keyof RegisterFormFields,
       value,
       formData,
-      countries
+      europeanCountries
     );
     setErrors((prevErrors) => ({
       ...prevErrors,
@@ -108,7 +97,10 @@ const Register = () => {
   };
 
   const validateForm = () => {
-    const { isValid, errors } = validateRegisterForm(formData, countries);
+    const { isValid, errors } = validateRegisterForm(
+      formData,
+      europeanCountries
+    );
     setErrors(errors);
     return isValid;
   };
@@ -278,7 +270,7 @@ const Register = () => {
               className={errors.country ? "input-error" : ""}
             >
               <option value="">Select a country</option>
-              {countries.map(({ name, code }) => (
+              {europeanCountries.map(({ name, code }) => (
                 <option key={code} value={code}>
                   {name}
                 </option>

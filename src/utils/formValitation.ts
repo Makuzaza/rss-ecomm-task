@@ -50,7 +50,10 @@ export const validateField = (
       break;
     case "dateOfBirth":
       if (!value) return "Date of birth is required";
+      if (calculateAge(value) < 0)
+        return "You are not born yet. Try again later.";
       if (calculateAge(value) < 13) return "You must be at least 13 years old";
+
       break;
     case "street":
       if (!value.trim()) return "Street address is required";

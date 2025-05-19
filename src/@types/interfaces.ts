@@ -22,3 +22,8 @@ export type RegisterFormFields = {
   postalCode: string;
   country: string;
 };
+
+export interface СountriesList {
+  name: string;
+  code: string;
+}
