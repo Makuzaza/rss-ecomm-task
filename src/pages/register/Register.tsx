@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
-import { validateRegisterForm } from "@/utils/formValitation";
+import { validateRegisterForm, validateField } from "@/utils/formValitation";
+import { RegisterFormFields } from "@/@types/interfaces";
 
 // CSS
 import "./Register.css";
 
 const Register = () => {
-  // useNavigate hook
   const navigate = useNavigate();
+  const apiClient = useApiClient();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormFields>({
     email: "",
     password: "",
     confirmPassword: "",
@@ -23,7 +24,9 @@ const Register = () => {
     country: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<
+    Record<keyof RegisterFormFields, string>
+  >({
     email: "",
     password: "",
     confirmPassword: "",
@@ -35,6 +38,8 @@ const Register = () => {
     postalCode: "",
     country: "",
   });
+
+  const [formError, setFormError] = useState<string | null>(null);
 
   const countries = [
     { name: "United States", code: "US" },
@@ -50,23 +55,46 @@ const Register = () => {
     { name: "Brazil", code: "BR" },
   ];
 
-  const validateForm = () => {
-    const { isValid, errors } = validateRegisterForm(formData, countries);
-    setErrors(errors);
-    return isValid;
-  };
-
-  const apiClient = useApiClient();
-  const [formError, setFormError] = useState<string | null>(null);
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
+    setFormData((prev) => {
+      const updatedForm = { ...prev, [name]: value };
+      const error = validateField(
+        name as keyof RegisterFormFields,
+        value,
+        updatedForm,
+        countries
+      );
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: error,
+      }));
+      return updatedForm;
+    });
+  };
+
+  const handleBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    const error = validateField(
+      name as keyof RegisterFormFields,
+      value,
+      formData,
+      countries
+    );
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
     }));
+  };
+
+  const validateForm = () => {
+    const { isValid, errors } = validateRegisterForm(formData, countries);
+    setErrors(errors);
+    return isValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,8 +122,6 @@ const Register = () => {
         });
 
         console.log("Registration successful:", result);
-
-        // redirect to main page
         navigate("/");
       } catch (err: unknown) {
         if (err instanceof Error) {
@@ -114,148 +140,83 @@ const Register = () => {
         <p className="login-subtitle">Please fill in your details</p>
 
         <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={errors.email ? "input-error" : ""}
-              placeholder="Enter your email"
-            />
-            {errors.email && (
-              <span className="error-message">{errors.email}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={errors.password ? "input-error" : ""}
-              placeholder="Enter your password"
-            />
-            {errors.password && (
-              <span className="error-message">{errors.password}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={errors.confirmPassword ? "input-error" : ""}
-              placeholder="Confirm your password"
-            />
-            {errors.confirmPassword && (
-              <span className="error-message">{errors.confirmPassword}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="firstName">First Name</label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              className={errors.firstName ? "input-error" : ""}
-              placeholder="Enter your first name"
-            />
-            {errors.firstName && (
-              <span className="error-message">{errors.firstName}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="lastName">Last Name</label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className={errors.lastName ? "input-error" : ""}
-              placeholder="Enter your last name"
-            />
-            {errors.lastName && (
-              <span className="error-message">{errors.lastName}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="dateOfBirth">Date of Birth</label>
-            <input
-              type="date"
-              id="dateOfBirth"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              className={errors.dateOfBirth ? "input-error" : ""}
-            />
-            {errors.dateOfBirth && (
-              <span className="error-message">{errors.dateOfBirth}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="street">Street Address</label>
-            <input
-              type="text"
-              id="street"
-              name="street"
-              value={formData.street}
-              onChange={handleChange}
-              className={errors.street ? "input-error" : ""}
-              placeholder="Enter your street address"
-            />
-            {errors.street && (
-              <span className="error-message">{errors.street}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="city">City</label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              className={errors.city ? "input-error" : ""}
-              placeholder="Enter your city"
-            />
-            {errors.city && (
-              <span className="error-message">{errors.city}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="postalCode">Postal Code</label>
-            <input
-              type="text"
-              id="postalCode"
-              name="postalCode"
-              value={formData.postalCode}
-              onChange={handleChange}
-              className={errors.postalCode ? "input-error" : ""}
-              placeholder="Enter your postal code"
-            />
-            {errors.postalCode && (
-              <span className="error-message">{errors.postalCode}</span>
-            )}
-          </div>
+          {[
+            {
+              id: "email",
+              type: "email",
+              label: "Email",
+              placeholder: "Enter your email",
+            },
+            {
+              id: "password",
+              type: "password",
+              label: "Password",
+              placeholder: "Enter your password",
+            },
+            {
+              id: "confirmPassword",
+              type: "password",
+              label: "Confirm Password",
+              placeholder: "Confirm your password",
+            },
+            {
+              id: "firstName",
+              type: "text",
+              label: "First Name",
+              placeholder: "Enter your first name",
+            },
+            {
+              id: "lastName",
+              type: "text",
+              label: "Last Name",
+              placeholder: "Enter your last name",
+            },
+            {
+              id: "dateOfBirth",
+              type: "date",
+              label: "Date of Birth",
+              placeholder: "",
+            },
+            {
+              id: "street",
+              type: "text",
+              label: "Street Address",
+              placeholder: "Enter your street address",
+            },
+            {
+              id: "city",
+              type: "text",
+              label: "City",
+              placeholder: "Enter your city",
+            },
+            {
+              id: "postalCode",
+              type: "text",
+              label: "Postal Code",
+              placeholder: "Enter your postal code",
+            },
+          ].map(({ id, type, label, placeholder }) => (
+            <div className="form-group" key={id}>
+              <label htmlFor={id}>{label}</label>
+              <input
+                type={type}
+                id={id}
+                name={id}
+                value={formData[id as keyof RegisterFormFields]}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={
+                  errors[id as keyof RegisterFormFields] ? "input-error" : ""
+                }
+                placeholder={placeholder}
+              />
+              {errors[id as keyof RegisterFormFields] && (
+                <span className="error-message">
+                  {errors[id as keyof RegisterFormFields]}
+                </span>
+              )}
+            </div>
+          ))}
 
           <div className="form-group">
             <label htmlFor="country">Country</label>
@@ -264,6 +225,7 @@ const Register = () => {
               name="country"
               value={formData.country}
               onChange={handleChange}
+              onBlur={handleBlur}
               className={errors.country ? "input-error" : ""}
             >
               <option value="">Select a country</option>

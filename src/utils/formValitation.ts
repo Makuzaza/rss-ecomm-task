@@ -1,18 +1,5 @@
 import { RegisterFormFields } from "@/@types/interfaces";
 
-const defaultErrors: Record<keyof RegisterFormFields, string> = {
-  email: "",
-  password: "",
-  confirmPassword: "",
-  firstName: "",
-  lastName: "",
-  dateOfBirth: "",
-  street: "",
-  city: "",
-  postalCode: "",
-  country: "",
-};
-
 const EMAIL_REGEX = /\S+@\S+\.\S+/;
 const NAME_REGEX = /^[a-zA-Z]+$/;
 const CITY_REGEX = /^[a-zA-Z\s]+$/;
@@ -34,92 +21,86 @@ const calculateAge = (date: string): number => {
   );
 };
 
+export const validateField = (
+  name: keyof RegisterFormFields,
+  value: string,
+  formData: RegisterFormFields,
+  countries: { code: string }[]
+): string => {
+  switch (name) {
+    case "email":
+      if (!value) return "Email is required";
+      if (!EMAIL_REGEX.test(value)) return "Email is invalid";
+      break;
+    case "password":
+      if (!value) return "Password is required";
+      if (value.length < 8) return "Password must be at least 8 characters";
+      if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value))
+        return "Password must contain at least one uppercase, one lowercase letter and one number";
+      break;
+    case "confirmPassword":
+      if (value !== formData.password) return "Passwords don't match";
+      break;
+    case "firstName":
+    case "lastName":
+      if (!value)
+        return `${name === "firstName" ? "First" : "Last"} name is required`;
+      if (!NAME_REGEX.test(value))
+        return `${name === "firstName" ? "First" : "Last"} name can only contain letters`;
+      break;
+    case "dateOfBirth":
+      if (!value) return "Date of birth is required";
+      if (calculateAge(value) < 13) return "You must be at least 13 years old";
+      break;
+    case "street":
+      if (!value.trim()) return "Street address is required";
+      break;
+    case "city":
+      if (!value) return "City is required";
+      if (!CITY_REGEX.test(value))
+        return "City can only contain letters and spaces";
+      break;
+    case "postalCode":
+      if (!value) return "Postal code is required";
+      if (!POSTAL_CODE_REGEXES.some((regex) => regex.test(value)))
+        return "Postal code is invalid";
+      break;
+    case "country":
+      if (!value) return "Country is required";
+      if (!countries.some((c) => c.code === value))
+        return "Please select a valid country";
+      break;
+  }
+  return "";
+};
+
 export const validateRegisterForm = (
   formData: RegisterFormFields,
   countries: { code: string }[]
 ): { isValid: boolean; errors: Record<keyof RegisterFormFields, string> } => {
-  const errors = { ...defaultErrors };
-  let valid = true;
+  const errors: Record<keyof RegisterFormFields, string> = {
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    street: "",
+    city: "",
+    postalCode: "",
+    country: "",
+  };
 
-  if (!formData.email) {
-    errors.email = "Email is required";
-    valid = false;
-  } else if (!EMAIL_REGEX.test(formData.email)) {
-    errors.email = "Email is invalid";
-    valid = false;
+  let isValid = true;
+
+  for (const field in formData) {
+    const key = field as keyof RegisterFormFields;
+    const error = validateField(key, formData[key], formData, countries);
+    if (error) {
+      errors[key] = error;
+      isValid = false;
+    }
   }
 
-  if (!formData.password) {
-    errors.password = "Password is required";
-    valid = false;
-  } else if (formData.password.length < 8) {
-    errors.password = "Password must be at least 8 characters";
-    valid = false;
-  } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-    errors.password =
-      "Password must contain at least one uppercase, one lowercase letter and one number";
-    valid = false;
-  }
-
-  if (formData.password !== formData.confirmPassword) {
-    errors.confirmPassword = "Passwords don't match";
-    valid = false;
-  }
-
-  if (!formData.firstName) {
-    errors.firstName = "First name is required";
-    valid = false;
-  } else if (!NAME_REGEX.test(formData.firstName)) {
-    errors.firstName = "First name can only contain letters";
-    valid = false;
-  }
-
-  if (!formData.lastName) {
-    errors.lastName = "Last name is required";
-    valid = false;
-  } else if (!NAME_REGEX.test(formData.lastName)) {
-    errors.lastName = "Last name can only contain letters";
-    valid = false;
-  }
-
-  if (!formData.dateOfBirth) {
-    errors.dateOfBirth = "Date of birth is required";
-    valid = false;
-  } else if (calculateAge(formData.dateOfBirth) < 13) {
-    errors.dateOfBirth = "You must be at least 13 years old";
-    valid = false;
-  }
-
-  if (!formData.street.trim()) {
-    errors.street = "Street address is required";
-    valid = false;
-  }
-
-  if (!formData.city) {
-    errors.city = "City is required";
-    valid = false;
-  } else if (!CITY_REGEX.test(formData.city)) {
-    errors.city = "City can only contain letters and spaces";
-    valid = false;
-  }
-
-  if (!formData.postalCode) {
-    errors.postalCode = "Postal code is required";
-    valid = false;
-  } else if (
-    !POSTAL_CODE_REGEXES.some((regex) => regex.test(formData.postalCode))
-  ) {
-    errors.postalCode = "Postal code is invalid";
-    valid = false;
-  }
-
-  if (!formData.country) {
-    errors.country = "Country is required";
-    valid = false;
-  } else if (!countries.some((c) => c.code === formData.country)) {
-    errors.country = "Please select a valid country";
-    valid = false;
-  }
-
-  return { isValid: valid, errors };
+  return { isValid, errors };
 };
