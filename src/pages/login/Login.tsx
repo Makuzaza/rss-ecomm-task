@@ -1,66 +1,75 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useApiClient } from "@/api/ApiClientContext";
+import { validateEmail, validatePassword } from "@/utils/loginValidation";
 import "./Login.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // API Client
+  const apiClient = useApiClient();
+
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
   const [errors, setErrors] = useState({
     email: "",
     password: "",
   });
 
-  const validateForm = () => {
-    let valid = true;
-    const newErrors = { email: "", password: "" };
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-    if (!email) {
-      newErrors.email = "Email is required";
-      valid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid";
-      valid = false;
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (!password.trim()) {
-      newErrors.password = "Password is required";
-      valid = false;
-    } else {
-      if (password.length < 6) {
-      newErrors.password = "Password must be at least 8 characters";
-      valid = false;
-      }
-      if (!/[A-Z]/.test(password)) {
-        newErrors.password = "Password must contain at least one uppercase letter (A-Z)";
-        valid = false;
-      }
-      if (!/[a-z]/.test(password)) {
-        newErrors.password = "Password must contain at least one lowercase letter (a-z)";
-        valid = false;
-      }
-      if (!/[0-9]/.test(password)) {
-        newErrors.password = "Password must contain at least one digit (0-9)";
-        valid = false;
-      }
-      if (!/[^A-Za-z0-9]/.test(password)) {
-        newErrors.password = "Password must contain at least one special character (!@#$%^&*)";
-      valid = false;
-      }
-      if (password !== password.trim()) {
-        newErrors.password = "Password must not contain leading or trailing whitespace";
-        valid = false;
-      }
+    if (name === "email") {
+      setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+    } else if (name === "password") {
+      setErrors((prev) => ({ ...prev, password: validatePassword(value) }));
     }
-    
-    setErrors(newErrors);
-    return valid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === "email") {
+      setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+    } else if (name === "password") {
+      setErrors((prev) => ({ ...prev, password: validatePassword(value) }));
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      // logic here
-      console.log("Login submitted:", { email, password });
+    setLoginError(null);
+
+    const emailError = validateEmail(formData.email);
+    const passwordError = validatePassword(formData.password);
+
+    if (emailError || passwordError) {
+      setErrors({
+        email: emailError,
+        password: passwordError,
+      });
+      return;
+    }
+
+    try {
+      await apiClient.loginCustomer(formData.email, formData.password);
+      console.log("Login successful");
+      navigate("/");
+    } catch (err) {
+      console.error("Login error:", err);
+      setLoginError(err instanceof Error ? err.message : "Unexpected error");
     }
   };
 
@@ -76,24 +85,40 @@ const Login = () => {
             <input
               type="email"
               id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
               className={errors.email ? "input-error" : ""}
               placeholder="Enter your email"
             />
-            {errors.email && <span className="error-message">{errors.email}</span>}
+            {errors.email && (
+              <span className="error-message">{errors.email}</span>
+            )}
           </div>
 
-          <div className="form-group">
+          <div className="form-group password-input-container">
             <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={errors.password ? "input-error" : ""}
-              placeholder="Enter your password"
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.password ? "input-error" : ""}
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={togglePasswordVisibility}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && (
               <span className="error-message">{errors.password}</span>
             )}
@@ -112,6 +137,7 @@ const Login = () => {
           <button type="submit" className="login-button">
             Sign In
           </button>
+          {loginError && <p className="error-message">{loginError}</p>}
         </form>
 
         <div className="signup-link">

@@ -5,6 +5,7 @@ import { LazyAbout } from "@/pages/about/About.lazy";
 import Login from "@/pages/login/Login";
 import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
+import { ApiClientProvider } from "@/api/ApiClientContext";
 
 const root = document.getElementById("root");
 
@@ -51,4 +52,8 @@ const router = createBrowserRouter([
   },
 ]);
 
-container.render(<RouterProvider router={router} />);
+container.render(
+  <ApiClientProvider>
+    <RouterProvider router={router} />
+  </ApiClientProvider>
+);
