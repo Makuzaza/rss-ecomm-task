@@ -141,6 +141,17 @@
   width: 100%;
 }
 
+.email-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.email-input-wrapper input {
+  padding-right: 40px;
+  width: 100%;
+}
+
 .password-toggle {
   position: absolute;
   right: 10px;
@@ -161,6 +172,15 @@
 .password-toggle svg {
   font-size: 18px;
 }
+
+.error-icon {
+  position: absolute;
+  right: 15px;
+  color: #e74c3c;
+  font-size: 18px;
+  pointer-events: none;
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 30px 20px;
