@@ -8,7 +8,6 @@ import {
 import europeanCountriesData from "@/data/europeanCountries.json";
 import { RegisterFormFields, СountriesList } from "@/@types/interfaces";
 import "./Register.css";
-import { MdError } from "react-icons/md";
 
 const Register = () => {
   const navigate = useNavigate();
