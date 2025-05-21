@@ -130,24 +130,13 @@
   position: relative;
 }
 
-.password-input-wrapper {
+.input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.password-input-wrapper input {
-  padding-right: 40px;
-  width: 100%;
-}
-
-.email-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.email-input-wrapper input {
+.input-wrapper input {
   padding-right: 40px;
   width: 100%;
 }

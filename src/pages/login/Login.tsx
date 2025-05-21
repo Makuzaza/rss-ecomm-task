@@ -83,7 +83,7 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
           <label htmlFor="email">Email</label>
-          <div className="email-input-wrapper">
+          <div className="input-wrapper">
             <input
               type="email"
               id="email"
@@ -102,7 +102,7 @@ const Login = () => {
 
           <div className="form-group password-input-container">
             <label htmlFor="password">Password</label>
-            <div className="password-input-wrapper">
+            <div className="input-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
