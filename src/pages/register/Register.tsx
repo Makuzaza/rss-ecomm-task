@@ -9,6 +9,8 @@ import europeanCountriesData from "@/data/europeanCountries.json";
 import { RegisterFormFields, СountriesList } from "@/@types/interfaces";
 import "./Register.css";
 import { useAuth } from "@/context/AuthContext";
+import { MdError } from "react-icons/md";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
   const { user } = useAuth();
@@ -149,6 +151,9 @@ const Register = () => {
     }
   };
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   // Check if all password requirements are met
   const allPasswordRequirementsMet =
     passwordValidation.minLength &&
@@ -161,7 +166,6 @@ const Register = () => {
       <div className="login-card">
         <h1 className="login-title">Create Account</h1>
         <p className="login-subtitle">Please fill in your details</p>
-
         <form onSubmit={handleSubmit} className="login-form">
           {[
             {
@@ -218,82 +222,145 @@ const Register = () => {
               label: "Postal Code",
               placeholder: "Enter your postal code",
             },
-          ].map(({ id, type, label, placeholder }) => (
-            <div className="form-group" key={id}>
-              <label htmlFor={id}>{label}</label>
-              <input
-                type={type}
-                id={id}
-                name={id}
-                value={formData[id as keyof RegisterFormFields]}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={
-                  errors[id as keyof RegisterFormFields] ? "input-error" : ""
-                }
-                placeholder={placeholder}
-              />
-              {errors[id as keyof RegisterFormFields] && (
-                <span className="error-message">
-                  {errors[id as keyof RegisterFormFields]}
-                </span>
-              )}
-              {id === "password" &&
-                formData.password &&
-                !allPasswordRequirementsMet && (
-                  <div className="password-hints">
-                    <span
-                      className={passwordValidation.minLength ? "valid" : ""}
+          ].map(({ id, type, label, placeholder }) => {
+            const hasError = !!errors[id as keyof RegisterFormFields];
+            const showPasswordHints =
+              id === "password" &&
+              formData.password &&
+              !allPasswordRequirementsMet;
+              
+            if (id === "password" || id === "confirmPassword") {
+              const isPassword = id === "password";
+              const showCurrentPassword = isPassword ? showPassword : showConfirmPassword;
+              const toggleShowCurrentPassword = isPassword
+                ? () => setShowPassword(!showPassword)
+                : () => setShowConfirmPassword(!showConfirmPassword);
+
+              return (
+                <div className="form-group password-input-container" key={id}>
+                  <label htmlFor={id}>{label}</label>
+                  <div className={`input-wrapper${hasError ? " has-error" : ""}`}>
+                    <input
+                      type={showCurrentPassword ? "text" : "password"}
+                      id={id}
+                      name={id}
+                      value={formData[id as keyof RegisterFormFields]}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={hasError ? "input-error" : ""}
+                      placeholder={placeholder}
+                    />
+
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={toggleShowCurrentPassword}
+                      aria-label={showCurrentPassword ? "Hide password" : "Show password"}
                     >
+                      {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+
+                    {hasError && <MdError className="error-icon" />}
+                  </div>
+
+                  {hasError && (
+                    <span className="error-message">
+                      {errors[id as keyof RegisterFormFields]}
+                    </span>
+                  )}
+
+                  {isPassword && showPasswordHints && (
+                    <div className="password-hints">
+                      <span className={passwordValidation.minLength ? "valid" : ""}>
+                        • Minimum 8 characters
+                      </span>
+                      <span className={passwordValidation.hasUpper ? "valid" : ""}>
+                        • At least 1 uppercase letter
+                      </span>
+                      <span className={passwordValidation.hasLower ? "valid" : ""}>
+                        • At least 1 lowercase letter
+                      </span>
+                      <span className={passwordValidation.hasNumber ? "valid" : ""}>
+                        • At least 1 number
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <div className="form-group" key={id}>
+                <label htmlFor={id}>{label}</label>
+                <div className="input-wrapper">
+                  <input
+                    type={type}
+                    id={id}
+                    name={id}
+                    value={formData[id as keyof RegisterFormFields]}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={hasError ? "input-error" : ""}
+                    placeholder={placeholder}
+                  />
+                  {hasError && <MdError className="error-icon" />}
+                </div>
+                {hasError && (
+                  <span className="error-message">
+                    {errors[id as keyof RegisterFormFields]}
+                  </span>
+                )}
+
+                {showPasswordHints && (
+                  <div className="password-hints">
+                    <span className={passwordValidation.minLength ? "valid" : ""}>
                       • Minimum 8 characters
                     </span>
-                    <span
-                      className={passwordValidation.hasUpper ? "valid" : ""}
-                    >
+                    <span className={passwordValidation.hasUpper ? "valid" : ""}>
                       • At least 1 uppercase letter
                     </span>
-                    <span
-                      className={passwordValidation.hasLower ? "valid" : ""}
-                    >
+                    <span className={passwordValidation.hasLower ? "valid" : ""}>
                       • At least 1 lowercase letter
                     </span>
-                    <span
-                      className={passwordValidation.hasNumber ? "valid" : ""}
-                    >
+                    <span className={passwordValidation.hasNumber ? "valid" : ""}>
                       • At least 1 number
                     </span>
                   </div>
                 )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
 
           <div className="form-group">
             <label htmlFor="country">Country</label>
-            <select
-              id="country"
-              name="country"
-              value={formData.country}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={errors.country ? "input-error" : ""}
-            >
-              <option value="">Select a country</option>
-              {europeanCountries.map(({ name, code }) => (
-                <option key={code} value={code}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            <div className="input-wrapper">
+              <select
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.country ? "input-error" : ""}
+              >
+                <option value="">Select a country</option>
+                {europeanCountries.map(({ name, code }) => (
+                  <option key={code} value={code}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              {errors.country && <MdError className="error-icon" />}
+            </div>
             {errors.country && (
               <span className="error-message">{errors.country}</span>
             )}
           </div>
 
-          <button type="submit" className="login-button">
-            Register
-          </button>
+
+          <button type="submit" className="login-button">Register</button>
           {formError && <p className="error-message">{formError}</p>}
         </form>
+
 
         <div className="signup-link">
           Already have an account? <Link to="/login">Sign in</Link>

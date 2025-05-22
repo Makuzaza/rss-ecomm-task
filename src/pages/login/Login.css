@@ -130,13 +130,13 @@
   position: relative;
 }
 
-.password-input-wrapper {
+.input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.password-input-wrapper input {
+.input-wrapper input {
   padding-right: 40px;
   width: 100%;
 }
@@ -161,6 +161,15 @@
 .password-toggle svg {
   font-size: 18px;
 }
+
+.error-icon {
+  position: absolute;
+  right: 15px;
+  color: #e74c3c;
+  font-size: 18px;
+  pointer-events: none;
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 30px 20px;
