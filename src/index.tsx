@@ -5,7 +5,7 @@ import Login from "@/pages/login/Login";
 import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/api/ApiClientContext";
-import Shop from "@/pages/shop/shop";
+import Shop from "@/pages/shop/Shop";
 import About from "@/pages/about/About";
 
 const root = document.getElementById("root");
