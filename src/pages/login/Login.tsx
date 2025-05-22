@@ -5,6 +5,7 @@ import { validateEmail, validatePassword } from "@/utils/loginValidation";
 import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
+import { MdError } from "react-icons/md"
 
 const Login = () => {
   const { user } = useAuth();
@@ -91,7 +92,8 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+          <label htmlFor="email">Email</label>
+          <div className="input-wrapper">
             <input
               type="email"
               id="email"
@@ -102,14 +104,15 @@ const Login = () => {
               className={errors.email ? "input-error" : ""}
               placeholder="Enter your email"
             />
-            {errors.email && (
-              <span className="error-message">{errors.email}</span>
-            )}
+            {errors.email && <MdError className="error-icon" />}
+            </div>
+            {errors.email && <span className="error-message">{errors.email}</span>}
           </div>
+
 
           <div className="form-group password-input-container">
             <label htmlFor="password">Password</label>
-            <div className="password-input-wrapper">
+            <div className="input-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"

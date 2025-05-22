@@ -124,6 +124,69 @@
   color: #4caf50;
 }
 
+.password-input-container {
+  position: relative;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper input {
+  padding-right: 40px;
+  width: 100%;
+}
+
+.input-wrapper input[type="date"] {
+  padding-right: 10px;
+}
+
+.input-wrapper input[type="date"].input-error {
+  padding-right: 40px;
+}
+
+.input-wrapper select {
+  width: 100%;
+  padding-right: 40px;
+  height: 44px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  appearance: auto; 
+}
+
+.input-wrapper select.input-error {
+  margin-right: 40px; 
+}
+.input-wrapper input {
+  padding-right: 60px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: right 0.2s ease;
+}
+
+.input-wrapper.has-error .password-toggle {
+  right: 36px; 
+}
+
+.input-wrapper input {
+  padding-right: 60px;
+}
+
 @media (max-width: 480px) {
   .login-card {
     padding: 30px 20px;
