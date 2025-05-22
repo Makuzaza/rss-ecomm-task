@@ -103,7 +103,11 @@ export class ApiClient {
     }
   }
 
-  public async loginCustomer(email: string, password: string): Promise<void> {
+  public async loginCustomer(email: string, password: string): Promise<{
+    firstName: string;
+    lastName: string;
+    email: string;
+  }> {
     const formData = new URLSearchParams();
     formData.append("grant_type", "password");
     formData.append("username", email);
@@ -138,6 +142,33 @@ export class ApiClient {
     }
 
     localStorage.setItem("accessToken", data.access_token);
+
+    return this.getCurrentCustomer(data.access_token);
+  }
+
+  public async getCurrentCustomer(accessToken: string): Promise<{
+    firstName: string;
+    lastName: string;
+    email: string;
+  }> {
+    const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error("Failed to fetch customer data");
+    }
+  
+    const data = await response.json();
+    return {
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      email: data.email
+    };
   }
 }
 // Singleton instance
