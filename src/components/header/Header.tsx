@@ -20,11 +20,13 @@ export const Header = () => {
               About
             </Link>
           </li>
-          <li className="nav-item">
-            <Link to="/shop" className="nav-link">
-              Shop
-            </Link>
-          </li>
+          {user && (
+            <li className="nav-item">
+              <Link to="/shop" className="nav-link">
+                Shop
+              </Link>
+            </li>
+          )}
         </ul>
         <div className="auth-buttons">
           {user ? (

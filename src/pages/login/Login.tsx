@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
 import { validateEmail, validatePassword } from "@/utils/loginValidation";
@@ -7,10 +7,16 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
-  // API Client
+  const { user } = useAuth();
   const apiClient = useApiClient();
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/shop");
+    }
+  }, [user, navigate]);
 
   const [formData, setFormData] = useState({
     email: "",

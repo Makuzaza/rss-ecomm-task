@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
 import {
@@ -8,11 +8,19 @@ import {
 import europeanCountriesData from "@/data/europeanCountries.json";
 import { RegisterFormFields, СountriesList } from "@/@types/interfaces";
 import "./Register.css";
+import { useAuth } from "@/context/AuthContext";
 
 const Register = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const apiClient = useApiClient();
   const europeanCountries: СountriesList[] = europeanCountriesData;
+  
+  useEffect(() => {
+    if (user) {
+      navigate("/shop");
+    }
+  }, [user, navigate]);
 
   const [formData, setFormData] = useState<RegisterFormFields>({
     email: "",

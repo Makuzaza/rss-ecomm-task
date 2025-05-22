@@ -1,11 +1,12 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./components/App";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { LazyAbout } from "@/pages/about/About.lazy";
 import Login from "@/pages/login/Login";
 import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/api/ApiClientContext";
+import Shop from "@/pages/shop/shop";
+import About from "@/pages/about/About";
 
 const root = document.getElementById("root");
 
@@ -24,13 +25,17 @@ const router = createBrowserRouter([
         path: "/about",
         element: (
           <Suspense fallback={"Loading..."}>
-            <LazyAbout />
+            <About />
           </Suspense>
         ),
       },
       {
         path: "/shop",
-        element: <h1>Shop</h1>,
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <Shop />
+          </Suspense>
+        ),
       },
       {
         path: "/login",
