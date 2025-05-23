@@ -12,14 +12,16 @@ export class ApiClient {
   private OAUTH_URI = "https://auth.europe-west1.gcp.commercetools.com";
   private PROJECT_KEY = "api-rs-school";
 
-  private readonly ADMIN_CREDENTIALS = { // Admin client (scope)
+  private readonly ADMIN_CREDENTIALS = {
+    // Admin client (scope)
     clientId: "wkSBIH57z7eootNrTs-fx54U",
     clientSecret: "aDRhkOUKc51Z3-_cp45A_asnITocAjzM",
   };
 
-  private readonly SPA_CREDENTIALS = { // SPA client (scope)
-    clientId: "DLHBgbFar-WAp5-rUwI_u0nA", 
-    clientSecret: "2HUjaA1AZjzqbIranxV9PisjzBJ1zhjW"
+  private readonly SPA_CREDENTIALS = {
+    // SPA client (scope)
+    clientId: "DLHBgbFar-WAp5-rUwI_u0nA",
+    clientSecret: "2HUjaA1AZjzqbIranxV9PisjzBJ1zhjW",
   };
 
   private client: Client;
@@ -76,7 +78,9 @@ export class ApiClient {
     }
   }
 
-  public async registerCustomer(customerData: MyCustomerDraft): Promise<CustomerSignInResult> {
+  public async registerCustomer(
+    customerData: MyCustomerDraft
+  ): Promise<CustomerSignInResult> {
     const apiRoot = this.getApiRoot(false);
 
     try {
@@ -89,33 +93,36 @@ export class ApiClient {
 
       return body;
     } catch (error) {
-        const err = error as CommerceToolsError;
+      const err = error as CommerceToolsError;
 
-        const duplicateEmail = err.body.errors?.find(
-          (e) => e.code === "DuplicateField" && e.field === "email"
-        );
+      const duplicateEmail = err.body.errors?.find(
+        (e) => e.code === "DuplicateField" && e.field === "email"
+      );
 
-        if (duplicateEmail) {
-          throw new Error("A customer with this email already exists.");
-        }
+      if (duplicateEmail) {
+        throw new Error("A customer with this email already exists.");
+      }
 
-        throw new Error(err.body.message || "Registration failed. Try again.");
+      throw new Error(err.body.message || "Registration failed. Try again.");
     }
   }
 
-  public async loginCustomer(email: string, password: string): Promise<void> {
+  public async loginCustomer(
+    email: string,
+    password: string
+  ): Promise<{
+    firstName: string;
+    lastName: string;
+    email: string;
+  }> {
     const formData = new URLSearchParams();
     formData.append("grant_type", "password");
     formData.append("username", email);
     formData.append("password", password);
     formData.append(
       "scope",
-      [
-        "manage_my_profile",
-        "view_published_products",
-        "manage_my_orders"
-      ]
-        .map(scope => `${scope}:${this.PROJECT_KEY}`)
+      ["manage_my_profile", "view_published_products", "manage_my_orders"]
+        .map((scope) => `${scope}:${this.PROJECT_KEY}`)
         .join(" ")
     );
 
@@ -133,11 +140,53 @@ export class ApiClient {
     const data = await res.json();
 
     if (!res.ok) {
-      const errorMessage = data?.error_description || data?.message || "Login failed";
+      const errorMessage =
+        data?.error_description || data?.message || "Login failed";
       throw new Error(errorMessage);
     }
 
     localStorage.setItem("accessToken", data.access_token);
+
+    return this.getCurrentCustomer(data.access_token);
+  }
+
+  public async getCurrentCustomer(accessToken: string): Promise<{
+    firstName: string;
+    lastName: string;
+    email: string;
+  }> {
+    const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch customer data");
+    }
+
+    const data = await response.json();
+    return {
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
+      email: data.email,
+    };
+  }
+  
+  public async validateToken(token: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 }
 // Singleton instance

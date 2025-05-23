@@ -1,16 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApiClient } from "@/api/ApiClientContext";
 import { validateEmail, validatePassword } from "@/utils/loginValidation";
 import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext";
 import { MdError } from "react-icons/md"
 
 const Login = () => {
-  // API Client
+  const { user } = useAuth();
   const apiClient = useApiClient();
-
+  const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/shop");
+    }
+  }, [user, navigate]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -65,9 +72,12 @@ const Login = () => {
     }
 
     try {
-      await apiClient.loginCustomer(formData.email, formData.password);
-      console.log("Login successful");
-      navigate("/");
+      const userData = await apiClient.loginCustomer(
+        formData.email,
+        formData.password
+      );
+      login(userData);
+      navigate("/shop");
     } catch (err) {
       console.error("Login error:", err);
       setLoginError(err instanceof Error ? err.message : "Unexpected error");
