@@ -6,7 +6,7 @@ import {
   validateField,
 } from "@/utils/registerValitation";
 import europeanCountriesData from "@/data/europeanCountries.json";
-import { RegisterFormFields, СountriesList } from "@/@types/interfaces";
+import { RegisterFormFields } from "@/@types/interfaces";
 import "./Register.css";
 import { useAuth } from "@/context/AuthContext";
 import { MdError } from "react-icons/md";
@@ -16,8 +16,8 @@ const Register = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const apiClient = useApiClient();
-  const europeanCountries: СountriesList[] = europeanCountriesData;
-  
+  const europeanCountries: typeof europeanCountriesData = europeanCountriesData;
+
   useEffect(() => {
     if (user) {
       navigate("/shop");
@@ -60,6 +60,22 @@ const Register = () => {
     hasNumber: false,
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isDefaultAddress, setIsDefaultAddress] = useState(true);
+
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      postalCode: "",
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      postalCode: "",
+    }));
+  };
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -135,12 +151,14 @@ const Register = () => {
               country: formData.country,
             },
           ],
-          defaultShippingAddress: 0,
-          defaultBillingAddress: 0,
+          ...(isDefaultAddress && {
+            defaultShippingAddress: 0,
+            defaultBillingAddress: 0,
+          }),
         });
 
         console.log("Registration successful:", result);
-        navigate("/");
+        navigate("/login");
       } catch (err: unknown) {
         if (err instanceof Error) {
           setFormError(err.message);
@@ -151,15 +169,18 @@ const Register = () => {
     }
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Check if all password requirements are met
   const allPasswordRequirementsMet =
     passwordValidation.minLength &&
     passwordValidation.hasUpper &&
     passwordValidation.hasLower &&
     passwordValidation.hasNumber;
+
+  const isAddressDisabled = !formData.country;
+  const showPasswordHints = formData.password && !allPasswordRequirementsMet;
+  // const selectedCountry = europeanCountries.find(
+  //   (c) => c.code === formData.country
+  // );
+  // const postalCodeExample = selectedCountry?.codeExample || "12345";
 
   return (
     <div className="login-container">
@@ -167,178 +188,186 @@ const Register = () => {
         <h1 className="login-title">Create Account</h1>
         <p className="login-subtitle">Please fill in your details</p>
         <form onSubmit={handleSubmit} className="login-form">
-          {[
-            {
-              id: "email",
-              type: "email",
-              label: "Email",
-              placeholder: "Enter your email",
-            },
-            {
-              id: "password",
-              type: "password",
-              label: "Password",
-              placeholder: "Enter your password",
-            },
-            {
-              id: "confirmPassword",
-              type: "password",
-              label: "Confirm Password",
-              placeholder: "Confirm your password",
-            },
-            {
-              id: "firstName",
-              type: "text",
-              label: "First Name",
-              placeholder: "Enter your first name",
-            },
-            {
-              id: "lastName",
-              type: "text",
-              label: "Last Name",
-              placeholder: "Enter your last name",
-            },
-            {
-              id: "dateOfBirth",
-              type: "date",
-              label: "Date of Birth",
-              placeholder: "",
-            },
-            {
-              id: "street",
-              type: "text",
-              label: "Street Address",
-              placeholder: "Enter your street address",
-            },
-            {
-              id: "city",
-              type: "text",
-              label: "City",
-              placeholder: "Enter your city",
-            },
-            {
-              id: "postalCode",
-              type: "text",
-              label: "Postal Code",
-              placeholder: "Enter your postal code",
-            },
-          ].map(({ id, type, label, placeholder }) => {
-            const hasError = !!errors[id as keyof RegisterFormFields];
-            const showPasswordHints =
-              id === "password" &&
-              formData.password &&
-              !allPasswordRequirementsMet;
-              
-            if (id === "password" || id === "confirmPassword") {
-              const isPassword = id === "password";
-              const showCurrentPassword = isPassword ? showPassword : showConfirmPassword;
-              const toggleShowCurrentPassword = isPassword
-                ? () => setShowPassword(!showPassword)
-                : () => setShowConfirmPassword(!showConfirmPassword);
+          {/* Email Field */}
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <div className={`input-wrapper${errors.email ? " has-error" : ""}`}>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.email ? "input-error" : ""}
+                placeholder="Enter your email"
+              />
+              {errors.email && <MdError className="error-icon" />}
+            </div>
+            {errors.email && (
+              <span className="error-message">{errors.email}</span>
+            )}
+          </div>
 
-              return (
-                <div className="form-group password-input-container" key={id}>
-                  <label htmlFor={id}>{label}</label>
-                  <div className={`input-wrapper${hasError ? " has-error" : ""}`}>
-                    <input
-                      type={showCurrentPassword ? "text" : "password"}
-                      id={id}
-                      name={id}
-                      value={formData[id as keyof RegisterFormFields]}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={hasError ? "input-error" : ""}
-                      placeholder={placeholder}
-                    />
-
-                    <button
-                      type="button"
-                      className="password-toggle"
-                      onClick={toggleShowCurrentPassword}
-                      aria-label={showCurrentPassword ? "Hide password" : "Show password"}
-                    >
-                      {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-
-                    {hasError && <MdError className="error-icon" />}
-                  </div>
-
-                  {hasError && (
-                    <span className="error-message">
-                      {errors[id as keyof RegisterFormFields]}
-                    </span>
-                  )}
-
-                  {isPassword && showPasswordHints && (
-                    <div className="password-hints">
-                      <span className={passwordValidation.minLength ? "valid" : ""}>
-                        • Minimum 8 characters
-                      </span>
-                      <span className={passwordValidation.hasUpper ? "valid" : ""}>
-                        • At least 1 uppercase letter
-                      </span>
-                      <span className={passwordValidation.hasLower ? "valid" : ""}>
-                        • At least 1 lowercase letter
-                      </span>
-                      <span className={passwordValidation.hasNumber ? "valid" : ""}>
-                        • At least 1 number
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            return (
-              <div className="form-group" key={id}>
-                <label htmlFor={id}>{label}</label>
-                <div className="input-wrapper">
-                  <input
-                    type={type}
-                    id={id}
-                    name={id}
-                    value={formData[id as keyof RegisterFormFields]}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={hasError ? "input-error" : ""}
-                    placeholder={placeholder}
-                  />
-                  {hasError && <MdError className="error-icon" />}
-                </div>
-                {hasError && (
-                  <span className="error-message">
-                    {errors[id as keyof RegisterFormFields]}
-                  </span>
-                )}
-
-                {showPasswordHints && (
-                  <div className="password-hints">
-                    <span className={passwordValidation.minLength ? "valid" : ""}>
-                      • Minimum 8 characters
-                    </span>
-                    <span className={passwordValidation.hasUpper ? "valid" : ""}>
-                      • At least 1 uppercase letter
-                    </span>
-                    <span className={passwordValidation.hasLower ? "valid" : ""}>
-                      • At least 1 lowercase letter
-                    </span>
-                    <span className={passwordValidation.hasNumber ? "valid" : ""}>
-                      • At least 1 number
-                    </span>
-                  </div>
-                )}
+          {/* Password Field */}
+          <div className="form-group password-input-container">
+            <label htmlFor="password">Password</label>
+            <div
+              className={`input-wrapper${errors.password ? " has-error" : ""}`}
+            >
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.password ? "input-error" : ""}
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+              {errors.password && <MdError className="error-icon" />}
+            </div>
+            {errors.password && (
+              <span className="error-message">{errors.password}</span>
+            )}
+            {showPasswordHints && (
+              <div className="password-hints">
+                <span className={passwordValidation.minLength ? "valid" : ""}>
+                  • Minimum 8 characters
+                </span>
+                <span className={passwordValidation.hasUpper ? "valid" : ""}>
+                  • At least 1 uppercase letter
+                </span>
+                <span className={passwordValidation.hasLower ? "valid" : ""}>
+                  • At least 1 lowercase letter
+                </span>
+                <span className={passwordValidation.hasNumber ? "valid" : ""}>
+                  • At least 1 number
+                </span>
               </div>
-            );
-          })}
+            )}
+          </div>
 
+          {/* Confirm Password Field */}
+          <div className="form-group password-input-container">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <div
+              className={`input-wrapper${errors.confirmPassword ? " has-error" : ""}`}
+            >
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.confirmPassword ? "input-error" : ""}
+                placeholder="Confirm your password"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
+              >
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+              {errors.confirmPassword && <MdError className="error-icon" />}
+            </div>
+            {errors.confirmPassword && (
+              <span className="error-message">{errors.confirmPassword}</span>
+            )}
+          </div>
+
+          {/* First Name Field */}
+          <div className="form-group">
+            <label htmlFor="firstName">First Name</label>
+            <div
+              className={`input-wrapper${errors.firstName ? " has-error" : ""}`}
+            >
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.firstName ? "input-error" : ""}
+                placeholder="Enter your first name"
+              />
+              {errors.firstName && <MdError className="error-icon" />}
+            </div>
+            {errors.firstName && (
+              <span className="error-message">{errors.firstName}</span>
+            )}
+          </div>
+
+          {/* Last Name Field */}
+          <div className="form-group">
+            <label htmlFor="lastName">Last Name</label>
+            <div
+              className={`input-wrapper${errors.lastName ? " has-error" : ""}`}
+            >
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.lastName ? "input-error" : ""}
+                placeholder="Enter your last name"
+              />
+              {errors.lastName && <MdError className="error-icon" />}
+            </div>
+            {errors.lastName && (
+              <span className="error-message">{errors.lastName}</span>
+            )}
+          </div>
+
+          {/* Date of Birth Field */}
+          <div className="form-group">
+            <label htmlFor="dateOfBirth">Date of Birth</label>
+            <div
+              className={`input-wrapper${errors.dateOfBirth ? " has-error" : ""}`}
+            >
+              <input
+                type="date"
+                id="dateOfBirth"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.dateOfBirth ? "input-error" : ""}
+              />
+              {errors.dateOfBirth && <MdError className="error-icon" />}
+            </div>
+            {errors.dateOfBirth && (
+              <span className="error-message">{errors.dateOfBirth}</span>
+            )}
+          </div>
+
+          {/* Country Field */}
           <div className="form-group">
             <label htmlFor="country">Country</label>
-            <div className="input-wrapper">
+            <div
+              className={`input-wrapper${errors.country ? " has-error" : ""}`}
+            >
               <select
                 id="country"
                 name="country"
                 value={formData.country}
-                onChange={handleChange}
+                onChange={handleCountryChange}
                 onBlur={handleBlur}
                 className={errors.country ? "input-error" : ""}
               >
@@ -356,11 +385,102 @@ const Register = () => {
             )}
           </div>
 
+          {/* Street Address Field */}
+          <div className="form-group">
+            <label htmlFor="street">Street Address</label>
+            <div
+              className={`input-wrapper${errors.street ? " has-error" : ""}`}
+            >
+              <input
+                type="text"
+                id="street"
+                name="street"
+                value={formData.street}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.street ? "input-error" : ""}
+                placeholder={
+                  isAddressDisabled
+                    ? "Select country first"
+                    : "Enter your street address"
+                }
+                disabled={isAddressDisabled}
+              />
+              {errors.street && <MdError className="error-icon" />}
+            </div>
+            {errors.street && (
+              <span className="error-message">{errors.street}</span>
+            )}
+          </div>
 
-          <button type="submit" className="login-button">Register</button>
+          {/* City Field */}
+          <div className="form-group">
+            <label htmlFor="city">City</label>
+            <div className={`input-wrapper${errors.city ? " has-error" : ""}`}>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.city ? "input-error" : ""}
+                placeholder={
+                  isAddressDisabled ? "Select country first" : "Enter your city"
+                }
+                disabled={isAddressDisabled}
+              />
+              {errors.city && <MdError className="error-icon" />}
+            </div>
+            {errors.city && (
+              <span className="error-message">{errors.city}</span>
+            )}
+          </div>
+
+          {/* Postal Code Field */}
+          <div className="form-group">
+            <label htmlFor="postalCode">Postal Code</label>
+            <div
+              className={`input-wrapper${errors.postalCode ? " has-error" : ""}`}
+            >
+              <input
+                type="text"
+                id="postalCode"
+                name="postalCode"
+                value={formData.postalCode}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.postalCode ? "input-error" : ""}
+                placeholder={
+                  isAddressDisabled
+                    ? "Select country first"
+                    : "Enter your postal code"
+                }
+                disabled={isAddressDisabled}
+              />
+              {errors.postalCode && <MdError className="error-icon" />}
+            </div>
+            {errors.postalCode && (
+              <span className="error-message">{errors.postalCode}</span>
+            )}
+          </div>
+          {/* Default Address Checkbox */}
+          <div className="form-group checkbox-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={isDefaultAddress}
+                onChange={() => setIsDefaultAddress(!isDefaultAddress)}
+              />
+              <span>Set as default address</span>
+            </label>
+          </div>
+
+          <button type="submit" className="login-button">
+            Register
+          </button>
           {formError && <p className="error-message">{formError}</p>}
         </form>
-
 
         <div className="signup-link">
           Already have an account? <Link to="/login">Sign in</Link>
