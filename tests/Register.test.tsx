@@ -47,9 +47,7 @@ describe("Registration Form", () => {
     expect(screen.getByLabelText("Street Address")).toBeInTheDocument();
     expect(screen.getByLabelText("City")).toBeInTheDocument();
     expect(screen.getByLabelText("Postal Code")).toBeInTheDocument();
-    expect(
-      screen.getByText("Set as default shipping and billing address")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Set as default address")).toBeInTheDocument();
   });
 
   it("shows validation errors for required fields", async () => {
@@ -238,7 +236,7 @@ describe("Registration Form", () => {
         defaultShippingAddress: 0,
         defaultBillingAddress: 0,
       });
-      expect(mockNavigate).toHaveBeenCalledWith("/");
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
   });
 
