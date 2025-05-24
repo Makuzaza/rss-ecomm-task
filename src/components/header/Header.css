@@ -12,7 +12,7 @@
   align-items: center;
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0;
   padding: 0 20px 0 5px;
 }
 
@@ -27,7 +27,7 @@
 .nav-link {
   color: white;
   text-decoration: none;
-  font-size: 1.2rem;
+  font-size: 1rem;
   padding: 0.5rem 1rem;
   transition: background-color 0.3s;
 }
@@ -91,13 +91,14 @@
   background-color: #c82333;
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 550px) {
   .header {
     height: 95px;
   }
 
   .nav-container {
     padding: 0;
+    margin: 0;
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
@@ -114,7 +115,7 @@
   }
 }
 
-@media screen and (max-width: 300px) {
+@media screen and (max-width: 365px) {
   .nav-container {
     padding: 0;
     margin: 0;
@@ -122,7 +123,7 @@
   }
 
   .header {
-    height: 170px;
+    height: 180px;
   }
 
   .nav-list {
@@ -141,6 +142,7 @@
     width: 100%;
     margin: 0;
     padding: 0;
+    gap: 0.5rem;
   }
 
   .welcome-message {

@@ -101,10 +101,6 @@ select {
 }
 
 @media (max-width: 480px) {
-  .login-card {
-    padding: 30px 20px;
-  }
-
   .checkbox-label {
     display: flex;
     align-items: center;
@@ -121,5 +117,4 @@ select {
   .input-wrapper input {
     padding-right: 40px;
   }
-
 }
