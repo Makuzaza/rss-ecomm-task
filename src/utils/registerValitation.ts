@@ -94,7 +94,7 @@ export const validateField = (
     // BILLING ADRESS
 
     case "billingPostalCode": {
-      if (!formData.shippingCountry) return "Please select a country first";
+      if (!formData.billingCountry) return "Please select a country first";
       if (!value) return "Postal code is required";
       const selectedCountry = countries.find(
         (c) => c.code === formData.billingCountry

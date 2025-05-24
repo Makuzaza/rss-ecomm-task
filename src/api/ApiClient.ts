@@ -174,7 +174,7 @@ export class ApiClient {
       email: data.email,
     };
   }
-  
+
   public async validateToken(token: string): Promise<boolean> {
     try {
       const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
