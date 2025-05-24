@@ -655,9 +655,6 @@ const Register = () => {
                     checked={defaultBillingAddress}
                     onChange={(e) => {
                       setDefaultBillingAddress(e.target.checked);
-                      if (e.target.checked) {
-                        setDefaultShippingAddress(false);
-                      }
                     }}
                   />
                   <span>Set as default billing address</span>
