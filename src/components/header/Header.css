@@ -90,3 +90,64 @@
 .logout-button:hover {
   background-color: #c82333;
 }
+
+@media screen and (max-width: 480px) {
+  .header {
+    height: 95px;
+  }
+
+  .nav-container {
+    padding: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .nav-item:nth-child(1) {
+    margin-left: 10px;
+  }
+
+  .auth-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-left: 20px;
+  }
+}
+
+@media screen and (max-width: 300px) {
+  .nav-container {
+    padding: 0;
+    margin: 0;
+    align-items: center;
+  }
+
+  .header {
+    height: 170px;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav-item:nth-child(1) {
+    margin-left: 0;
+  }
+
+  .auth-buttons {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .welcome-message {
+    margin-right: 0;
+  }
+
+  .auth-buttons {
+    margin-bottom: 10px;
+  }
+}

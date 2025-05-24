@@ -344,7 +344,7 @@ const Register = () => {
               >
                 <option value="">Select a country</option>
                 {europeanCountries.map(({ name, code }) => (
-                  <option key={code} value={code}>
+                  <option key={code} value={code} className="country-option">
                     {name}
                   </option>
                 ))}

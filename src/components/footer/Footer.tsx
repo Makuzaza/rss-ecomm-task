@@ -43,7 +43,7 @@ export const Footer = () => {
             ></a>
           </li>
           <li className="year">
-            &copy; {new Date().getFullYear()} All rights reserved
+            &copy; {new Date().getFullYear()}
           </li>
         </div>
       </div>

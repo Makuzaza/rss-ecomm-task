@@ -19,3 +19,18 @@
     margin-bottom: 1rem;
     font-size: 0.9rem;
   }
+
+  @media screen and (max-width: 600px) {
+    #about {
+      padding: 10px;
+      margin: 0;
+    }
+    
+    #about h2 {
+      font-size: 1.5rem;
+    }
+    
+    #about p {
+      font-size: 0.85rem;
+    }
+  }
