@@ -31,10 +31,16 @@ const Register = () => {
     firstName: "",
     lastName: "",
     dateOfBirth: "",
-    street: "",
-    city: "",
-    postalCode: "",
-    country: "",
+
+    shippingCountry: "",
+    shippingCity: "",
+    shippingStreet: "",
+    shippingPostalCode: "",
+
+    billingCountry: "",
+    billingCity: "",
+    billingStreet: "",
+    billingPostalCode: "",
   });
 
   const [errors, setErrors] = useState<
@@ -46,10 +52,16 @@ const Register = () => {
     firstName: "",
     lastName: "",
     dateOfBirth: "",
-    street: "",
-    city: "",
-    postalCode: "",
-    country: "",
+
+    shippingCountry: "",
+    shippingCity: "",
+    shippingStreet: "",
+    shippingPostalCode: "",
+
+    billingCountry: "",
+    billingCity: "",
+    billingStreet: "",
+    billingPostalCode: "",
   });
 
   const [formError, setFormError] = useState<string | null>(null);
@@ -62,20 +74,45 @@ const Register = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isDefaultAddress, setIsDefaultAddress] = useState(true);
 
-  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const [showBillingAddress, setShowBillingAddress] = useState(false);
+  const [defaultShippingAddress, setDefaultShippingAddress] = useState(true);
+  const [defaultBillingAddress, setDefaultBillingAddress] = useState(true);
+
+  const shippingCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      postalCode: "",
+      shippingPostalCode: "",
     }));
     setErrors((prev) => ({
       ...prev,
-      postalCode: "",
+      shippingPostalCode: "",
     }));
   };
+
+  const billingCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      billingPostalCode: "",
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      billingPostalCode: "",
+    }));
+  };
+
+  // Update the default address checkboxes when showBillingAddress changes
+  useEffect(() => {
+    if (!showBillingAddress) {
+      setDefaultShippingAddress(true);
+      setDefaultBillingAddress(true);
+    }
+  }, [showBillingAddress]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -137,24 +174,38 @@ const Register = () => {
 
     if (validateForm()) {
       try {
+        // Create address objects
+        const addresses = [
+          {
+            country: formData.shippingCountry,
+            city: formData.shippingCity,
+            streetName: formData.shippingStreet,
+            postalCode: formData.shippingPostalCode,
+            key: "shipping-address",
+          },
+        ];
+
+        // Add billing address if enabled
+        if (showBillingAddress) {
+          addresses.push({
+            country: formData.billingCountry,
+            city: formData.billingCity,
+            streetName: formData.billingStreet,
+            postalCode: formData.billingPostalCode,
+            key: "billing-address",
+          });
+        }
+
         const result = await apiClient.registerCustomer({
           email: formData.email,
           password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName,
           dateOfBirth: formData.dateOfBirth,
-          addresses: [
-            {
-              streetName: formData.street,
-              city: formData.city,
-              postalCode: formData.postalCode,
-              country: formData.country,
-            },
-          ],
-          ...(isDefaultAddress && {
-            defaultShippingAddress: 0,
-            defaultBillingAddress: 0,
-          }),
+          addresses: addresses,
+          defaultShippingAddress: defaultShippingAddress ? 0 : undefined,
+          defaultBillingAddress:
+            showBillingAddress && defaultBillingAddress ? 1 : undefined,
         });
 
         console.log("Registration successful:", result);
@@ -175,12 +226,7 @@ const Register = () => {
     passwordValidation.hasLower &&
     passwordValidation.hasNumber;
 
-  const isAddressDisabled = !formData.country;
   const showPasswordHints = formData.password && !allPasswordRequirementsMet;
-  // const selectedCountry = europeanCountries.find(
-  //   (c) => c.code === formData.country
-  // );
-  // const postalCodeExample = selectedCountry?.codeExample || "12345";
 
   return (
     <div className="login-container">
@@ -357,125 +403,280 @@ const Register = () => {
             )}
           </div>
 
-          {/* Country Field */}
-          <div className="form-group">
-            <label htmlFor="country">Country</label>
-            <div
-              className={`input-wrapper${errors.country ? " has-error" : ""}`}
-            >
-              <select
-                id="country"
-                name="country"
-                value={formData.country}
-                onChange={handleCountryChange}
-                onBlur={handleBlur}
-                className={errors.country ? "input-error" : ""}
+          {/* Shipping Address - Country */}
+          <div className="address-section address-section-shipping">
+            <h3 className="address-section-title">Shipping Address</h3>
+            <div className="form-group">
+              <label htmlFor="shippingCountry">Country</label>
+              <div
+                className={`input-wrapper${errors.shippingCountry ? " has-error" : ""}`}
               >
-                <option value="">Select a country</option>
-                {europeanCountries.map(({ name, code }) => (
-                  <option key={code} value={code}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-              {errors.country && <MdError className="error-icon" />}
+                <select
+                  id="shippingCountry"
+                  name="shippingCountry"
+                  value={formData.shippingCountry}
+                  onChange={shippingCountryChange}
+                  onBlur={handleBlur}
+                  className={errors.shippingCountry ? "input-error" : ""}
+                >
+                  <option value="">Select a country</option>
+                  {europeanCountries.map(({ name, code }) => (
+                    <option key={code} value={code}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                {errors.shippingCountry && <MdError className="error-icon" />}
+              </div>
+              {errors.shippingCountry && (
+                <span className="error-message">{errors.shippingCountry}</span>
+              )}
             </div>
-            {errors.country && (
-              <span className="error-message">{errors.country}</span>
+
+            {/* Shipping Address - City*/}
+            <div className="form-group">
+              <label htmlFor="shippingCity">City</label>
+              <div
+                className={`input-wrapper${errors.shippingCity ? " has-error" : ""}`}
+              >
+                <input
+                  type="text"
+                  id="shippingCity"
+                  name="shippingCity"
+                  value={formData.shippingCity}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={errors.shippingCity ? "input-error" : ""}
+                  placeholder={
+                    !formData.shippingCountry
+                      ? "Select country first"
+                      : "Enter your city"
+                  }
+                  disabled={!formData.shippingCountry}
+                />
+                {errors.shippingCity && <MdError className="error-icon" />}
+              </div>
+              {errors.shippingCity && (
+                <span className="error-message">{errors.shippingCity}</span>
+              )}
+            </div>
+
+            {/* Shipping Address - Street */}
+            <div className="form-group">
+              <label htmlFor="shippingStreet">Street Address</label>
+              <div
+                className={`input-wrapper${errors.shippingStreet ? " has-error" : ""}`}
+              >
+                <input
+                  type="text"
+                  id="shippingStreet"
+                  name="shippingStreet"
+                  value={formData.shippingStreet}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={errors.shippingStreet ? "input-error" : ""}
+                  placeholder={
+                    !formData.shippingCountry
+                      ? "Select country first"
+                      : "Enter your street address"
+                  }
+                  disabled={!formData.shippingCountry}
+                />
+                {errors.shippingStreet && <MdError className="error-icon" />}
+              </div>
+              {errors.shippingStreet && (
+                <span className="error-message">{errors.shippingStreet}</span>
+              )}
+            </div>
+
+            {/* Shipping Address - Postal Code */}
+            <div className="form-group">
+              <label htmlFor="shippingPostalCode">Postal Code</label>
+              <div
+                className={`input-wrapper${errors.shippingPostalCode ? " has-error" : ""}`}
+              >
+                <input
+                  type="text"
+                  id="shippingPostalCode"
+                  name="shippingPostalCode"
+                  value={formData.shippingPostalCode}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={errors.shippingPostalCode ? "input-error" : ""}
+                  placeholder={
+                    !formData.shippingCountry
+                      ? "Select country first"
+                      : "Enter your postal code"
+                  }
+                  disabled={!formData.shippingCountry}
+                />
+                {errors.shippingPostalCode && (
+                  <MdError className="error-icon" />
+                )}
+              </div>
+              {errors.shippingPostalCode && (
+                <span className="error-message">
+                  {errors.shippingPostalCode}
+                </span>
+              )}
+            </div>
+
+            {/* Default Address Checkbox */}
+            {showBillingAddress && (
+              <div className="form-group checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={defaultShippingAddress}
+                    onChange={(e) =>
+                      setDefaultShippingAddress(e.target.checked)
+                    }
+                  />
+                  <span>Set as default shipping address</span>
+                </label>
+              </div>
             )}
           </div>
 
-          {/* Street Address Field */}
-          <div className="form-group">
-            <label htmlFor="street">Street Address</label>
-            <div
-              className={`input-wrapper${errors.street ? " has-error" : ""}`}
-            >
-              <input
-                type="text"
-                id="street"
-                name="street"
-                value={formData.street}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={errors.street ? "input-error" : ""}
-                placeholder={
-                  isAddressDisabled
-                    ? "Select country first"
-                    : "Enter your street address"
-                }
-                disabled={isAddressDisabled}
-              />
-              {errors.street && <MdError className="error-icon" />}
-            </div>
-            {errors.street && (
-              <span className="error-message">{errors.street}</span>
-            )}
-          </div>
+          {/* Billing Address Section */}
+          {showBillingAddress && (
+            <div className="address-section address-section-billing">
+              <h3 className="address-section-title">Billing Address</h3>
 
-          {/* City Field */}
-          <div className="form-group">
-            <label htmlFor="city">City</label>
-            <div className={`input-wrapper${errors.city ? " has-error" : ""}`}>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={errors.city ? "input-error" : ""}
-                placeholder={
-                  isAddressDisabled ? "Select country first" : "Enter your city"
-                }
-                disabled={isAddressDisabled}
-              />
-              {errors.city && <MdError className="error-icon" />}
-            </div>
-            {errors.city && (
-              <span className="error-message">{errors.city}</span>
-            )}
-          </div>
+              {/* Billing Country Field */}
+              <div className="form-group">
+                <label htmlFor="billingCountry">Country</label>
+                <div
+                  className={`input-wrapper${errors.billingCountry ? " has-error" : ""}`}
+                >
+                  <select
+                    id="billingCountry"
+                    name="billingCountry"
+                    value={formData.billingCountry}
+                    onChange={billingCountryChange}
+                    onBlur={handleBlur}
+                    className={errors.billingCountry ? "input-error" : ""}
+                  >
+                    <option value="">Select a country</option>
+                    {europeanCountries.map(({ name, code }) => (
+                      <option key={code} value={code}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.billingCountry && <MdError className="error-icon" />}
+                </div>
+                {errors.billingCountry && (
+                  <span className="error-message">{errors.billingCountry}</span>
+                )}
+              </div>
 
-          {/* Postal Code Field */}
-          <div className="form-group">
-            <label htmlFor="postalCode">Postal Code</label>
-            <div
-              className={`input-wrapper${errors.postalCode ? " has-error" : ""}`}
-            >
-              <input
-                type="text"
-                id="postalCode"
-                name="postalCode"
-                value={formData.postalCode}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={errors.postalCode ? "input-error" : ""}
-                placeholder={
-                  isAddressDisabled
-                    ? "Select country first"
-                    : "Enter your postal code"
-                }
-                disabled={isAddressDisabled}
-              />
-              {errors.postalCode && <MdError className="error-icon" />}
+              {/* Billing City Field */}
+              <div className="form-group">
+                <label htmlFor="billingCity">City</label>
+                <div
+                  className={`input-wrapper${errors.billingCity ? " has-error" : ""}`}
+                >
+                  <input
+                    type="text"
+                    id="billingCity"
+                    name="billingCity"
+                    value={formData.billingCity}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={errors.billingCity ? "input-error" : ""}
+                    placeholder="Enter your billing city"
+                    disabled={!formData.billingCountry}
+                  />
+                  {errors.billingCity && <MdError className="error-icon" />}
+                </div>
+                {errors.billingCity && (
+                  <span className="error-message">{errors.billingCity}</span>
+                )}
+              </div>
+
+              {/* Billing Street Address Field */}
+              <div className="form-group">
+                <label htmlFor="billingStreet">Street Address</label>
+                <div
+                  className={`input-wrapper${errors.billingStreet ? " has-error" : ""}`}
+                >
+                  <input
+                    type="text"
+                    id="billingStreet"
+                    name="billingStreet"
+                    value={formData.billingStreet}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={errors.billingStreet ? "input-error" : ""}
+                    placeholder="Enter your billing street address"
+                    disabled={!formData.billingCountry}
+                  />
+                  {errors.billingStreet && <MdError className="error-icon" />}
+                </div>
+                {errors.billingStreet && (
+                  <span className="error-message">{errors.billingStreet}</span>
+                )}
+              </div>
+
+              {/* Billing Postal Code Field */}
+              <div className="form-group">
+                <label htmlFor="billingPostalCode">Postal Code</label>
+                <div
+                  className={`input-wrapper${errors.billingPostalCode ? " has-error" : ""}`}
+                >
+                  <input
+                    type="text"
+                    id="billingPostalCode"
+                    name="billingPostalCode"
+                    value={formData.billingPostalCode}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={errors.billingPostalCode ? "input-error" : ""}
+                    placeholder="Enter your billing postal code"
+                    disabled={!formData.billingCountry}
+                  />
+                  {errors.billingPostalCode && (
+                    <MdError className="error-icon" />
+                  )}
+                </div>
+                {errors.billingPostalCode && (
+                  <span className="error-message">
+                    {errors.billingPostalCode}
+                  </span>
+                )}
+              </div>
+
+              {/* Default Billing Address Checkbox  */}
+              <div className="form-group checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={defaultBillingAddress}
+                    onChange={(e) => {
+                      setDefaultBillingAddress(e.target.checked);
+                      if (e.target.checked) {
+                        setDefaultShippingAddress(false);
+                      }
+                    }}
+                  />
+                  <span>Set as default billing address</span>
+                </label>
+              </div>
             </div>
-            {errors.postalCode && (
-              <span className="error-message">{errors.postalCode}</span>
-            )}
-          </div>
-          {/* Default Address Checkbox */}
+          )}
+          {/* Separate Billing Address Checkbox */}
           <div className="form-group checkbox-group">
             <label className="checkbox-label">
               <input
                 type="checkbox"
-                checked={isDefaultAddress}
-                onChange={() => setIsDefaultAddress(!isDefaultAddress)}
+                checked={!showBillingAddress}
+                onChange={() => setShowBillingAddress(!showBillingAddress)}
               />
-              <span>Set as default address</span>
+              <span>Shipping and billing addresses are the same.</span>
             </label>
           </div>
-
+          {/* SUBMIT BUTTON */}
           <button type="submit" className="login-button">
             Register
           </button>

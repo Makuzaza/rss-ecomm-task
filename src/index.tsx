@@ -7,6 +7,7 @@ import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/api/ApiClientContext";
 import Shop from "@/pages/shop/Shop";
 import About from "@/pages/about/About";
+import Profile from "./pages/profile/Profile";
 
 const root = document.getElementById("root");
 
@@ -21,6 +22,22 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
+      {
+        path: "/login",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <Login />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/register",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <Register />
+          </Suspense>
+        ),
+      },
       {
         path: "/about",
         element: (
@@ -38,18 +55,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/login",
+        path: "/profile",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Login />
-          </Suspense>
-        ),
-      },
-      {
-        path: "/register",
-        element: (
-          <Suspense fallback={"Loading..."}>
-            <Register />
+            <Profile />
           </Suspense>
         ),
       },

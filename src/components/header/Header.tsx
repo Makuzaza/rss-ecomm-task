@@ -20,6 +20,11 @@ export const Header = () => {
               About
             </Link>
           </li>
+          <li className="nav-item">
+            <Link to="/profile" className="nav-link">
+              Profile
+            </Link>
+          </li>
           {user && (
             <li className="nav-item">
               <Link to="/shop" className="nav-link">
