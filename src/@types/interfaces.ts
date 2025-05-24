@@ -17,10 +17,14 @@ export type RegisterFormFields = {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  street: string;
-  city: string;
-  postalCode: string;
-  country: string;
+  shippingCountry: string;
+  shippingCity: string;
+  shippingStreet: string;
+  shippingPostalCode: string;
+  billingCountry: string;
+  billingCity: string;
+  billingStreet: string;
+  billingPostalCode: string;
 };
 
 export interface СountriesList {
@@ -39,4 +43,3 @@ export interface AuthContextType {
   login: (userData: User) => void;
   logout: () => void;
 }
-

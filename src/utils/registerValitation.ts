@@ -1,12 +1,13 @@
 import { RegisterFormFields } from "@/@types/interfaces";
+import europeanCountriesData from "@/data/europeanCountries.json";
 
 const EMAIL_REGEX = /\S+@\S+\.\S+/;
 const NAME_REGEX = /^[a-zA-Z]+$/;
 const CITY_REGEX = /^[a-zA-Z\s]+$/;
-const POSTAL_CODE_REGEXES = [
-  /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/, // Canada
-  /^\d{5}(-\d{4})?$/, // US
-];
+// const POSTAL_CODE_REGEXES = [
+//   /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/, // Canada
+//   /^\d{5}(-\d{4})?$/, // US
+// ];
 
 const calculateAge = (date: string): number => {
   const birthDate = new Date(date);
@@ -25,22 +26,22 @@ export const validateField = (
   name: keyof RegisterFormFields,
   value: string,
   formData: RegisterFormFields,
-  countries: { code: string }[]
+  countries: typeof europeanCountriesData
 ): string => {
   switch (name) {
     case "email":
       if (!value) return "Email is required";
       if (!EMAIL_REGEX.test(value)) return "Email is invalid";
       break;
+
     case "password":
       if (!value) return "Password is required";
-      // if (value.length < 8) return "Password must be at least 8 characters";
-      // if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value))
-      //   return "Password must contain at least one uppercase, one lowercase letter and one number";
       break;
+
     case "confirmPassword":
       if (value !== formData.password) return "Passwords don't match";
       break;
+
     case "firstName":
     case "lastName":
       if (!value)
@@ -53,33 +54,67 @@ export const validateField = (
       if (calculateAge(value) < 0)
         return "You are not born yet. Try again later.";
       if (calculateAge(value) < 13) return "You must be at least 13 years old";
+      break;
 
-      break;
-    case "street":
-      if (!value.trim()) return "Street address is required";
-      break;
-    case "city":
-      if (!value) return "City is required";
-      if (!CITY_REGEX.test(value))
-        return "City can only contain letters and spaces";
-      break;
-    case "postalCode":
-      if (!value) return "Postal code is required";
-      if (!POSTAL_CODE_REGEXES.some((regex) => regex.test(value)))
-        return "Postal code is invalid";
-      break;
-    case "country":
+    // SHIPPING ADRESS
+    case "shippingCountry":
+    case "billingCountry":
       if (!value) return "Country is required";
       if (!countries.some((c) => c.code === value))
         return "Please select a valid country";
       break;
+
+    case "shippingCity":
+    case "billingCity":
+      if (!value) return "City is required";
+      if (!CITY_REGEX.test(value))
+        return "City can only contain letters and spaces";
+      break;
+
+    case "shippingStreet":
+    case "billingStreet":
+      if (!value.trim()) return "Street address is required";
+      break;
+
+    case "shippingPostalCode": {
+      if (!formData.shippingCountry) return "Please select a country first";
+      if (!value) return "Postal code is required";
+      const selectedCountry = countries.find(
+        (c) => c.code === formData.shippingCountry
+      );
+      if (selectedCountry) {
+        const regex = new RegExp(selectedCountry.codeRegex);
+        if (!regex.test(value)) {
+          return `Invalid postal code format. Example for ${selectedCountry.name}: ${selectedCountry.codeExample}`;
+        }
+      }
+      break;
+    }
+
+    // BILLING ADRESS
+
+    case "billingPostalCode": {
+      if (!formData.billingCountry) return "Please select a country first";
+      if (!value) return "Postal code is required";
+      const selectedCountry = countries.find(
+        (c) => c.code === formData.billingCountry
+      );
+      if (selectedCountry) {
+        const regex = new RegExp(selectedCountry.codeRegex);
+        if (!regex.test(value)) {
+          return `Invalid postal code format. Example for ${selectedCountry.name}: ${selectedCountry.codeExample}`;
+        }
+      }
+      break;
+    }
   }
+
   return "";
 };
 
 export const validateRegisterForm = (
   formData: RegisterFormFields,
-  countries: { code: string }[]
+  countries: typeof europeanCountriesData
 ): { isValid: boolean; errors: Record<keyof RegisterFormFields, string> } => {
   const errors: Record<keyof RegisterFormFields, string> = {
     email: "",
@@ -88,10 +123,14 @@ export const validateRegisterForm = (
     firstName: "",
     lastName: "",
     dateOfBirth: "",
-    street: "",
-    city: "",
-    postalCode: "",
-    country: "",
+    shippingCountry: "",
+    shippingCity: "",
+    shippingStreet: "",
+    shippingPostalCode: "",
+    billingCountry: "",
+    billingCity: "",
+    billingStreet: "",
+    billingPostalCode: "",
   };
 
   let isValid = true;

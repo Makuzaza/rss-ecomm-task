@@ -152,6 +152,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: right 0.2s ease;
 }
 
 .password-toggle:hover {
@@ -171,6 +172,11 @@
 }
 
 @media (max-width: 480px) {
+  .login-container {
+    padding: 10px 0;
+    width: 100%;
+  }
+
   .login-card {
     padding: 30px 20px;
   }

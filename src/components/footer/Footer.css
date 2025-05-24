@@ -84,3 +84,21 @@
     fill: rgb(152, 194, 196)
   }
 }
+
+@media screen and (max-width: 300px) {
+  .rs-icon-wrap {
+    display: none;
+  }
+
+  .social-item-link svg {
+    margin: 0 2px 0 5px;
+  }
+
+  .footer-content {
+    padding: 0;
+  }
+
+  .social-items {
+    padding: 0 5px;
+  }
+}

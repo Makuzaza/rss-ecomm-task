@@ -12,7 +12,7 @@
   align-items: center;
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0;
   padding: 0 20px 0 5px;
 }
 
@@ -27,7 +27,7 @@
 .nav-link {
   color: white;
   text-decoration: none;
-  font-size: 1.2rem;
+  font-size: 1rem;
   padding: 0.5rem 1rem;
   transition: background-color 0.3s;
 }
@@ -89,4 +89,67 @@
 
 .logout-button:hover {
   background-color: #c82333;
+}
+
+@media screen and (max-width: 550px) {
+  .header {
+    height: 95px;
+  }
+
+  .nav-container {
+    padding: 0;
+    margin: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .nav-item:nth-child(1) {
+    margin-left: 10px;
+  }
+
+  .auth-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-left: 20px;
+  }
+}
+
+@media screen and (max-width: 365px) {
+  .nav-container {
+    padding: 0;
+    margin: 0;
+    align-items: center;
+  }
+
+  .header {
+    height: 180px;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav-item:nth-child(1) {
+    margin-left: 0;
+  }
+
+  .auth-buttons {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    gap: 0.5rem;
+  }
+
+  .welcome-message {
+    margin-right: 0;
+  }
+
+  .auth-buttons {
+    margin-bottom: 5px;
+  }
 }
