@@ -18,7 +18,10 @@
   },
   "ts-node": {
     "compilerOptions": {
-      "module": "CommonJS"
+      "module": "CommonJS",
+      "types": ["jest", "@testing-library/jest-dom"],
+      "esModuleInterop": true,
+      "jsx": "react-jsx"
     }
   }
 }

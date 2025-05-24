@@ -1,12 +1,13 @@
 import { RegisterFormFields } from "@/@types/interfaces";
+import europeanCountriesData from "@/data/europeanCountries.json";
 
 const EMAIL_REGEX = /\S+@\S+\.\S+/;
 const NAME_REGEX = /^[a-zA-Z]+$/;
 const CITY_REGEX = /^[a-zA-Z\s]+$/;
-const POSTAL_CODE_REGEXES = [
-  /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/, // Canada
-  /^\d{5}(-\d{4})?$/, // US
-];
+// const POSTAL_CODE_REGEXES = [
+//   /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/, // Canada
+//   /^\d{5}(-\d{4})?$/, // US
+// ];
 
 const calculateAge = (date: string): number => {
   const birthDate = new Date(date);
@@ -25,7 +26,7 @@ export const validateField = (
   name: keyof RegisterFormFields,
   value: string,
   formData: RegisterFormFields,
-  countries: { code: string }[]
+  countries: typeof europeanCountriesData
 ): string => {
   switch (name) {
     case "email":
@@ -63,11 +64,20 @@ export const validateField = (
       if (!CITY_REGEX.test(value))
         return "City can only contain letters and spaces";
       break;
-    case "postalCode":
+    case "postalCode": {
+      if (!formData.country) return "Please select a country first";
       if (!value) return "Postal code is required";
-      if (!POSTAL_CODE_REGEXES.some((regex) => regex.test(value)))
-        return "Postal code is invalid";
+      const selectedCountry = countries.find(
+        (c) => c.code === formData.country
+      );
+      if (selectedCountry) {
+        const regex = new RegExp(selectedCountry.codeRegex);
+        if (!regex.test(value)) {
+          return `Invalid postal code format. Example for ${selectedCountry.name}: ${selectedCountry.codeExample}`;
+        }
+      }
       break;
+    }
     case "country":
       if (!value) return "Country is required";
       if (!countries.some((c) => c.code === value))
@@ -79,7 +89,7 @@ export const validateField = (
 
 export const validateRegisterForm = (
   formData: RegisterFormFields,
-  countries: { code: string }[]
+  countries: typeof europeanCountriesData
 ): { isValid: boolean; errors: Record<keyof RegisterFormFields, string> } => {
   const errors: Record<keyof RegisterFormFields, string> = {
     email: "",

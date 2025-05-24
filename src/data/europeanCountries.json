@@ -1,48 +1,278 @@
 [
-  { "name": "Albania", "code": "AL" },
-  { "name": "Andorra", "code": "AD" },
-  { "name": "Austria", "code": "AT" },
-  { "name": "Belarus", "code": "BY" },
-  { "name": "Belgium", "code": "BE" },
-  { "name": "Bosnia and Herzegovina", "code": "BA" },
-  { "name": "Bulgaria", "code": "BG" },
-  { "name": "Croatia", "code": "HR" },
-  { "name": "Cyprus", "code": "CY" },
-  { "name": "Czech Republic", "code": "CZ" },
-  { "name": "Denmark", "code": "DK" },
-  { "name": "Estonia", "code": "EE" },
-  { "name": "Finland", "code": "FI" },
-  { "name": "France", "code": "FR" },
-  { "name": "Germany", "code": "DE" },
-  { "name": "Greece", "code": "GR" },
-  { "name": "Hungary", "code": "HU" },
-  { "name": "Iceland", "code": "IS" },
-  { "name": "Ireland", "code": "IE" },
-  { "name": "Italy", "code": "IT" },
-  { "name": "Kosovo", "code": "XK" },
-  { "name": "Latvia", "code": "LV" },
-  { "name": "Liechtenstein", "code": "LI" },
-  { "name": "Lithuania", "code": "LT" },
-  { "name": "Luxembourg", "code": "LU" },
-  { "name": "Malta", "code": "MT" },
-  { "name": "Moldova", "code": "MD" },
-  { "name": "Monaco", "code": "MC" },
-  { "name": "Montenegro", "code": "ME" },
-  { "name": "Netherlands", "code": "NL" },
-  { "name": "North Macedonia", "code": "MK" },
-  { "name": "Norway", "code": "NO" },
-  { "name": "Poland", "code": "PL" },
-  { "name": "Portugal", "code": "PT" },
-  { "name": "Romania", "code": "RO" },
-  { "name": "Russia", "code": "RU" },
-  { "name": "San Marino", "code": "SM" },
-  { "name": "Serbia", "code": "RS" },
-  { "name": "Slovakia", "code": "SK" },
-  { "name": "Slovenia", "code": "SI" },
-  { "name": "Spain", "code": "ES" },
-  { "name": "Sweden", "code": "SE" },
-  { "name": "Switzerland", "code": "CH" },
-  { "name": "Ukraine", "code": "UA" },
-  { "name": "United Kingdom", "code": "GB" },
-  { "name": "Vatican City", "code": "VA" }
+  {
+    "name": "Albania",
+    "code": "AL",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "1001"
+  },
+  {
+    "name": "Andorra",
+    "code": "AD",
+    "codeRegex": "^AD\\d{3}$",
+    "codeExample": "AD500"
+  },
+  {
+    "name": "Austria",
+    "code": "AT",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "1010"
+  },
+  {
+    "name": "Belarus",
+    "code": "BY",
+    "codeRegex": "^\\d{6}$",
+    "codeExample": "220030"
+  },
+  {
+    "name": "Belgium",
+    "code": "BE",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "1000"
+  },
+  {
+    "name": "Bosnia and Herzegovina",
+    "code": "BA",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "71000"
+  },
+  {
+    "name": "Bulgaria",
+    "code": "BG",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "1000"
+  },
+  {
+    "name": "Croatia",
+    "code": "HR",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "10000"
+  },
+  {
+    "name": "Cyprus",
+    "code": "CY",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "1010"
+  },
+  {
+    "name": "Czech Republic",
+    "code": "CZ",
+    "codeRegex": "^\\d{3} \\d{2}$",
+    "codeExample": "110 00"
+  },
+  {
+    "name": "Denmark",
+    "code": "DK",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "2100"
+  },
+  {
+    "name": "Estonia",
+    "code": "EE",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "10111"
+  },
+  {
+    "name": "Finland",
+    "code": "FI",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "00100"
+  },
+  {
+    "name": "France",
+    "code": "FR",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "75001"
+  },
+  {
+    "name": "Germany",
+    "code": "DE",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "10115"
+  },
+  {
+    "name": "Greece",
+    "code": "GR",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "10558"
+  },
+  {
+    "name": "Hungary",
+    "code": "HU",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "1051"
+  },
+  {
+    "name": "Iceland",
+    "code": "IS",
+    "codeRegex": "^\\d{3}$",
+    "codeExample": "101"
+  },
+  {
+    "name": "Ireland",
+    "code": "IE",
+    "codeRegex": "^[A-Za-z]\\d[\\dA-Za-z]? ?\\d[A-Za-z]{2}$",
+    "codeExample": "D02 X285"
+  },
+  {
+    "name": "Italy",
+    "code": "IT",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "00184"
+  },
+  {
+    "name": "Kosovo",
+    "code": "XK",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "10000"
+  },
+  {
+    "name": "Latvia",
+    "code": "LV",
+    "codeRegex": "^LV-\\d{4}$",
+    "codeExample": "LV-1050"
+  },
+  {
+    "name": "Liechtenstein",
+    "code": "LI",
+    "codeRegex": "^948[5-9]$",
+    "codeExample": "9490"
+  },
+  {
+    "name": "Lithuania",
+    "code": "LT",
+    "codeRegex": "^LT-\\d{5}$",
+    "codeExample": "LT-01100"
+  },
+  {
+    "name": "Luxembourg",
+    "code": "LU",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "L-1111"
+  },
+  {
+    "name": "Malta",
+    "code": "MT",
+    "codeRegex": "^[A-Z]{3} \\d{4}$",
+    "codeExample": "VLT 1111"
+  },
+  {
+    "name": "Moldova",
+    "code": "MD",
+    "codeRegex": "^MD-\\d{4}$",
+    "codeExample": "MD-2001"
+  },
+  {
+    "name": "Monaco",
+    "code": "MC",
+    "codeRegex": "^980\\d{2}$",
+    "codeExample": "98000"
+  },
+  {
+    "name": "Montenegro",
+    "code": "ME",
+    "codeRegex": "^8\\d{4}$",
+    "codeExample": "81000"
+  },
+  {
+    "name": "Netherlands",
+    "code": "NL",
+    "codeRegex": "^\\d{4} ?[A-Z]{2}$",
+    "codeExample": "1012 WX"
+  },
+  {
+    "name": "North Macedonia",
+    "code": "MK",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "1000"
+  },
+  {
+    "name": "Norway",
+    "code": "NO",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "0150"
+  },
+  {
+    "name": "Poland",
+    "code": "PL",
+    "codeRegex": "^\\d{2}-\\d{3}$",
+    "codeExample": "00-001"
+  },
+  {
+    "name": "Portugal",
+    "code": "PT",
+    "codeRegex": "^\\d{4}-\\d{3}$",
+    "codeExample": "1000-001"
+  },
+  {
+    "name": "Romania",
+    "code": "RO",
+    "codeRegex": "^\\d{6}$",
+    "codeExample": "010011"
+  },
+  {
+    "name": "Russia",
+    "code": "RU",
+    "codeRegex": "^\\d{6}$",
+    "codeExample": "101000"
+  },
+  {
+    "name": "San Marino",
+    "code": "SM",
+    "codeRegex": "^4789\\d$",
+    "codeExample": "47890"
+  },
+  {
+    "name": "Serbia",
+    "code": "RS",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "11000"
+  },
+  {
+    "name": "Slovakia",
+    "code": "SK",
+    "codeRegex": "^\\d{3} \\d{2}$",
+    "codeExample": "811 01"
+  },
+  {
+    "name": "Slovenia",
+    "code": "SI",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "1000"
+  },
+  {
+    "name": "Spain",
+    "code": "ES",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "28001"
+  },
+  {
+    "name": "Sweden",
+    "code": "SE",
+    "codeRegex": "^\\d{3} ?\\d{2}$",
+    "codeExample": "114 55"
+  },
+  {
+    "name": "Switzerland",
+    "code": "CH",
+    "codeRegex": "^\\d{4}$",
+    "codeExample": "8000"
+  },
+  {
+    "name": "Ukraine",
+    "code": "UA",
+    "codeRegex": "^\\d{5}$",
+    "codeExample": "01001"
+  },
+  {
+    "name": "United Kingdom",
+    "code": "GB",
+    "codeRegex": "^(GIR ?0AA|[A-Z]{1,2}\\d[A-Z\\d]? ?\\d[ABD-HJLNP-UW-Z]{2})$",
+    "codeExample": "SW1A 1AA"
+  },
+  {
+    "name": "Vatican City",
+    "code": "VA",
+    "codeRegex": "^00120$",
+    "codeExample": "00120"
+  }
 ]
