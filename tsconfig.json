@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
@@ -17,7 +18,10 @@
   },
   "ts-node": {
     "compilerOptions": {
-      "module": "CommonJS"
+      "module": "CommonJS",
+      "types": ["jest", "@testing-library/jest-dom"],
+      "esModuleInterop": true,
+      "jsx": "react-jsx"
     }
   }
 }

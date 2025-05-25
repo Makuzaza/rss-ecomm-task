@@ -32,52 +32,55 @@ export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
     ],
   };
 
-  const cssLoaderWithModules = {
-    loader: "css-loader",
-    options: {
-      modules: {
-        localIdentName: isDev ? "[path][name]__[local]" : "[hash:base64:8]",
-      },
-    },
+  // Regular CSS loader (for normal CSS files)
+  const cssLoader = {
+    test: /\.css$/i,
+    use: [isDev ? "style-loader" : MiniCssExtractPlugin.loader, "css-loader"],
   };
 
-  const scssLoader = {
-    test: /\.s[ac]ss$/i,
+  const cssModulesLoader = {
+    test: /\.module\.css$/i,
     use: [
-      // Creates `style` nodes from JS strings
       isDev ? "style-loader" : MiniCssExtractPlugin.loader,
-      // Translates CSS into CommonJS
-      cssLoaderWithModules,
-      // Compiles Sass to CSS
+      {
+        loader: "css-loader",
+        options: {
+          modules: {
+            namedExport: false,
+            localIdentName: isDev ? "[path][name]__[local]" : "[hash:base64:8]",
+          },
+        },
+      },
+    ],
+  };
+
+  // Sass
+  const scssModulesLoader = {
+    test: /\.module\.s[ac]ss$/i,
+    use: [
+      isDev ? "style-loader" : MiniCssExtractPlugin.loader,
+      {
+        loader: "css-loader",
+        options: {
+          modules: {
+            namedExport: false,
+            localIdentName: isDev ? "[path][name]__[local]" : "[hash:base64:8]",
+          },
+        },
+      },
       "sass-loader",
     ],
   };
 
-  // const scssModulesLoader = {
-  //   test: /\.module\.s[ac]ss$/i,
-  //   use: [
-  //     isDev ? "style-loader" : MiniCssExtractPlugin.loader,
-  //     {
-  //       loader: "css-loader",
-  //       options: {
-  //         modules: {
-  //           localIdentName: isDev ? "[path][name]__[local]" : "[hash:base64:8]",
-  //         },
-  //       },
-  //     },
-  //     "sass-loader",
-  //   ],
-  // };
-
-  // const scssLoader = {
-  //   test: /\.s[ac]ss$/i,
-  //   exclude: /\.module\.s[ac]ss$/i, // exclude CSS modules
-  //   use: [
-  //     isDev ? "style-loader" : MiniCssExtractPlugin.loader,
-  //     "css-loader", // <== NO modules here
-  //     "sass-loader",
-  //   ],
-  // };
+  const scssLoader = {
+    test: /\.s[ac]ss$/i,
+    exclude: /\.module\.s[ac]ss$/i, // exclude CSS modules
+    use: [
+      isDev ? "style-loader" : MiniCssExtractPlugin.loader,
+      "css-loader", // <== NO modules here
+      "sass-loader",
+    ],
+  };
 
   const tsLoader = {
     test: /\.tsx?$/,
@@ -92,5 +95,13 @@ export function buildLoaders(options: BuildOptions): ModuleOptions["rules"] {
     ],
   };
 
-  return [assetLoader, scssLoader, tsLoader, svgrLoader];
+  return [
+    assetLoader,
+    cssModulesLoader,
+    cssLoader,
+    scssModulesLoader,
+    scssLoader,
+    tsLoader,
+    svgrLoader,
+  ];
 }
