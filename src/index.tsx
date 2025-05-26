@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "@/pages/login/Login";
 import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
-import { ApiClientProvider } from "@/api/ApiClientContext";
+import { ApiClientProvider } from "@/context/ApiClientContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Shop from "@/pages/shop/Shop";
 import About from "@/pages/about/About";

@@ -44,9 +44,7 @@ export class ApiClient extends CreateApiClient {
    * LOGIN CUSTOMER WITH TOKEN
    */
   public async loginCustomerWithToken(token: string) {
-    // CREATE CLENT
     const client = this.buildClientWithToken(token);
-    // CREATE ApiRoot
     this.apiRoot = this.getApiRoot(client);
 
     try {
@@ -70,9 +68,7 @@ export class ApiClient extends CreateApiClient {
   public async registerCustomer(
     customerData: MyCustomerDraft
   ): Promise<CustomerSignInResult> {
-    // CREATE CLENT
     const client = this.buildDefaultClient(false);
-    // CREATE ApiRoot
     this.apiRoot = this.getApiRoot(client);
 
     try {

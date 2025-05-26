@@ -55,16 +55,13 @@ class CreateApiClient {
   protected buildClientWithPassword(email: string, password: string): Client {
     const customTokenCache: TokenCache = {
       get: () => {
-        // Try to get from localStorage
         const cached = localStorage.getItem("accessToken");
         if (cached) {
           return JSON.parse(cached);
         }
-        // Return empty token store if nothing cached
         return { token: "", expirationTime: 0 };
       },
       set: (cache: TokenStore) => {
-        // Save to localStorage
         localStorage.setItem("accessToken", JSON.stringify(cache));
       },
     };
@@ -94,13 +91,11 @@ class CreateApiClient {
   }
 
   // AUTHORIZED CLIENT (with Token)
-  protected buildClientWithToken(tokenData: string): Client {
-    const parsedToken: TokenStore = JSON.parse(tokenData);
-    const authorization: string = `Bearer ${parsedToken.token}`;
+  protected buildClientWithToken(token: string): Client {
+    const authorization: string = `Bearer ${token}`;
     const options: ExistingTokenMiddlewareOptions = {
       force: true,
     };
-    // console.log("build:", authorization);
     return new ClientBuilder()
       .withExistingTokenFlow(authorization, options)
       .withHttpMiddleware({
