@@ -63,9 +63,7 @@ const Login = () => {
     }
 
     try {
-      const customer = await login(formData.email, formData.password);
-      console.log("Login resap:", customer);
-      navigate("/shop");
+      await login(formData.email, formData.password);
     } catch (err) {
       console.log(err);
     }
