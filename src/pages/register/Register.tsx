@@ -133,7 +133,8 @@ const Register = () => {
         name as keyof RegisterFormFields,
         value,
         updatedForm,
-        europeanCountries
+        europeanCountries,
+        showBillingAddress
       );
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -151,7 +152,8 @@ const Register = () => {
       name as keyof RegisterFormFields,
       value,
       formData,
-      europeanCountries
+      europeanCountries,
+      showBillingAddress
     );
     setErrors((prevErrors) => ({
       ...prevErrors,
