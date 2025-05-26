@@ -164,7 +164,8 @@ const Register = () => {
   const validateForm = () => {
     const { isValid, errors } = validateRegisterForm(
       formData,
-      europeanCountries
+      europeanCountries,
+      showBillingAddress
     );
     setErrors(errors);
     return isValid;
