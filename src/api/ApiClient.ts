@@ -1,91 +1,70 @@
-import { ClientBuilder, type Client } from "@commercetools/ts-client";
+import CreateApiClient from "./CreateApiClient";
+
 import {
-  createApiBuilderFromCtpClient,
-  ApiRoot,
   CustomerSignInResult,
   MyCustomerDraft,
 } from "@commercetools/platform-sdk";
 import { CommerceToolsError } from "../@types/interfaces";
 
-export class ApiClient {
-  private BASE_URI = "https://api.europe-west1.gcp.commercetools.com";
-  private OAUTH_URI = "https://auth.europe-west1.gcp.commercetools.com";
-  private PROJECT_KEY = "api-rs-school";
-
-  private readonly ADMIN_CREDENTIALS = {
-    // Admin client (scope)
-    clientId: "wkSBIH57z7eootNrTs-fx54U",
-    clientSecret: "aDRhkOUKc51Z3-_cp45A_asnITocAjzM",
-  };
-
-  private readonly SPA_CREDENTIALS = {
-    // SPA client (scope)
-    clientId: "DLHBgbFar-WAp5-rUwI_u0nA",
-    clientSecret: "2HUjaA1AZjzqbIranxV9PisjzBJ1zhjW",
-  };
-
-  private client: Client;
-
+export class ApiClient extends CreateApiClient {
   constructor() {
-    this.client = this.getClient();
+    super();
   }
 
-  private getClient(): Client {
-    return new ClientBuilder()
-      .defaultClient(
-        this.BASE_URI,
-        this.ADMIN_CREDENTIALS,
-        this.OAUTH_URI,
-        this.PROJECT_KEY
-      )
-      .build();
+  /**
+   * LOGIN CUSTOMER WITH PASSWORD
+   */
+  public async loginCustomer(email: string, password: string) {
+    // CREATE CLENT
+    const client = this.buildClientWithPassword(email, password);
+    // CREATE ApiRoot
+    this.apiRoot = this.getApiRoot(client);
+
+    const customerProfile = await this.getCustomerProfile();
+    console.log(customerProfile);
+    return customerProfile;
   }
 
-  private getApiRoot(isAdmin: boolean = false): ApiRoot {
-    return createApiBuilderFromCtpClient(this.buildClient(isAdmin));
-  }
-
-  private buildClient(isAdmin: boolean): Client {
-    const credentials = isAdmin ? this.ADMIN_CREDENTIALS : this.SPA_CREDENTIALS;
-
-    return new ClientBuilder()
-      .defaultClient(
-        this.BASE_URI,
-        credentials,
-        this.OAUTH_URI,
-        this.PROJECT_KEY
-      )
-      .build();
-  }
-
-  async getCustomersByLastName(lastName: string) {
-    const apiRoot = this.getApiRoot(true); // Admin client
+  /**
+   * LOGIN CUSTOMER WITH TOKEN
+   */
+  public async loginCustomerWithToken(token: string) {
+    // CREATE CLENT
+    const client = this.buildClientWithToken(token);
+    // CREATE ApiRoot
+    this.apiRoot = this.getApiRoot(client);
 
     try {
-      const { body } = await apiRoot
-        .withProjectKey({ projectKey: this.PROJECT_KEY })
-        .customers()
-        .get({
-          queryArgs: {
-            where: `lastName="${lastName}"`,
-          },
+      const res = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
         })
+        .me()
+        .get()
         .execute();
-      return body;
+
+      return res;
     } catch (error) {
-      console.error("API Error:", error);
-      throw error;
+      console.log(error);
     }
   }
 
+  /**
+   * REGISTER CUSTOMER
+   */
   public async registerCustomer(
     customerData: MyCustomerDraft
   ): Promise<CustomerSignInResult> {
-    const apiRoot = this.getApiRoot(false);
+    // CREATE CLENT
+    const client = this.buildDefaultClient(false);
+    // CREATE ApiRoot
+    this.apiRoot = this.getApiRoot(client);
 
     try {
-      const { body } = await apiRoot
-        .withProjectKey({ projectKey: this.PROJECT_KEY })
+      const { body } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
         .me()
         .signup()
         .post({ body: customerData })
@@ -107,87 +86,26 @@ export class ApiClient {
     }
   }
 
-  public async loginCustomer(
-    email: string,
-    password: string
-  ): Promise<{
-    firstName: string;
-    lastName: string;
-    email: string;
-  }> {
-    const formData = new URLSearchParams();
-    formData.append("grant_type", "password");
-    formData.append("username", email);
-    formData.append("password", password);
-    formData.append(
-      "scope",
-      ["manage_my_profile", "view_published_products", "manage_my_orders"]
-        .map((scope) => `${scope}:${this.PROJECT_KEY}`)
-        .join(" ")
-    );
-
-    const authUrl = `${this.OAUTH_URI}/oauth/${this.PROJECT_KEY}/customers/token`;
-
-    const res = await fetch(authUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${btoa(`${this.SPA_CREDENTIALS.clientId}:${this.SPA_CREDENTIALS.clientSecret}`)}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: formData.toString(),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      const errorMessage =
-        data?.error_description || data?.message || "Login failed";
-      throw new Error(errorMessage);
-    }
-
-    localStorage.setItem("accessToken", data.access_token);
-
-    return this.getCurrentCustomer(data.access_token);
-  }
-
-  public async getCurrentCustomer(accessToken: string): Promise<{
-    firstName: string;
-    lastName: string;
-    email: string;
-  }> {
-    const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch customer data");
-    }
-
-    const data = await response.json();
-    return {
-      firstName: data.firstName || "",
-      lastName: data.lastName || "",
-      email: data.email,
-    };
-  }
-
-  public async validateToken(token: string): Promise<boolean> {
+  /**
+   * GET CUSTOMER PROFILE
+   */
+  public async getCustomerProfile() {
     try {
-      const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.ok;
-    } catch {
-      return false;
+      const { body: customer } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .me()
+        .get()
+        .execute();
+      return customer;
+    } catch (error) {
+      console.log(error);
     }
   }
+
+  // end
 }
+
 // Singleton instance
 export const apiClient = new ApiClient();

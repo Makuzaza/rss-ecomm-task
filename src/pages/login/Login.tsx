@@ -5,19 +5,19 @@ import { validateEmail, validatePassword } from "@/utils/loginValidation";
 import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
-import { MdError } from "react-icons/md"
+import { MdError } from "react-icons/md";
 
 const Login = () => {
-  const { user } = useAuth();
+  const { isAuth } = useAuth();
   const apiClient = useApiClient();
   const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (isAuth) {
       navigate("/shop");
     }
-  }, [user, navigate]);
+  }, [isAuth, navigate]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -72,12 +72,14 @@ const Login = () => {
     }
 
     try {
-      const userData = await apiClient.loginCustomer(
+      const customer = await apiClient.loginCustomer(
         formData.email,
         formData.password
       );
-      login(userData);
-      navigate("/shop");
+      console.log(customer);
+      if (customer) {
+        login();
+      }
     } catch (err) {
       console.error("Login error:", err);
       setLoginError(err instanceof Error ? err.message : "Unexpected error");
@@ -92,23 +94,24 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <div className="input-wrapper">
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={errors.email ? "input-error" : ""}
-              placeholder="Enter your email"
-            />
-            {errors.email && <MdError className="error-icon" />}
+            <label htmlFor="email">Email</label>
+            <div className="input-wrapper">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.email ? "input-error" : ""}
+                placeholder="Enter your email"
+              />
+              {errors.email && <MdError className="error-icon" />}
             </div>
-            {errors.email && <span className="error-message">{errors.email}</span>}
+            {errors.email && (
+              <span className="error-message">{errors.email}</span>
+            )}
           </div>
-
 
           <div className="form-group password-input-container">
             <label htmlFor="password">Password</label>
