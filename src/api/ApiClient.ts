@@ -15,14 +15,29 @@ export class ApiClient extends CreateApiClient {
    * LOGIN CUSTOMER WITH PASSWORD
    */
   public async loginCustomer(email: string, password: string) {
-    // CREATE CLENT
-    const client = this.buildClientWithPassword(email, password);
-    // CREATE ApiRoot
-    this.apiRoot = this.getApiRoot(client);
+    try {
+      const client = this.buildClientWithPassword(email, password);
+      this.apiRoot = this.getApiRoot(client);
 
-    const customerProfile = await this.getCustomerProfile();
-    console.log(customerProfile);
-    return customerProfile;
+      const { body: customer } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .me()
+        .get()
+        .execute();
+      return customer;
+    } catch (error) {
+      if (
+        error.toString() ===
+        "BadRequest: Customer account with the given credentials not found."
+      ) {
+        throw new Error("Invalid email or password");
+      }
+
+      // Fallback to generic message
+      throw new Error(error.toString());
+    }
   }
 
   /**

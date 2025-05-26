@@ -1,54 +1,123 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+// src/context/AuthContext.tsx
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { apiClient } from "@/api/ApiClient";
-import { useNavigate } from "react-router-dom";
-import { AuthContextType } from "@/@types/interfaces";
-import { type TokenStore } from "@commercetools/ts-client";
+import { Customer, MyCustomerDraft } from "@commercetools/platform-sdk";
+import { ClientResponse } from "@commercetools/ts-client";
+
+interface AuthContextType {
+  isAuth: boolean;
+  customer: Customer | null;
+  login: (email: string, password: string) => Promise<void>;
+  loginWithToken: (token: string) => Promise<void>;
+  logout: () => void;
+  register: (customerData: Customer) => Promise<void>;
+  loading: boolean;
+  error: string | null;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const navigate = useNavigate();
-  const [isAuth = false, setAuth] = useState<boolean | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Check for existing session on initial load
   useEffect(() => {
-    const tokenString = localStorage.getItem("accessToken");
-    const accessToken: TokenStore | null = tokenString
-      ? JSON.parse(tokenString)
-      : null;
-    console.log(accessToken);
-    if (accessToken) {
-      apiClient
-        .loginCustomerWithToken(accessToken.token)
-        .then((res) => {
-          if (res.statusCode === 200) {
-            setAuth(true);
-          } else {
-            logout();
-          }
-        })
-        .catch(() => logout());
-    }
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        try {
+          setLoading(true);
+          await loginWithToken(token);
+        } catch (err) {
+          console.error("Session validation failed:", err);
+          localStorage.removeItem("accessToken");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
   }, []);
 
-  const login = () => {
-    setAuth(true);
-    console.log("Login");
-    navigate("/");
+  const login = async (email: string, password: string): Promise<Customer> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const customer = await apiClient.loginCustomer(email, password);
+      setCustomer(customer);
+      return customer;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithToken = async (token: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const customer: ClientResponse<Customer> =
+        await apiClient.loginCustomerWithToken(token);
+      if (customer) {
+        console.log(customer);
+        setCustomer(customer.body);
+      } else {
+        logout();
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Session validation failed"
+      );
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = () => {
-    setAuth(false);
     localStorage.removeItem("accessToken");
-    navigate("/login");
+    setCustomer(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ isAuth, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const register = async (customerData: MyCustomerDraft) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await apiClient.registerCustomer(customerData);
+      if (result.customer) {
+        setCustomer(result.customer);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const value = {
+    isAuth: !!customer,
+    customer,
+    login,
+    loginWithToken,
+    logout,
+    register,
+    loading,
+    error,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

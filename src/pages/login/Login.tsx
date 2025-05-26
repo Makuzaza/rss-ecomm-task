@@ -1,23 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useApiClient } from "@/api/ApiClientContext";
+import React, { useState } from "react";
 import { validateEmail, validatePassword } from "@/utils/loginValidation";
 import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import { MdError } from "react-icons/md";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
-  const { isAuth } = useAuth();
-  const apiClient = useApiClient();
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const { isAuth, login, error: authError } = useAuth();
 
-  useEffect(() => {
-    if (isAuth) {
-      navigate("/shop");
-    }
-  }, [isAuth, navigate]);
+  if (isAuth) navigate("/");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -29,7 +22,6 @@ const Login = () => {
     password: "",
   });
 
-  const [loginError, setLoginError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,7 +50,6 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginError(null);
 
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
@@ -72,17 +63,11 @@ const Login = () => {
     }
 
     try {
-      const customer = await apiClient.loginCustomer(
-        formData.email,
-        formData.password
-      );
-      console.log(customer);
-      if (customer) {
-        login();
-      }
+      const customer = await login(formData.email, formData.password);
+      console.log("Login resap:", customer);
+      navigate("/shop");
     } catch (err) {
-      console.error("Login error:", err);
-      setLoginError(err instanceof Error ? err.message : "Unexpected error");
+      console.log(err);
     }
   };
 
@@ -153,7 +138,7 @@ const Login = () => {
           <button type="submit" className="login-button">
             Sign In
           </button>
-          {loginError && <p className="error-message">{loginError}</p>}
+          {authError && <p className="error-message">{authError}</p>}
         </form>
 
         <div className="signup-link">

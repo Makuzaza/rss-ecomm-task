@@ -5,6 +5,7 @@ import Login from "@/pages/login/Login";
 import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/api/ApiClientContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Shop from "@/pages/shop/Shop";
 import About from "@/pages/about/About";
 import NotFound from "./pages/notfound/NotFound";
@@ -51,7 +52,9 @@ const router = createBrowserRouter([
         path: "/shop",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Shop />
+            <ProtectedRoute>
+              <Shop />
+            </ProtectedRoute>
           </Suspense>
         ),
       },
@@ -59,7 +62,9 @@ const router = createBrowserRouter([
         path: "/profile",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Profile />
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
           </Suspense>
         ),
       },

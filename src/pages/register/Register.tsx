@@ -13,16 +13,12 @@ import { MdError } from "react-icons/md";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
-  const { user } = useAuth();
+  const { isAuth } = useAuth();
   const navigate = useNavigate();
+  if (isAuth) navigate("/");
+
   const apiClient = useApiClient();
   const europeanCountries: typeof europeanCountriesData = europeanCountriesData;
-
-  useEffect(() => {
-    if (user) {
-      navigate("/shop");
-    }
-  }, [user, navigate]);
 
   const [formData, setFormData] = useState<RegisterFormFields>({
     email: "",

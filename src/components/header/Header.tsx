@@ -4,8 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import "./Header.css";
 
 export const Header = () => {
-  const { user, logout } = useAuth();
-
+  const { isAuth, logout, customer } = useAuth();
   return (
     <header className="header">
       <nav className="nav-container">
@@ -20,14 +19,14 @@ export const Header = () => {
               About
             </Link>
           </li>
-          {user && (
+          {isAuth && (
             <li className="nav-item">
               <Link to="/profile" className="nav-link">
-              Profile
+                Profile
               </Link>
             </li>
           )}
-          {user && (
+          {isAuth && (
             <li className="nav-item">
               <Link to="/shop" className="nav-link">
                 Shop
@@ -36,10 +35,10 @@ export const Header = () => {
           )}
         </ul>
         <div className="auth-buttons">
-          {user ? (
+          {isAuth ? (
             <>
               <span className="welcome-message">
-                Welcome, {user.firstName}!
+                Welcome, {customer.firstName}!
               </span>
               <button onClick={logout} className="auth-button logout-button">
                 Logout

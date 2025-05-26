@@ -94,8 +94,9 @@ class CreateApiClient {
   }
 
   // AUTHORIZED CLIENT (with Token)
-  protected buildClientWithToken(token: string): Client {
-    const authorization: string = `Bearer ${token}`;
+  protected buildClientWithToken(tokenData: string): Client {
+    const parsedToken: TokenStore = JSON.parse(tokenData);
+    const authorization: string = `Bearer ${parsedToken.token}`;
     const options: ExistingTokenMiddlewareOptions = {
       force: true,
     };
