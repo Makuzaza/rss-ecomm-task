@@ -133,7 +133,8 @@ const Register = () => {
         name as keyof RegisterFormFields,
         value,
         updatedForm,
-        europeanCountries
+        europeanCountries,
+        showBillingAddress
       );
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -151,7 +152,8 @@ const Register = () => {
       name as keyof RegisterFormFields,
       value,
       formData,
-      europeanCountries
+      europeanCountries,
+      showBillingAddress
     );
     setErrors((prevErrors) => ({
       ...prevErrors,
@@ -162,7 +164,8 @@ const Register = () => {
   const validateForm = () => {
     const { isValid, errors } = validateRegisterForm(
       formData,
-      europeanCountries
+      europeanCountries,
+      showBillingAddress
     );
     setErrors(errors);
     return isValid;

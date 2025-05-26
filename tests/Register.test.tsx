@@ -47,7 +47,9 @@ describe("Registration Form", () => {
     expect(screen.getByLabelText("Street Address")).toBeInTheDocument();
     expect(screen.getByLabelText("City")).toBeInTheDocument();
     expect(screen.getByLabelText("Postal Code")).toBeInTheDocument();
-    expect(screen.getByText("Set as default address")).toBeInTheDocument();
+    expect(
+      screen.getByText("Shipping and billing addresses are the same.")
+    ).toBeInTheDocument();
   });
 
   it("shows validation errors for required fields", async () => {
@@ -231,10 +233,11 @@ describe("Registration Form", () => {
             city: "Berlin",
             postalCode: "10115",
             country: "DE",
+            key: "shipping-address",
           },
         ],
         defaultShippingAddress: 0,
-        defaultBillingAddress: 0,
+        defaultBillingAddress: undefined,
       });
       expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
