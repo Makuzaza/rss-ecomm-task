@@ -3,12 +3,16 @@ import CreateApiClient from "./CreateApiClient";
 import {
   CustomerSignInResult,
   MyCustomerDraft,
+  Product,
+  ProductPagedQueryResponse,
 } from "@commercetools/platform-sdk";
 import { CommerceToolsError } from "../@types/interfaces";
 
 export class ApiClient extends CreateApiClient {
+  products: ProductPagedQueryResponse;
   constructor() {
     super();
+    this.getAllProducts();
   }
 
   /**
@@ -114,7 +118,45 @@ export class ApiClient extends CreateApiClient {
       console.log(error);
     }
   }
-
+  /**
+   * GET ALL PRODUCTS
+   */
+  public async getAllProducts(): Promise<ProductPagedQueryResponse> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .products()
+        .get()
+        .execute();
+      this.products = data;
+      // console.log(this.products.results);
+      return this.products;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /**
+   * GET ALL PRODUCTS
+   */
+  public async getProduct(id: string): Promise<Product> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: product } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .products()
+        .withId({ ID: id })
+        .get()
+        .execute();
+      return product;
+    } catch (error) {
+      console.log(error);
+    }
+  }
   // end
 }
 

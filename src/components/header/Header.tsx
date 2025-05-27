@@ -26,13 +26,6 @@ export const Header = () => {
               </Link>
             </li>
           )}
-          {isAuth && (
-            <li className="nav-item">
-              <Link to="/shop" className="nav-link">
-                Shop
-              </Link>
-            </li>
-          )}
         </ul>
         <div className="auth-buttons">
           {isAuth ? (

@@ -1,15 +1,20 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./components/App";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import Login from "@/pages/login/Login";
 import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/context/ApiClientContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Shop from "@/pages/shop/Shop";
+import ProductsList from "@/pages/productsList/ProductsList";
 import About from "@/pages/about/About";
 import NotFound from "./pages/notfound/NotFound";
 import Profile from "./pages/profile/Profile";
+import ProductDetails from "./pages/productDetail/ProductDetails";
 
 const root = document.getElementById("root");
 
@@ -24,6 +29,14 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
+      {
+        index: true, // This makes Shop render at /
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <ProductsList />
+          </Suspense>
+        ),
+      },
       {
         path: "/login",
         element: (
@@ -49,22 +62,24 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/shop",
-        element: (
-          <Suspense fallback={"Loading..."}>
-            <ProtectedRoute>
-              <Shop />
-            </ProtectedRoute>
-          </Suspense>
-        ),
-      },
-      {
         path: "/profile",
         element: (
           <Suspense fallback={"Loading..."}>
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
+          </Suspense>
+        ),
+      },
+      {
+        path: "/product",
+        element: <Navigate to="/" replace />,
+      },
+      {
+        path: "/product/:id",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <ProductDetails />
           </Suspense>
         ),
       },

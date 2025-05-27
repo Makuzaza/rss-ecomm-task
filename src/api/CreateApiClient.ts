@@ -29,9 +29,13 @@ class CreateApiClient {
     clientSecret: "2HUjaA1AZjzqbIranxV9PisjzBJ1zhjW",
   };
 
+  protected defaultClient: Client;
   protected client: Client;
   protected apiRoot: ApiRoot;
 
+  constructor() {
+    this.defaultClient = this.buildDefaultClient(true);
+  }
   // API ROOT
   protected getApiRoot(client: Client) {
     return createApiBuilderFromCtpClient(client);
