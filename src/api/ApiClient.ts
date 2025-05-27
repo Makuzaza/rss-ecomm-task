@@ -10,10 +10,6 @@ import { CommerceToolsError } from "../@types/interfaces";
 
 export class ApiClient extends CreateApiClient {
   products: ProductPagedQueryResponse;
-  constructor() {
-    super();
-    this.getAllProducts();
-  }
 
   /**
    * LOGIN CUSTOMER WITH PASSWORD
@@ -131,20 +127,18 @@ export class ApiClient extends CreateApiClient {
         .products()
         .get()
         .execute();
-      this.products = data;
-      // console.log(this.products.results);
-      return this.products;
+      return data;
     } catch (error) {
       console.log(error);
     }
   }
   /**
-   * GET ALL PRODUCTS
+   * GET PRODUCT WITH ID
    */
   public async getProduct(id: string): Promise<Product> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
     try {
-      const { body: product } = await this.apiRoot
+      const { body: data } = await this.apiRoot
         .withProjectKey({
           projectKey: this.PROJECT_KEY,
         })
@@ -152,7 +146,7 @@ export class ApiClient extends CreateApiClient {
         .withId({ ID: id })
         .get()
         .execute();
-      return product;
+      return data;
     } catch (error) {
       console.log(error);
     }
