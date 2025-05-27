@@ -14,7 +14,7 @@ import ProductsList from "@/pages/productsList/ProductsList";
 import About from "@/pages/about/About";
 import NotFound from "./pages/notfound/NotFound";
 import Profile from "./pages/profile/Profile";
-import ProductDetails from "./pages/productDetail/ProductDetails";
+import ProductDetails from "./pages/productDetails/ProductDetails";
 
 const root = document.getElementById("root");
 
@@ -30,7 +30,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        index: true, // This makes Shop render at /
+        index: true,
         element: (
           <Suspense fallback={"Loading..."}>
             <ProductsList />
