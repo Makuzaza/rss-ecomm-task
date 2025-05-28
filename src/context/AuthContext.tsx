@@ -12,6 +12,7 @@ import {
   CustomerSignInResult,
   MyCustomerDraft,
 } from "@commercetools/platform-sdk";
+import { useNavigate } from "react-router-dom";
 
 interface TokenStore {
   token: string;
@@ -40,6 +41,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -85,7 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const parsedToken: TokenStore = JSON.parse(storedToken);
           setToken(parsedToken.token);
         }
-
+        navigate("/");
         return customer;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Login failed";

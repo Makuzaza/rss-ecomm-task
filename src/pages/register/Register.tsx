@@ -13,9 +13,13 @@ import { MdError } from "react-icons/md";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
-  const { isAuth } = useAuth();
+  const { isAuth, login } = useAuth();
   const navigate = useNavigate();
-  if (isAuth) navigate("/");
+  useEffect(() => {
+    if (isAuth) {
+      navigate("/");
+    }
+  }, [isAuth, navigate]);
 
   const apiClient = useApiClient();
   const europeanCountries: typeof europeanCountriesData = europeanCountriesData;
@@ -208,7 +212,10 @@ const Register = () => {
         });
 
         console.log("Registration successful:", result);
-        navigate("/login");
+
+        // Auto login customer
+        await login(formData.email, formData.password);
+        // navigate("/login");
       } catch (err: unknown) {
         if (err instanceof Error) {
           setFormError(err.message);

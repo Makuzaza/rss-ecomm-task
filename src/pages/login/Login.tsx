@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { validateEmail, validatePassword } from "@/utils/loginValidation";
 import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -10,7 +10,11 @@ const Login = () => {
   const navigate = useNavigate();
   const { isAuth, login, error: authError } = useAuth();
 
-  if (isAuth) navigate("/");
+  useEffect(() => {
+    if (isAuth) {
+      navigate("/");
+    }
+  }, [isAuth, navigate]);
 
   const [formData, setFormData] = useState({
     email: "",
