@@ -1,23 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useApiClient } from "@/api/ApiClientContext";
+import React, { useEffect, useState } from "react";
 import { validateEmail, validatePassword } from "@/utils/loginValidation";
 import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
-import { MdError } from "react-icons/md"
+import { MdError } from "react-icons/md";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
-  const { user } = useAuth();
-  const apiClient = useApiClient();
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const { isAuth, login, error: authError } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      navigate("/shop");
+    if (isAuth) {
+      navigate("/");
     }
-  }, [user, navigate]);
+  }, [isAuth, navigate]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -29,7 +26,6 @@ const Login = () => {
     password: "",
   });
 
-  const [loginError, setLoginError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,7 +54,6 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginError(null);
 
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
@@ -72,15 +67,9 @@ const Login = () => {
     }
 
     try {
-      const userData = await apiClient.loginCustomer(
-        formData.email,
-        formData.password
-      );
-      login(userData);
-      navigate("/shop");
+      await login(formData.email, formData.password);
     } catch (err) {
-      console.error("Login error:", err);
-      setLoginError(err instanceof Error ? err.message : "Unexpected error");
+      console.log(err);
     }
   };
 
@@ -92,23 +81,24 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <div className="input-wrapper">
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={errors.email ? "input-error" : ""}
-              placeholder="Enter your email"
-            />
-            {errors.email && <MdError className="error-icon" />}
+            <label htmlFor="email">Email</label>
+            <div className="input-wrapper">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.email ? "input-error" : ""}
+                placeholder="Enter your email"
+              />
+              {errors.email && <MdError className="error-icon" />}
             </div>
-            {errors.email && <span className="error-message">{errors.email}</span>}
+            {errors.email && (
+              <span className="error-message">{errors.email}</span>
+            )}
           </div>
-
 
           <div className="form-group password-input-container">
             <label htmlFor="password">Password</label>
@@ -150,7 +140,7 @@ const Login = () => {
           <button type="submit" className="login-button">
             Sign In
           </button>
-          {loginError && <p className="error-message">{loginError}</p>}
+          {authError && <p className="error-message">{authError}</p>}
         </form>
 
         <div className="signup-link">

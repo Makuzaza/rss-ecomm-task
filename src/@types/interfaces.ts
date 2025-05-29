@@ -39,7 +39,7 @@ export interface User {
 }
 
 export interface AuthContextType {
-  user: User | null;
-  login: (userData: User) => void;
+  isAuth: boolean | null;
+  login: () => void;
   logout: () => void;
 }

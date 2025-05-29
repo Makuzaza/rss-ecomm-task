@@ -1,14 +1,20 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./components/App";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import Login from "@/pages/login/Login";
 import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
-import { ApiClientProvider } from "@/api/ApiClientContext";
-import Shop from "@/pages/shop/Shop";
+import { ApiClientProvider } from "@/context/ApiClientContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import ProductsList from "@/pages/productsList/ProductsList";
 import About from "@/pages/about/About";
 import NotFound from "./pages/notfound/NotFound";
 import Profile from "./pages/profile/Profile";
+import ProductDetails from "./pages/productDetails/ProductDetails";
 
 const root = document.getElementById("root");
 
@@ -23,6 +29,14 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <ProductsList />
+          </Suspense>
+        ),
+      },
       {
         path: "/login",
         element: (
@@ -48,18 +62,24 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/shop",
+        path: "/profile",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Shop />
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
           </Suspense>
         ),
       },
       {
-        path: "/profile",
+        path: "/product",
+        element: <Navigate to="/" replace />,
+      },
+      {
+        path: "/product/:id",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Profile />
+            <ProductDetails />
           </Suspense>
         ),
       },

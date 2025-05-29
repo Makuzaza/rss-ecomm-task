@@ -1,91 +1,81 @@
-import { ClientBuilder, type Client } from "@commercetools/ts-client";
+import CreateApiClient from "./CreateApiClient";
+
 import {
-  createApiBuilderFromCtpClient,
-  ApiRoot,
   CustomerSignInResult,
   MyCustomerDraft,
+  Product,
+  ProductPagedQueryResponse,
 } from "@commercetools/platform-sdk";
 import { CommerceToolsError } from "../@types/interfaces";
 
-export class ApiClient {
-  private BASE_URI = "https://api.europe-west1.gcp.commercetools.com";
-  private OAUTH_URI = "https://auth.europe-west1.gcp.commercetools.com";
-  private PROJECT_KEY = "api-rs-school";
+export class ApiClient extends CreateApiClient {
+  products: ProductPagedQueryResponse;
 
-  private readonly ADMIN_CREDENTIALS = {
-    // Admin client (scope)
-    clientId: "wkSBIH57z7eootNrTs-fx54U",
-    clientSecret: "aDRhkOUKc51Z3-_cp45A_asnITocAjzM",
-  };
-
-  private readonly SPA_CREDENTIALS = {
-    // SPA client (scope)
-    clientId: "DLHBgbFar-WAp5-rUwI_u0nA",
-    clientSecret: "2HUjaA1AZjzqbIranxV9PisjzBJ1zhjW",
-  };
-
-  private client: Client;
-
-  constructor() {
-    this.client = this.getClient();
-  }
-
-  private getClient(): Client {
-    return new ClientBuilder()
-      .defaultClient(
-        this.BASE_URI,
-        this.ADMIN_CREDENTIALS,
-        this.OAUTH_URI,
-        this.PROJECT_KEY
-      )
-      .build();
-  }
-
-  private getApiRoot(isAdmin: boolean = false): ApiRoot {
-    return createApiBuilderFromCtpClient(this.buildClient(isAdmin));
-  }
-
-  private buildClient(isAdmin: boolean): Client {
-    const credentials = isAdmin ? this.ADMIN_CREDENTIALS : this.SPA_CREDENTIALS;
-
-    return new ClientBuilder()
-      .defaultClient(
-        this.BASE_URI,
-        credentials,
-        this.OAUTH_URI,
-        this.PROJECT_KEY
-      )
-      .build();
-  }
-
-  async getCustomersByLastName(lastName: string) {
-    const apiRoot = this.getApiRoot(true); // Admin client
-
+  /**
+   * LOGIN CUSTOMER WITH PASSWORD
+   */
+  public async loginCustomer(email: string, password: string) {
     try {
-      const { body } = await apiRoot
-        .withProjectKey({ projectKey: this.PROJECT_KEY })
-        .customers()
-        .get({
-          queryArgs: {
-            where: `lastName="${lastName}"`,
-          },
+      const client = this.buildClientWithPassword(email, password);
+      this.apiRoot = this.getApiRoot(client);
+
+      const { body: customer } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
         })
+        .me()
+        .get()
         .execute();
-      return body;
+      return customer;
     } catch (error) {
-      console.error("API Error:", error);
-      throw error;
+      if (
+        error.toString() ===
+        "BadRequest: Customer account with the given credentials not found."
+      ) {
+        throw new Error("Invalid email or password");
+      }
+
+      // Fallback to generic message
+      throw new Error(error.toString());
     }
   }
 
+  /**
+   * LOGIN CUSTOMER WITH TOKEN
+   */
+  public async loginCustomerWithToken(token: string) {
+    const client = this.buildClientWithToken(token);
+    this.apiRoot = this.getApiRoot(client);
+
+    try {
+      const res = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .me()
+        .get()
+        .execute();
+
+      return res;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+   * REGISTER CUSTOMER
+   */
   public async registerCustomer(
     customerData: MyCustomerDraft
   ): Promise<CustomerSignInResult> {
-    const apiRoot = this.getApiRoot(false);
+    const client = this.buildDefaultClient(false);
+    this.apiRoot = this.getApiRoot(client);
 
     try {
-      const { body } = await apiRoot
-        .withProjectKey({ projectKey: this.PROJECT_KEY })
+      const { body } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
         .me()
         .signup()
         .post({ body: customerData })
@@ -107,87 +97,62 @@ export class ApiClient {
     }
   }
 
-  public async loginCustomer(
-    email: string,
-    password: string
-  ): Promise<{
-    firstName: string;
-    lastName: string;
-    email: string;
-  }> {
-    const formData = new URLSearchParams();
-    formData.append("grant_type", "password");
-    formData.append("username", email);
-    formData.append("password", password);
-    formData.append(
-      "scope",
-      ["manage_my_profile", "view_published_products", "manage_my_orders"]
-        .map((scope) => `${scope}:${this.PROJECT_KEY}`)
-        .join(" ")
-    );
-
-    const authUrl = `${this.OAUTH_URI}/oauth/${this.PROJECT_KEY}/customers/token`;
-
-    const res = await fetch(authUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${btoa(`${this.SPA_CREDENTIALS.clientId}:${this.SPA_CREDENTIALS.clientSecret}`)}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: formData.toString(),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      const errorMessage =
-        data?.error_description || data?.message || "Login failed";
-      throw new Error(errorMessage);
-    }
-
-    localStorage.setItem("accessToken", data.access_token);
-
-    return this.getCurrentCustomer(data.access_token);
-  }
-
-  public async getCurrentCustomer(accessToken: string): Promise<{
-    firstName: string;
-    lastName: string;
-    email: string;
-  }> {
-    const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch customer data");
-    }
-
-    const data = await response.json();
-    return {
-      firstName: data.firstName || "",
-      lastName: data.lastName || "",
-      email: data.email,
-    };
-  }
-
-  public async validateToken(token: string): Promise<boolean> {
+  /**
+   * GET CUSTOMER PROFILE
+   */
+  public async getCustomerProfile() {
     try {
-      const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.ok;
-    } catch {
-      return false;
+      const { body: customer } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .me()
+        .get()
+        .execute();
+      return customer;
+    } catch (error) {
+      console.log(error);
     }
   }
+  /**
+   * GET ALL PRODUCTS
+   */
+  public async getAllProducts(): Promise<ProductPagedQueryResponse> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .products()
+        .get()
+        .execute();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /**
+   * GET PRODUCT WITH ID
+   */
+  public async getProduct(id: string): Promise<Product> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .products()
+        .withId({ ID: id })
+        .get()
+        .execute();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  // end
 }
+
 // Singleton instance
 export const apiClient = new ApiClient();
