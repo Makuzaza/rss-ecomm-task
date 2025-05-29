@@ -12,27 +12,8 @@ import {
   CustomerSignInResult,
   MyCustomerDraft,
 } from "@commercetools/platform-sdk";
+import { TokenStore, AuthContextType } from "@/@types/interfaces";
 import { useNavigate } from "react-router-dom";
-
-interface TokenStore {
-  token: string;
-  expirationTime: number;
-  refreshToken?: string;
-}
-
-interface AuthContextType {
-  isAuth: boolean;
-  customer: Customer | null;
-  token: string | null;
-  login: (email: string, password: string) => Promise<Customer>;
-  loginWithToken: (token: string) => Promise<void>;
-  logout: () => void;
-  register: (customerData: MyCustomerDraft) => Promise<CustomerSignInResult>;
-  loading: boolean;
-  error: string | null;
-  clearError: () => void;
-  refreshToken: () => Promise<void>;
-}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
