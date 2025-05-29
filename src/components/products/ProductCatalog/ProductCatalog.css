@@ -1,0 +1,27 @@
+.section__product-catalog {
+  margin: 20px;
+  background-color: #f4f4f4;
+  border-radius: 20px;
+}
+
+.cards-item-img {
+  display: flex;
+  justify-content: center;
+  width: 100%; /* Use full width of the card */
+  height: 140px; /* Set a fixed height */
+  overflow: hidden; /* Hide any part of the image that exceeds the container */
+}
+
+.cards-item-img img {
+  width: 100%; /* Make image fill the container width */
+  height: 100%; /* Make image fill the container height */
+  object-fit: contain; /* Preserve aspect ratio while fitting within container */
+  object-position: center; /* Center the image */
+}
+.cards-item-text {
+  padding: 16px;
+}
+
+.cards-item-card {
+  text-align: center;
+}

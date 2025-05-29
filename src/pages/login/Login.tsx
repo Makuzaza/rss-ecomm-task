@@ -74,77 +74,79 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h1 className="login-title">Welcome!</h1>
-        <p className="login-subtitle">Please enter your credentials</p>
+    <div className="login-wrapper">
+      <div className="login-container">
+        <div className="login-card">
+          <h1 className="login-title">Welcome!</h1>
+          <p className="login-subtitle">Please enter your credentials</p>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <div className="input-wrapper">
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={errors.email ? "input-error" : ""}
-                placeholder="Enter your email"
-              />
-              {errors.email && <MdError className="error-icon" />}
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <div className="input-wrapper">
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={errors.email ? "input-error" : ""}
+                  placeholder="Enter your email"
+                />
+                {errors.email && <MdError className="error-icon" />}
+              </div>
+              {errors.email && (
+                <span className="error-message">{errors.email}</span>
+              )}
             </div>
-            {errors.email && (
-              <span className="error-message">{errors.email}</span>
-            )}
-          </div>
 
-          <div className="form-group password-input-container">
-            <label htmlFor="password">Password</label>
-            <div className="input-wrapper">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={errors.password ? "input-error" : ""}
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={togglePasswordVisibility}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
+            <div className="form-group password-input-container">
+              <label htmlFor="password">Password</label>
+              <div className="input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={errors.password ? "input-error" : ""}
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {errors.password && (
+                <span className="error-message">{errors.password}</span>
+              )}
             </div>
-            {errors.password && (
-              <span className="error-message">{errors.password}</span>
-            )}
-          </div>
 
-          <div className="form-options">
-            <label className="remember-me">
-              <input type="checkbox" />
-              Remember me
-            </label>
-            {/* <Link to="/forgot-password" className="forgot-password">
+            <div className="form-options">
+              <label className="remember-me">
+                <input type="checkbox" />
+                Remember me
+              </label>
+              {/* <Link to="/forgot-password" className="forgot-password">
               Forgot password?
             </Link> */}
+            </div>
+
+            <button type="submit" className="login-button">
+              Sign In
+            </button>
+            {authError && <p className="error-message">{authError}</p>}
+          </form>
+
+          <div className="signup-link">
+            Don&apos;t have an account? <Link to="/register">Sign up</Link>
           </div>
-
-          <button type="submit" className="login-button">
-            Sign In
-          </button>
-          {authError && <p className="error-message">{authError}</p>}
-        </form>
-
-        <div className="signup-link">
-          Don&apos;t have an account? <Link to="/register">Sign up</Link>
         </div>
       </div>
     </div>

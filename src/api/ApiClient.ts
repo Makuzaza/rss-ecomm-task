@@ -1,6 +1,7 @@
 import CreateApiClient from "./CreateApiClient";
 
 import {
+  CategoryPagedQueryResponse,
   CustomerSignInResult,
   MyCustomerDraft,
   Product,
@@ -115,17 +116,20 @@ export class ApiClient extends CreateApiClient {
     }
   }
   /**
-   * GET ALL PRODUCTS
+   * GET CATEGORIES
    */
-  public async getAllProducts(): Promise<ProductPagedQueryResponse> {
+  public async getAllCategories(args: {
+    limit?: number;
+    sort?: string;
+  }): Promise<CategoryPagedQueryResponse> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
     try {
       const { body: data } = await this.apiRoot
         .withProjectKey({
           projectKey: this.PROJECT_KEY,
         })
-        .products()
-        .get()
+        .categories()
+        .get({ queryArgs: args })
         .execute();
       return data;
     } catch (error) {
@@ -133,9 +137,12 @@ export class ApiClient extends CreateApiClient {
     }
   }
   /**
-   * GET PRODUCT WITH ID
+   * GET ALL PRODUCTS
    */
-  public async getProduct(id: string): Promise<Product> {
+  public async getAllProducts(args: {
+    limit?: number;
+    sort?: string;
+  }): Promise<ProductPagedQueryResponse> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
     try {
       const { body: data } = await this.apiRoot
@@ -143,7 +150,25 @@ export class ApiClient extends CreateApiClient {
           projectKey: this.PROJECT_KEY,
         })
         .products()
-        .withId({ ID: id })
+        .get({ queryArgs: args })
+        .execute();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /**
+   * GET PRODUCT WITH KEY
+   */
+  public async getProduct(key: string): Promise<Product> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .products()
+        .withKey({ key: key })
         .get()
         .execute();
       return data;
