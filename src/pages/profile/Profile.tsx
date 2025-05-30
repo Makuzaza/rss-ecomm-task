@@ -9,12 +9,13 @@ import { apiClient } from "@/api/ApiClient";
 
 
 const Profile = () => {
-  const { customer, setCustomer } = useAuth() 
+  const { customer, setCustomer } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
 
   const [editedFirstName, setEditedFirstName] = useState("");
   const [editedLastName, setEditedLastName] = useState("");
   const [editedDOB, setEditedDOB] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (!customer) return <p>Loading...</p>;
 
@@ -32,6 +33,7 @@ const Profile = () => {
     setEditedFirstName(firstName);
     setEditedLastName(lastName);
     setEditedDOB(dateOfBirth);
+    setErrorMessage("");
     setIsEditing(true);
   };
 
@@ -41,7 +43,7 @@ const Profile = () => {
 
   const saveChanges = async () => {
     if (!editedFirstName || !editedLastName || !editedDOB) {
-      alert("All fields are required.");
+      setErrorMessage("All fields are required.");
       return;
     }
 
@@ -67,35 +69,46 @@ const Profile = () => {
 
       <section className="personal-info">
         <h3>Personal Information</h3>
+        {errorMessage && (
+          <p className="error-message">{errorMessage}</p>
+        )}
         {isEditing ? (
           <>
-            <input
-              type="text"
-              value={editedFirstName}
-              onChange={(e) => setEditedFirstName(e.target.value)}
-              placeholder="First Name"
-            />
-            <input
-              type="text"
-              value={editedLastName}
-              onChange={(e) => setEditedLastName(e.target.value)}
-              placeholder="Last Name"
-            />
-            <input
-              type="date"
-              value={editedDOB}
-              onChange={(e) => setEditedDOB(e.target.value)}
-              placeholder="Date of Birth"
-            />
-            <button onClick={saveChanges}>Save</button>
-            <button onClick={cancelEdit}>Cancel</button>
+            <div className="edit-form-container">
+              <input
+                type="text"
+                value={editedFirstName}
+                onChange={(e) => setEditedFirstName(e.target.value)}
+                placeholder="First Name"
+                className="edit-input"
+              />
+              <input
+                type="text"
+                value={editedLastName}
+                onChange={(e) => setEditedLastName(e.target.value)}
+                placeholder="Last Name"
+                className="edit-input"
+              />
+              <input
+                type="date"
+                value={editedDOB}
+                onChange={(e) => setEditedDOB(e.target.value)}
+                placeholder="Date of Birth"
+                className="edit-input"
+              />
+
+              <div className="edit-buttons-container">
+                <button onClick={saveChanges} className="save-button">Save</button>
+                <button onClick={cancelEdit} className="close-button">Cancel</button>
+              </div>
+            </div>
           </>
         ) : (
           <>
             <p className="p-text"><strong>First Name:</strong> {firstName}</p>
             <p className="p-text"><strong>Last Name:</strong> {lastName}</p>
             <p className="p-text"><strong>Date of Birth:</strong> {dateOfBirth}</p>
-            <button onClick={startEdit}>Edit</button>
+            <button onClick={startEdit} className="edit-button">Edit</button>
           </>
         )}
       </section>

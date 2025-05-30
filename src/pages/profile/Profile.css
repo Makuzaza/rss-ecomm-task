@@ -38,3 +38,55 @@
 .address-label:last-child {
   margin-bottom: 5px;
 }
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.edit-button {
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.edit-buttons-container {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 10px;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+.edit-input {
+  width: 97.5%;
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.save-button {
+  background-color: rgb(7, 131, 7);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.close-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
