@@ -7,16 +7,16 @@
 .cards-item-img {
   display: flex;
   justify-content: center;
-  width: 100%; /* Use full width of the card */
-  height: 140px; /* Set a fixed height */
-  overflow: hidden; /* Hide any part of the image that exceeds the container */
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
 }
 
 .cards-item-img img {
-  width: 100%; /* Make image fill the container width */
-  height: 100%; /* Make image fill the container height */
-  object-fit: contain; /* Preserve aspect ratio while fitting within container */
-  object-position: center; /* Center the image */
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 .cards-item-text {
   padding: 16px;
@@ -24,4 +24,38 @@
 
 .cards-item-card {
   text-align: center;
+}
+
+.cards-item-price-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cards-item-price {
+  color: #888;
+  text-decoration: line-through;
+  font-size: 14px;
+}
+
+.cards-item-price-discount {
+  color: #e53935;
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.button__addToCart {
+  color: rgb(255, 255, 255);
+  background-color: rgba(76, 176, 76, 0.8);
+  border: none;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.button__addToCart:hover {
+  cursor: pointer;
+  background-color: #45a049;
 }

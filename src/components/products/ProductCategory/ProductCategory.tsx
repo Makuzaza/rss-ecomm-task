@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApiClient } from "@/context/ApiClientContext";
+import { ProductCatalogProps } from "@/@types/interfaces";
+import { BiCategory } from "react-icons/bi";
 import "./ProductCategory.css";
 import "@/pages/shop/Shop.css";
 
-const ProductCategory = () => {
+const ProductCategory: React.FC<ProductCatalogProps> = ({
+  propsLimit,
+  propsSort,
+}) => {
   const apiClient = useApiClient();
   const [categories, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +19,8 @@ const ProductCategory = () => {
     const fetchProducts = async () => {
       try {
         const arg = {
-          limit: 4,
+          limit: propsLimit,
+          sort: propsSort,
           // sort: "name.en asc"
         };
         const productsData = await apiClient.getAllCategories(arg);
@@ -34,36 +40,21 @@ const ProductCategory = () => {
   if (error) return <div className="main-content">Error: {error}</div>;
 
   return (
-    <section className="section__categories">
-      <Link to={"/category"}>
-        <div>
-          <h2 className="section__header">TOP CATEGORIES</h2>
+    <div className="cards-container">
+      {/* Array of Products */}
+      {categories.map((category) => (
+        <div key={category.id} className="category-cards-item">
+          <Link to={"/product/" + category.key}>
+            <div className="cards-item-img">
+              <BiCategory className="img__category" />
+            </div>
+            <div className="cards-category-name cards-item-text">
+              <h2>{category.name["en-US"]}</h2>
+            </div>
+          </Link>
         </div>
-      </Link>
-      <div className="cards-container">
-        {/* Array of Products */}
-        {categories.map((category) => (
-          <div key={category.id} className="category-cards-item">
-            <Link to={"/product/" + category.key}>
-              <div className="cards-item-img">
-                {/* <img
-                    height={180}
-                    src={product.masterData.current.masterVariant.images[0].url}
-                  /> */}{" "}
-              </div>
-              <div className="cards-category-name cards-item-text">
-                <h2>{category.name["en-US"]}</h2>
-              </div>
-            </Link>
-          </div>
-        ))}
-      </div>
-      <div>
-        <Link to={"/category"}>
-          <h2 className="section__header">ALL CATEGORIES</h2>
-        </Link>
-      </div>
-    </section>
+      ))}
+    </div>
   );
 
   // end

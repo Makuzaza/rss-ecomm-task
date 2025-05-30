@@ -26,3 +26,13 @@
   font-size: 18px;
   color: #333;
 }
+
+.cards-item-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.img__category {
+  width: 32px;
+  height: 32px;
+}

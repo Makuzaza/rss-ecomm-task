@@ -63,3 +63,8 @@ export interface AuthContextType {
   clearError: () => void;
   refreshToken: () => Promise<void>;
 }
+
+export interface ProductCatalogProps {
+  propsLimit?: number;
+  propsSort?: string;
+}

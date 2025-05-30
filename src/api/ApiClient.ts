@@ -7,6 +7,7 @@ import {
   Product,
   ProductPagedQueryResponse,
 } from "@commercetools/platform-sdk";
+import { apiDataProcessing } from "@/utils/dataProcessing";
 import { CommerceToolsError } from "../@types/interfaces";
 
 export class ApiClient extends CreateApiClient {
@@ -141,7 +142,7 @@ export class ApiClient extends CreateApiClient {
    */
   public async getAllProducts(args: {
     limit?: number;
-    sort?: string;
+    sort?: string | string[];
   }): Promise<ProductPagedQueryResponse> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
     try {
@@ -152,6 +153,7 @@ export class ApiClient extends CreateApiClient {
         .products()
         .get({ queryArgs: args })
         .execute();
+      console.log(apiDataProcessing(data));
       return data;
     } catch (error) {
       console.log(error);

@@ -37,6 +37,15 @@ export const Header = () => {
             </li>
           )}
         </ul>
+        <div className="search-container">
+          <input
+            type="search"
+            id="search-input"
+            name="searchInput"
+            className="input__search"
+            placeholder="search for product..."
+          />
+        </div>
         <div className="auth-buttons">
           {isAuth ? (
             <>

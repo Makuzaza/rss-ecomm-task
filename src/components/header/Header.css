@@ -61,7 +61,7 @@
 }
 
 .auth-buttons .register-button {
-  background-color: #4caf50; /* Green */
+  background-color: #4caf50;
   border: 1px solid #4caf50;
 }
 
@@ -89,6 +89,19 @@
 
 .logout-button:hover {
   background-color: #c82333;
+}
+
+.search-container {
+  width: 100%;
+  padding: 0 20px;
+}
+.input__search {
+  width: 100%;
+  /* background: none; */
+  border: none;
+  height: 38px;
+  border-radius: 20px;
+  padding: 16px;
 }
 
 @media screen and (max-width: 550px) {

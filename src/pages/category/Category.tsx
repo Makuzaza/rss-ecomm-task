@@ -4,7 +4,7 @@ import "./Category.css";
 
 const Category = () => {
   return (
-    <div>
+    <div className="main-container">
       <ProductCategory />;
     </div>
   );
