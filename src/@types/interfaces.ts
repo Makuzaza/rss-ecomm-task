@@ -43,3 +43,4 @@ export interface AuthContextType {
   login: () => void;
   logout: () => void;
 }
+

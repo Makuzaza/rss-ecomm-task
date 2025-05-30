@@ -32,6 +32,7 @@ interface AuthContextType {
   error: string | null;
   clearError: () => void;
   refreshToken: () => Promise<void>;
+  setCustomer: (customer: Customer | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -193,6 +194,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     clearError,
     refreshToken,
+    setCustomer,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

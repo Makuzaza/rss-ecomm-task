@@ -1,10 +1,15 @@
 import CreateApiClient from "./CreateApiClient";
 
+
 import {
   CustomerSignInResult,
   MyCustomerDraft,
   Product,
   ProductPagedQueryResponse,
+  MyCustomerUpdate,
+  Customer,
+  ClientResponse,
+  ApiRoot,
 } from "@commercetools/platform-sdk";
 import { CommerceToolsError } from "../@types/interfaces";
 
@@ -17,15 +22,15 @@ export class ApiClient extends CreateApiClient {
   public async loginCustomer(email: string, password: string) {
     try {
       const client = this.buildClientWithPassword(email, password);
-      this.apiRoot = this.getApiRoot(client);
+      this.apiRoot = this.getApiRoot(client); // сохраняем, если хочешь использовать его как основной
+      this.customerApiRoot = this.apiRoot; // сохраняем customerApiRoot отдельно
 
-      const { body: customer } = await this.apiRoot
-        .withProjectKey({
-          projectKey: this.PROJECT_KEY,
-        })
+      const { body: customer } = await this.customerApiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
         .me()
         .get()
         .execute();
+
       return customer;
     } catch (error) {
       if (
@@ -39,7 +44,7 @@ export class ApiClient extends CreateApiClient {
       throw new Error(error.toString());
     }
   }
-
+  
   /**
    * LOGIN CUSTOMER WITH TOKEN
    */
@@ -150,6 +155,20 @@ export class ApiClient extends CreateApiClient {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  private customerApiRoot?: ApiRoot;
+
+  public async updateCustomer(updatePayload: MyCustomerUpdate): Promise<ClientResponse<Customer>> {
+    if (!this.customerApiRoot) {
+      throw new Error("Customer API root is not initialized. Please log in first.");
+    }
+
+    return this.customerApiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .me()
+      .post({ body: updatePayload })
+      .execute();
   }
   // end
 }
