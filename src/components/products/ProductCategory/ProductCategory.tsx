@@ -41,7 +41,7 @@ const ProductCategory: React.FC<ProductCatalogProps> = ({
     <div className="cards-container">
       {categories.map((category) => (
         <div key={category.id} className="category-cards-item">
-          <Link to={"/product/" + category.key}>
+          <Link to={"/category/" + category.key}>
             <div className="cards-item-img">
               <BiCategory className="img__category" />
             </div>
