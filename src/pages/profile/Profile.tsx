@@ -22,6 +22,15 @@ const Profile = () => {
     return <p>Loading...</p>;
   }
 
+   const {
+    firstName,
+    lastName,
+    dateOfBirth,
+    addresses,
+    defaultBillingAddressId,
+    defaultShippingAddressId,
+    version,
+  } = customer;
   
 
   const normalizeAddresses = (addresses: Address[]): CustomerAddress[] =>
@@ -44,23 +53,17 @@ const Profile = () => {
   const validatePostalCode = (postalCode: string, country: string): boolean => {
     if (!postalCode) return false;
 
-    if (country === "PL") return /^\d{2}-\d{3}$/.test(postalCode); 
-    if (country === "DE") return /^\d{5}$/.test(postalCode);       
-    if (country === "FR") return /^\d{5}$/.test(postalCode);      
-    if (country === "IT") return /^\d{5}$/.test(postalCode); 
+    const countryRule = europeanCountries.find(c => c.code === country);
+    if (!countryRule) return true;
 
-    return true; 
+    try {
+      const regex = new RegExp(countryRule.codeRegex);
+      return regex.test(postalCode);
+    } catch (err) {
+      console.warn(`Invalid regex for ${country}`, err);
+      return true;
+    }
   };
-
-  const {
-    firstName,
-    lastName,
-    dateOfBirth,
-    addresses,
-    defaultBillingAddressId,
-    defaultShippingAddressId,
-    version,
-  } = customer;
 
   const startEdit = () => {
     setEditedFirstName(firstName);
@@ -105,44 +108,50 @@ const Profile = () => {
   };
 
   const saveAddressChanges = async (index: number) => {
-  const address = editedAddresses[index];
-  if (!address.id) return;
+    const address = editedAddresses[index];
+    if (!address.id) return;
 
-  const isValid = validatePostalCode(address.postalCode, address.country);
-  if (!isValid) {
-    setAddressErrors((prev) => ({
-      ...prev,
-      [index]: "Invalid postal code format for selected country.",
-    }));
-    return;
-  }
+    const errors: Record<number, string> = {};
 
-  setAddressErrors((prev) => ({ ...prev, [index]: "" }));
+    if (!address.streetName || !address.city || !address.country || !address.postalCode) {
+      errors[index] = "All fields are required.";
+      setAddressErrors((prev) => ({ ...prev, ...errors }));
+      return;
+    }
 
-  try {
-    const updated = await apiClient.updateCustomer({
-      version: customer.version,
-      actions: [
-        {
-          action: "changeAddress",
-          addressId: address.id,
-          address: {
-            streetName: address.streetName,
-            postalCode: address.postalCode,
-            city: address.city,
-            state: address.state,
-            country: address.country,
+    const isValidPostal = validatePostalCode(address.postalCode, address.country);
+    if (!isValidPostal) {
+      errors[index] = "Invalid postal code format for selected country.";
+      setAddressErrors((prev) => ({ ...prev, ...errors }));
+      return;
+    }
+
+    // No errors → clear and proceed
+    setAddressErrors((prev) => ({ ...prev, [index]: "" }));
+
+    try {
+      const updated = await apiClient.updateCustomer({
+        version: customer.version,
+        actions: [
+          {
+            action: "changeAddress",
+            addressId: address.id,
+            address: {
+              streetName: address.streetName,
+              postalCode: address.postalCode,
+              city: address.city,
+              state: address.state,
+              country: address.country,
+            },
           },
-        },
-      ],
-    });
-    setCustomer(updated.body);
-    setEditingAddressIndex(null);
-  } catch (error) {
-    console.error("Failed to update address", error);
-  }
-};
-
+        ],
+      });
+      setCustomer(updated.body);
+      setEditingAddressIndex(null);
+    } catch (error) {
+      console.error("Failed to update address", error);
+    }
+  };
 
   const saveChanges = async () => {
     if (!editedFirstName || !editedLastName || !editedDOB) {
@@ -188,7 +197,6 @@ const Profile = () => {
       console.error(`Failed to set default ${type} address`, error);
     }
   };
-
 
   return (
     <div className="profile-page">
@@ -236,7 +244,7 @@ const Profile = () => {
       </section>
 
       <section className="addresses">
-        <h3 className="h3-addresses">Delivery adresses:</h3>
+        <h3 className="h3-addresses">Delivery addresses:</h3>
         {addresses && addresses.length > 0 ? (
           addresses.map((addr, index) => (
             <div key={addr.id || index} className="address-card">
@@ -287,7 +295,7 @@ const Profile = () => {
                   <p className="p-text">
                     {addr.streetName}, {addr.postalCode}, {addr.city}, {addr.state || ""}, {addr.country}
                   </p>
-                  <div className="label-conatiner">
+                  <div className="label-container">
                     <label
                       className={`checkbox-toggle ${addr.id === defaultShippingAddressId ? "active" : ""}`}
                     >

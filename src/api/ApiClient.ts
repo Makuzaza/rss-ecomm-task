@@ -23,8 +23,8 @@ export class ApiClient extends CreateApiClient {
   public async loginCustomer(email: string, password: string) {
     try {
       const client = this.buildClientWithPassword(email, password);
-      this.apiRoot = this.getApiRoot(client); // сохраняем, если хочешь использовать его как основной
-      this.customerApiRoot = this.apiRoot; // сохраняем customerApiRoot отдельно
+      this.apiRoot = this.getApiRoot(client); 
+      this.customerApiRoot = this.apiRoot; 
 
       const { body: customer } = await this.customerApiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
@@ -173,7 +173,7 @@ export class ApiClient extends CreateApiClient {
   }
 
   public async restoreCustomerSessionFromStorage(): Promise<void> {
-  const storedToken = localStorage.getItem("accessToken"); 
+    const storedToken = localStorage.getItem("accessToken");
 
     if (!storedToken) {
       console.warn("No customer token found in storage.");
@@ -181,7 +181,20 @@ export class ApiClient extends CreateApiClient {
     }
 
     const parsedToken: TokenStore = JSON.parse(storedToken);
-    const client = this.buildClientWithToken(parsedToken.token);
+    const token = parsedToken.token;
+
+    //  Decode JWT token to check if expired
+    const [, payload] = token.split(".");
+    const decoded = JSON.parse(atob(payload));
+    const expiryInSec = decoded.exp;
+
+    if (Date.now() / 1000 > expiryInSec) {
+      console.warn("Stored token is expired.");
+      localStorage.removeItem("accessToken");
+      return;
+    }
+
+    const client = this.buildClientWithToken(token);
     this.customerApiRoot = this.getApiRoot(client);
   }
 
