@@ -1,10 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { SearchInput } from "../search/SearchInput";
+
 import "./Header.css";
 
 export const Header = () => {
   const { isAuth, logout, customer } = useAuth();
+
   return (
     <header className="header">
       <nav className="nav-container">
@@ -37,14 +40,8 @@ export const Header = () => {
             </li>
           )}
         </ul>
-        <div className="search-container">
-          <input
-            type="search"
-            id="search-input"
-            name="searchInput"
-            className="input__search"
-            placeholder="search for product..."
-          />
+        <div className="search-wrapper">
+          <SearchInput />
         </div>
         <div className="auth-buttons">
           {isAuth ? (

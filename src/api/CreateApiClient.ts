@@ -10,6 +10,7 @@ import {
   createApiBuilderFromCtpClient,
   ApiRoot,
 } from "@commercetools/platform-sdk";
+import { MyProductsData } from "@/@types/interfaces";
 
 class CreateApiClient {
   protected BASE_URI = process.env.REACT_APP_BASE_URL;
@@ -31,6 +32,7 @@ class CreateApiClient {
   protected defaultClient: Client;
   protected client: Client;
   protected apiRoot: ApiRoot;
+  productData: MyProductsData[];
 
   constructor() {
     this.defaultClient = this.buildDefaultClient(true);

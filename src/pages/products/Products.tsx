@@ -3,7 +3,7 @@ import ProductCatalog from "@/components/products/ProductCatalog/ProductCatalog"
 import "./Products.css";
 
 const Products = () => {
-  const [sortOption, setSortOption] = useState<string>("name.en asc");
+  const [sortOption, setSortOption] = useState<string>("name-asc");
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortOption(e.target.value);
@@ -18,17 +18,10 @@ const Products = () => {
           onChange={handleSortChange}
           className="sort-select"
         >
-          <option value="name.en-US asc">Name (A-Z)</option>
-          <option value="name.en-US desc">Name (Z-A)</option>
-          <option value="masterVariant.prices[0].value.centAmount asc">
-            Price (Low to High)
-          </option>
-          <option
-            value="masterVariant.prices[0].value.centAmount
- desc"
-          >
-            Price (High to Low)
-          </option>
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+          <option value="price-asc">Price (Low to High)</option>
+          <option value="price-desc">Price (High to Low)</option>
         </select>
       </div>
       <ProductCatalog propsLimit={20} propsSort={sortOption} />

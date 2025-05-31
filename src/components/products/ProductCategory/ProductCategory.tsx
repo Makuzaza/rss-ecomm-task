@@ -18,6 +18,9 @@ const ProductCategory: React.FC<ProductCatalogProps> = ({
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        const search = await apiClient.searchProduct("Ivory Plate");
+        console.log("Search:", search);
+
         const arg = {
           limit: propsLimit,
           sort: propsSort,
@@ -36,7 +39,7 @@ const ProductCategory: React.FC<ProductCatalogProps> = ({
     fetchProducts();
   }, [apiClient]);
 
-  if (loading) return <div className="main-content">Loading...</div>;
+  if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-content">Error: {error}</div>;
 
   return (

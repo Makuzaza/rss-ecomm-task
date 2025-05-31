@@ -14,11 +14,11 @@ const Shop = () => {
           </div>
         </Link>
         <ProductCategories propsLimit={4} />
-        <div>
-          <Link to={"/category"}>
-            <h2 className="section__header">ALL CATEGORIES</h2>
-          </Link>
-        </div>
+        <Link to={"/category"}>
+          <div className="section__footer">
+            <h2>ALL CATEGORIES</h2>
+          </div>
+        </Link>
       </section>
       {/* PRODUCT SECTION */}
       <section className="section__product-catalog">
@@ -26,11 +26,11 @@ const Shop = () => {
           <h2 className="section__header">NEW ARRIVALS</h2>
         </div>
         <ProductCatalog propsLimit={8} />
-        <div>
-          <Link to={"/products"}>
-            <h2 className="section__header">ALL PRODUCTS</h2>
-          </Link>
-        </div>
+        <Link to={"/products"}>
+          <div className="section__footer">
+            <h2>ALL PRODUCTS</h2>
+          </div>
+        </Link>
       </section>
     </div>
   );

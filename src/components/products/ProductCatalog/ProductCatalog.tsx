@@ -1,64 +1,79 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApiClient } from "@/context/ApiClientContext";
-import { ProductCatalogProps } from "@/@types/interfaces";
+import { MyProductsData, ProductCatalogProps } from "@/@types/interfaces";
 import "./ProductCatalog.css";
 import "@/pages/shop/Shop.css";
+import { sortProducts } from "@/utils/dataProcessing";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
+  products: propsProducts,
   propsLimit = 10,
-  propsSort = "name.en-US asc",
+  propsSort = "name-asc",
 }) => {
   const apiClient = useApiClient();
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<MyProductsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const path = "masterData.current.";
-  // const pricePath = path + ".masterVariant.prices[0].value.centAmount";
-  // const priceDiscountPath = pricePath + ".discounted.value.centAmount";
-  // const pricePath = "current.masterVariant.prices[0].value";
-
-  console.log("path: ", path + propsSort);
-
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const arg = {
-          limit: propsLimit,
-          // sort: propsSort,
-          // sort: path + propsSort,
-          // sort: "variants.price.centAmount asc",
-          // priceCurrency: "EUR",
-        };
-
-        const productsData = await apiClient.getAllProducts(arg);
-        setProducts(productsData.results);
-        setError(null);
-
-        // tmp logs
-        console.log("Product Catalog:", productsData.results);
-        // console.log(
-        //   "Description:",
-        //   productsData.results[0].masterData.current.description["en-US"]
-        // );
-        console.log(
-          productsData.results[0].masterData.current.masterVariant.prices[0]
-            .discounted.value.centAmount
-        );
-      } catch (err) {
-        setError(err.message);
-      } finally {
+      if (propsProducts) {
+        let sortedProducts = [];
+        switch (propsSort) {
+          case "name-desc":
+            sortedProducts = sortProducts(propsProducts, "name", "desc");
+            break;
+          case "price-asc":
+            sortedProducts = sortProducts(propsProducts, "price", "asc");
+            break;
+          case "price-desc":
+            sortedProducts = sortProducts(propsProducts, "price", "desc");
+            break;
+          default:
+            sortedProducts = sortProducts(propsProducts, "name", "asc");
+        }
+        setProducts(sortedProducts.slice(0, propsLimit));
         setLoading(false);
+      } else {
+        try {
+          setLoading(true);
+          const arg = {
+            limit: propsLimit,
+          };
+          let data: MyProductsData[] = [];
+
+          data = await apiClient.getAllProducts(arg);
+
+          let productsData = [];
+          switch (propsSort) {
+            case "name-desc":
+              productsData = sortProducts(data, "name", "desc");
+              break;
+            case "price-asc":
+              productsData = sortProducts(data, "price", "asc");
+              break;
+            case "price-desc":
+              productsData = sortProducts(data, "price", "desc");
+              break;
+            default:
+              productsData = sortProducts(data, "name", "asc");
+          }
+          setProducts(productsData);
+          setError(null);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
     fetchProducts();
-  }, [apiClient, propsSort, propsLimit]);
+  }, [propsProducts, propsSort, propsLimit]);
 
-  if (loading) return <div className="main-content">Loading...</div>;
-  if (error) return <div className="main-content">Error: {error}</div>;
+  if (loading) return <div className="loading-container">Loading...</div>;
+  if (error) return <div className="main-container">Error: {error}</div>;
 
   return (
     <div className="cards-container">
@@ -67,29 +82,19 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
         <div key={product.id} className="cards-item">
           <Link to={"/product/" + product.key}>
             <div className="cards-item-img">
-              <img
-                height={150}
-                src={product.masterData.current.masterVariant.images[0].url}
-              />
+              <img height={150} src={product.images[0].url} />
             </div>
             <div className="cards-item-name cards-item-text">
-              {product.masterData.current.name["en-US"]}
+              {product.name}
             </div>
             <div className="cards-item-desc cards-item-text">
-              {product.masterData.current.description["en-US"].slice(0, 54) +
-                "...  "}
+              {product.description.slice(0, 54) + "...  "}
             </div>
             <div className="cards-item-price-container">
               <div className="cards-item-price-discount">
-                {product.masterData.current.masterVariant.prices[0].discounted
-                  .value.centAmount / 100}{" "}
-                &euro;
+                {product.priceDiscounted} &euro;
               </div>
-              <div className="cards-item-price">
-                {product.masterData.current.masterVariant.prices[0].value
-                  .centAmount / 100}{" "}
-                &euro;
-              </div>
+              <div className="cards-item-price">{product.price} &euro;</div>
             </div>
           </Link>
           <div className="cards-item-card cards-item-text">

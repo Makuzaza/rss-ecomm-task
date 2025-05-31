@@ -6,9 +6,10 @@ import {
   MyCustomerDraft,
   Product,
   ProductPagedQueryResponse,
+  ProductProjectionPagedQueryResponse,
 } from "@commercetools/platform-sdk";
 import { apiDataProcessing } from "@/utils/dataProcessing";
-import { CommerceToolsError } from "../@types/interfaces";
+import { CommerceToolsError, MyProductsData } from "../@types/interfaces";
 
 export class ApiClient extends CreateApiClient {
   products: ProductPagedQueryResponse;
@@ -140,10 +141,10 @@ export class ApiClient extends CreateApiClient {
   /**
    * GET ALL PRODUCTS
    */
-  public async getAllProducts(args: {
+  public async getAllProducts(args?: {
     limit?: number;
     sort?: string | string[];
-  }): Promise<ProductPagedQueryResponse> {
+  }): Promise<MyProductsData[]> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
     try {
       const { body: data } = await this.apiRoot
@@ -153,8 +154,8 @@ export class ApiClient extends CreateApiClient {
         .products()
         .get({ queryArgs: args })
         .execute();
-      console.log(apiDataProcessing(data));
-      return data;
+      this.productData = apiDataProcessing(data);
+      return this.productData;
     } catch (error) {
       console.log(error);
     }
@@ -178,6 +179,37 @@ export class ApiClient extends CreateApiClient {
       console.log(error);
     }
   }
+  /**
+   * SEARCH PRODUCT
+   */
+  public async searchProduct(
+    searchName: string
+  ): Promise<ProductProjectionPagedQueryResponse> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+    // const locale = "en-US";
+    // const whereClause = `name(${locale}="*${searchName}*")`;
+
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .productProjections()
+        .search()
+        .get({
+          queryArgs: {
+            // where: whereClause,
+            "text.en-US": searchName,
+            limit: 10,
+          },
+        })
+        .execute();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   // end
 }
 

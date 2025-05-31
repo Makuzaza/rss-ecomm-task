@@ -12,11 +12,12 @@ import { ApiClientProvider } from "@/context/ApiClientContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Shop from "@/pages/shop/Shop";
 import About from "@/pages/about/About";
-import NotFound from "./pages/notfound/NotFound";
-import Profile from "./pages/profile/Profile";
-import ProductDetails from "./pages/productDetails/ProductDetails";
-import Category from "./pages/category/Category";
-import Products from "./pages/products/Products";
+import NotFound from "@/pages/notfound/NotFound";
+import Profile from "@/pages/profile/Profile";
+import ProductDetails from "@/pages/productDetails/ProductDetails";
+import Category from "@/pages/category/Category";
+import Products from "@/pages/products/Products";
+import SearchResults from "@/pages/search/SearchResults";
 
 const root = document.getElementById("root");
 
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
       {
         path: "/category",
         element: <Category />,
+      },
+      {
+        path: "/search",
+        element: <SearchResults />,
       },
       {
         path: "*",
