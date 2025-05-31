@@ -56,6 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const parsedToken: TokenStore = JSON.parse(storedToken);
           if (parsedToken.expirationTime > Date.now()) {
+            await apiClient.restoreCustomerSessionFromStorage();
             setToken(parsedToken.token);
             await loginWithToken(parsedToken.token);
           } else {

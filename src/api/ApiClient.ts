@@ -12,6 +12,7 @@ import {
   ApiRoot,
 } from "@commercetools/platform-sdk";
 import { CommerceToolsError } from "../@types/interfaces";
+import { TokenStore } from "@commercetools/ts-client";
 
 export class ApiClient extends CreateApiClient {
   products: ProductPagedQueryResponse;
@@ -170,6 +171,21 @@ export class ApiClient extends CreateApiClient {
       .post({ body: updatePayload })
       .execute();
   }
+
+  public async restoreCustomerSessionFromStorage(): Promise<void> {
+  const storedToken = localStorage.getItem("accessToken"); 
+
+    if (!storedToken) {
+      console.warn("No customer token found in storage.");
+      return;
+    }
+
+    const parsedToken: TokenStore = JSON.parse(storedToken);
+    const client = this.buildClientWithToken(parsedToken.token);
+    this.customerApiRoot = this.getApiRoot(client);
+  }
+
+  
   // end
 }
 

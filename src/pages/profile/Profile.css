@@ -24,19 +24,38 @@
   border-radius: 8px;
 }
 
+.address-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  margin-top: 12px;
+}
+.h3-addresses{
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
 .address-card {
   border-bottom: 1px solid #ccc;
 }
 
-.address-label {
-  font-size: 10px;
-  color: #0070f3;
-  font-weight: bold;
-  margin: 2px 0px 2px 0px
+.address-card:last-child {
+  border-bottom: none;
 }
 
-.address-label:last-child {
-  margin-bottom: 5px;
+.address-label {
+  font-size: 12px;
+  font-weight: bold;
+  margin: 2px 0;
+}
+
+.address-label.default {
+  color: #0070f3;
+}
+
+.address-label.not-default {
+  color: red;
 }
 
 .error-message {
@@ -49,18 +68,47 @@
   background-color: #0070f3;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
+.edit-button-address {
+  background-color: #0070f3;
+  margin: 5px 0px 6px 0px;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.address-edit-form {
+  max-width: 390px;
+  padding: 10px; 
+  transition: all 0.3s ease-in-out;
+}
+
+.personal-info {
+  max-width: 390px; 
+  transition: all 0.3s ease-in-out;
+}
+
 .edit-buttons-container {
   display: flex;
-  flex-direction: row-reverse;
+  justify-content: flex-end;
   gap: 10px;
   margin-top: 10px;
   box-sizing: border-box;
+}
+
+.edit-button-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 10px 0px 10px 0px;
 }
 
 .edit-input {
@@ -89,4 +137,42 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+}
+
+.label-conatiner {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.default-billing-checkbox {
+  font-size: 14px;
+}
+
+.checkbox-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 500;
+  font-size: 12px;
+  color: #333;
+}
+
+.checkbox-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: gray;
+  cursor: pointer;
+}
+
+.checkbox-toggle.active {
+  color: green;
+}
+
+.checkbox-toggle.active input[type="checkbox"] {
+  accent-color: green;
+}
+
+.button-container {
+  margin-top: 10px;
 }
