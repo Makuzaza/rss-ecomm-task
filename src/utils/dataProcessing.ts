@@ -1,5 +1,8 @@
 import { MyProductsData, SortDirection } from "@/@types/interfaces";
-import { ProductPagedQueryResponse } from "@commercetools/platform-sdk";
+import {
+  ProductPagedQueryResponse,
+  ProductProjectionPagedSearchResponse,
+} from "@commercetools/platform-sdk";
 
 export function apiDataProcessing(
   data: ProductPagedQueryResponse
@@ -17,6 +20,24 @@ export function apiDataProcessing(
       price: masterVariant.prices[0].value.centAmount,
       priceDiscounted: masterVariant.prices[0].discounted.value.centAmount,
       images: masterVariant.images,
+    };
+  });
+}
+
+export function apiDataSearchProcessing(
+  data: ProductProjectionPagedSearchResponse
+) {
+  return data.results.map((record) => {
+    return {
+      id: record.id,
+      key: record.key,
+      name: record.name["en-US"],
+      description: record.description["en-US"],
+      sku: record.masterVariant.sku,
+      price: record.masterVariant.prices[0].value.centAmount,
+      priceDiscounted:
+        record.masterVariant.prices[0].discounted.value.centAmount,
+      images: record.masterVariant.images,
     };
   });
 }

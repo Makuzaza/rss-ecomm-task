@@ -18,6 +18,7 @@ import ProductDetails from "@/pages/productDetails/ProductDetails";
 import Category from "@/pages/category/Category";
 import Products from "@/pages/products/Products";
 import SearchResults from "@/pages/search/SearchResults";
+import CategoryProductsPage from "./pages/category/CategoryProductsPage";
 
 const root = document.getElementById("root");
 
@@ -93,6 +94,10 @@ const router = createBrowserRouter([
       {
         path: "/category",
         element: <Category />,
+      },
+      {
+        path: "/category/:categorySlug",
+        element: <CategoryProductsPage />,
       },
       {
         path: "/search",

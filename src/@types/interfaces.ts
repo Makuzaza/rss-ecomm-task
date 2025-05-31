@@ -65,6 +65,7 @@ export interface AuthContextType {
 }
 
 export interface ProductCatalogProps {
+  categoryId?: string;
   products?: MyProductsData[];
   propsLimit?: number;
   propsSort?: string;
@@ -72,6 +73,7 @@ export interface ProductCatalogProps {
 
 export interface MyProductsData {
   id: string;
+  key: string;
   name: string;
   description: string;
   sku: string;
@@ -81,3 +83,9 @@ export interface MyProductsData {
 }
 
 export type SortDirection = "asc" | "desc";
+
+export interface SearchResult {
+  id: string;
+  key?: string;
+  name: { [key: string]: string };
+}

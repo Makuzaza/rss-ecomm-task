@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient } from "@/api/ApiClient";
+import { SearchResult } from "@/@types/interfaces";
 import "./SearchInput.css";
-
-interface SearchResult {
-  id: string;
-  key?: string;
-  name: { [key: string]: string };
-}
 
 export const SearchInput = () => {
   const navigate = useNavigate();
@@ -24,7 +19,7 @@ export const SearchInput = () => {
     }
 
     try {
-      const response = await apiClient.searchProduct(term);
+      const response = await apiClient.searchProductsByName(term);
       setSearchResults(response.results || []);
       setIsDropdownOpen(true);
     } catch (error) {

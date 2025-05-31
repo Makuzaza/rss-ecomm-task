@@ -8,7 +8,10 @@ import {
   ProductPagedQueryResponse,
   ProductProjectionPagedQueryResponse,
 } from "@commercetools/platform-sdk";
-import { apiDataProcessing } from "@/utils/dataProcessing";
+import {
+  apiDataProcessing,
+  apiDataSearchProcessing,
+} from "@/utils/dataProcessing";
 import { CommerceToolsError, MyProductsData } from "../@types/interfaces";
 
 export class ApiClient extends CreateApiClient {
@@ -123,6 +126,7 @@ export class ApiClient extends CreateApiClient {
   public async getAllCategories(args: {
     limit?: number;
     sort?: string;
+    where?: string;
   }): Promise<CategoryPagedQueryResponse> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
     try {
@@ -154,6 +158,7 @@ export class ApiClient extends CreateApiClient {
         .products()
         .get({ queryArgs: args })
         .execute();
+
       this.productData = apiDataProcessing(data);
       return this.productData;
     } catch (error) {
@@ -182,12 +187,10 @@ export class ApiClient extends CreateApiClient {
   /**
    * SEARCH PRODUCT
    */
-  public async searchProduct(
+  public async searchProductsByName(
     searchName: string
   ): Promise<ProductProjectionPagedQueryResponse> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
-    // const locale = "en-US";
-    // const whereClause = `name(${locale}="*${searchName}*")`;
 
     try {
       const { body: data } = await this.apiRoot
@@ -198,13 +201,37 @@ export class ApiClient extends CreateApiClient {
         .search()
         .get({
           queryArgs: {
-            // where: whereClause,
             "text.en-US": searchName,
             limit: 10,
           },
         })
         .execute();
       return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  public async searchProductsByCategory(
+    categoryId: string
+  ): Promise<MyProductsData[]> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .productProjections()
+        .search()
+        .get({
+          queryArgs: {
+            "filter.query": `categories.id:"${categoryId}"`,
+          },
+        })
+        .execute();
+
+      return apiDataSearchProcessing(data);
     } catch (error) {
       console.log(error);
     }

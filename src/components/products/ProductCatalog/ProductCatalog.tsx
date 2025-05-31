@@ -7,6 +7,7 @@ import "@/pages/shop/Shop.css";
 import { sortProducts } from "@/utils/dataProcessing";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
+  categoryId,
   products: propsProducts,
   propsLimit = 10,
   propsSort = "name-asc",
@@ -18,33 +19,47 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
   useEffect(() => {
     const fetchProducts = async () => {
-      if (propsProducts) {
-        let sortedProducts = [];
-        switch (propsSort) {
-          case "name-desc":
-            sortedProducts = sortProducts(propsProducts, "name", "desc");
-            break;
-          case "price-asc":
-            sortedProducts = sortProducts(propsProducts, "price", "asc");
-            break;
-          case "price-desc":
-            sortedProducts = sortProducts(propsProducts, "price", "desc");
-            break;
-          default:
-            sortedProducts = sortProducts(propsProducts, "name", "asc");
+      if (categoryId) {
+        console.log("CategoryId", categoryId);
+      }
+
+      if (categoryId) {
+        // let sortedProducts = [];
+        // switch (propsSort) {
+        //   case "name-desc":
+        //     sortedProducts = sortProducts(propsProducts, "name", "desc");
+        //     break;
+        //   case "price-asc":
+        //     sortedProducts = sortProducts(propsProducts, "price", "asc");
+        //     break;
+        //   case "price-desc":
+        //     sortedProducts = sortProducts(propsProducts, "price", "desc");
+        //     break;
+        //   default:
+        //     sortedProducts = sortProducts(propsProducts, "name", "asc");
+        // }
+        // setProducts(sortedProducts.slice(0, propsLimit));
+        // setLoading(false);
+        try {
+          setLoading(true);
+          const data: MyProductsData[] =
+            await apiClient.searchProductsByCategory(categoryId);
+          console.log(data);
+          setProducts(data);
+          setError(null);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
         }
-        setProducts(sortedProducts.slice(0, propsLimit));
-        setLoading(false);
       } else {
         try {
           setLoading(true);
           const arg = {
             limit: propsLimit,
           };
-          let data: MyProductsData[] = [];
 
-          data = await apiClient.getAllProducts(arg);
-
+          const data: MyProductsData[] = await apiClient.getAllProducts(arg);
           let productsData = [];
           switch (propsSort) {
             case "name-desc":
@@ -98,9 +113,6 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
             </div>
           </Link>
           <div className="cards-item-card cards-item-text">
-            {/* <Link to={"/cart/"}>
-              <h3>ADD TO CART</h3>
-            </Link> */}
             <button className="button__addToCart">ADD TO CART</button>
           </div>
         </div>

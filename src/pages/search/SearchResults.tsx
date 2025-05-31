@@ -18,7 +18,7 @@ const SearchResults = () => {
     if (query) {
       setLoading(true);
       apiClient
-        .searchProduct(query)
+        .searchProductsByName(query)
         .then((response) => {
           const transformedResults = response.results.map((product) => ({
             id: product.id,

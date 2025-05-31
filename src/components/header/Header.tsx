@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { SearchInput } from "../search/SearchInput";
+import CategoryDropdown from "../products/ProductCategory/CategoryDropdown";
 
 import "./Header.css";
 
@@ -23,9 +24,9 @@ export const Header = () => {
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/category" className="nav-link">
-              Category
-            </Link>
+            {/* <Link to="/category" className="nav-link"> */}
+            <CategoryDropdown />
+            {/* </Link> */}
           </li>
           <li className="nav-item">
             <Link to="/Products" className="nav-link">

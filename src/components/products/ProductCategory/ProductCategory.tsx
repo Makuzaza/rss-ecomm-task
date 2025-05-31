@@ -18,16 +18,11 @@ const ProductCategory: React.FC<ProductCatalogProps> = ({
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const search = await apiClient.searchProduct("Ivory Plate");
-        console.log("Search:", search);
-
         const arg = {
           limit: propsLimit,
           sort: propsSort,
-          // sort: "name.en asc"
         };
         const productsData = await apiClient.getAllCategories(arg);
-        console.log("Categories", productsData);
         setProducts(productsData.results);
         setLoading(false);
       } catch (err) {
@@ -44,7 +39,6 @@ const ProductCategory: React.FC<ProductCatalogProps> = ({
 
   return (
     <div className="cards-container">
-      {/* Array of Products */}
       {categories.map((category) => (
         <div key={category.id} className="category-cards-item">
           <Link to={"/product/" + category.key}>
