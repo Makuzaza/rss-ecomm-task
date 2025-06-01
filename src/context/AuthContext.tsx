@@ -32,6 +32,7 @@ interface AuthContextType {
   error: string | null;
   clearError: () => void;
   refreshToken: () => Promise<void>;
+  setCustomer: (customer: Customer | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,6 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const parsedToken: TokenStore = JSON.parse(storedToken);
           if (parsedToken.expirationTime > Date.now()) {
+            await apiClient.restoreCustomerSessionFromStorage();
             setToken(parsedToken.token);
             await loginWithToken(parsedToken.token);
           } else {
@@ -193,6 +195,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     clearError,
     refreshToken,
+    setCustomer,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

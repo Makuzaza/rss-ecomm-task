@@ -43,3 +43,24 @@ export interface AuthContextType {
   login: () => void;
   logout: () => void;
 }
+
+
+export interface CustomerAddress {
+  id?: string;
+  streetName: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  state?: string;
+}
+
+export interface CustomerProfile {
+  id: string;
+  version: number;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  addresses: CustomerAddress[];
+  defaultBillingAddressId?: string;
+  defaultShippingAddressId?: string;
+}
