@@ -139,7 +139,7 @@
   transition: background-color 0.3s;
 }
 
-.label-conatiner {
+.label-container {
   display: flex;
   flex-direction: column;
   margin-bottom: 10px;
