@@ -8,20 +8,20 @@ import {
 import { CommerceToolsError } from "../@types/interfaces";
 
 export class ApiClient {
-  private BASE_URI = "https://api.europe-west1.gcp.commercetools.com";
-  private OAUTH_URI = "https://auth.europe-west1.gcp.commercetools.com";
-  private PROJECT_KEY = "api-rs-school";
+  protected BASE_URI = process.env.REACT_APP_BASE_URL;
+  protected OAUTH_URI = process.env.REACT_APP_OAUTH_URL;
+  protected PROJECT_KEY = process.env.REACT_APP_PROJECT_KEY;
 
   private readonly ADMIN_CREDENTIALS = {
     // Admin client (scope)
-    clientId: "wkSBIH57z7eootNrTs-fx54U",
-    clientSecret: "aDRhkOUKc51Z3-_cp45A_asnITocAjzM",
+    clientId: process.env.REACT_APP_ADMIN_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_ADMIN_CLIENT_SECRET,
   };
 
   private readonly SPA_CREDENTIALS = {
     // SPA client (scope)
-    clientId: "DLHBgbFar-WAp5-rUwI_u0nA",
-    clientSecret: "2HUjaA1AZjzqbIranxV9PisjzBJ1zhjW",
+    clientId: process.env.REACT_APP_SPA_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_SPA_CLIENT_SECRET,
   };
 
   private client: Client;

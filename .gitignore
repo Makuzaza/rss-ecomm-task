@@ -137,3 +137,6 @@ dist
 
 # webpack build
 build/
+
+# Environment Variables
+.env*
