@@ -13,6 +13,11 @@ const CategoryDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
+  const closeMenu = () => {
+    setIsOpen(false);
+    setActiveCategory(null);
+  };
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -27,6 +32,23 @@ const CategoryDropdown = () => {
 
     fetchCategories();
   }, []);
+
+  // Closing category menu when ESC key is pressed
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
 
   const buildCategoryTree = (
     allCategories: Category[]

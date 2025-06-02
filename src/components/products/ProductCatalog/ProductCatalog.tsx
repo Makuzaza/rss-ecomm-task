@@ -20,26 +20,6 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   useEffect(() => {
     const fetchProducts = async () => {
       if (categoryId) {
-        console.log("CategoryId", categoryId);
-      }
-
-      if (categoryId) {
-        // let sortedProducts = [];
-        // switch (propsSort) {
-        //   case "name-desc":
-        //     sortedProducts = sortProducts(propsProducts, "name", "desc");
-        //     break;
-        //   case "price-asc":
-        //     sortedProducts = sortProducts(propsProducts, "price", "asc");
-        //     break;
-        //   case "price-desc":
-        //     sortedProducts = sortProducts(propsProducts, "price", "desc");
-        //     break;
-        //   default:
-        //     sortedProducts = sortProducts(propsProducts, "name", "asc");
-        // }
-        // setProducts(sortedProducts.slice(0, propsLimit));
-        // setLoading(false);
         try {
           setLoading(true);
           const data: MyProductsData[] =
@@ -85,7 +65,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
     };
 
     fetchProducts();
-  }, [propsProducts, propsSort, propsLimit]);
+  }, [categoryId, apiClient, propsProducts, propsSort, propsLimit]);
 
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-container">Error: {error}</div>;
@@ -97,7 +77,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
         <div key={product.id} className="cards-item">
           <Link to={"/product/" + product.key}>
             <div className="cards-item-img">
-              <img height={150} src={product.images[0].url} />
+              <img src={product.images[0].url} alt={product.name} />
             </div>
             <div className="cards-item-name cards-item-text">
               {product.name}
