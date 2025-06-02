@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiClient } from "@/api/ApiClient";
 import { Category } from "@commercetools/platform-sdk";
 import "./CategoryDropdown.css";
@@ -9,6 +9,7 @@ interface CategoryWithChildren extends Category {
 }
 
 const CategoryDropdown = () => {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<CategoryWithChildren[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -100,7 +101,7 @@ const CategoryDropdown = () => {
     <div className="category-dropdown">
       <button
         className="dropdown-toggle"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => navigate("/category")}
         onMouseEnter={() => setIsOpen(true)}
       >
         Categories
