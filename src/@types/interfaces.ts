@@ -1,3 +1,9 @@
+import {
+  Customer,
+  CustomerSignInResult,
+  MyCustomerDraft,
+} from "@commercetools/platform-sdk";
+
 export interface CommerceToolsError {
   body: {
     statusCode: number;
@@ -38,12 +44,52 @@ export interface User {
   email: string;
 }
 
-export interface AuthContextType {
-  isAuth: boolean | null;
-  login: () => void;
-  logout: () => void;
+export interface TokenStore {
+  token: string;
+  expirationTime: number;
+  refreshToken?: string;
 }
 
+export interface AuthContextType {
+  isAuth: boolean;
+  customer: Customer | null;
+  token: string | null;
+  login: (email: string, password: string) => Promise<Customer>;
+  loginWithToken: (token: string) => Promise<void>;
+  logout: () => void;
+  register: (customerData: MyCustomerDraft) => Promise<CustomerSignInResult>;
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+  refreshToken: () => Promise<void>;
+  setCustomer: (customer: Customer | null) => void;
+}
+
+export interface ProductCatalogProps {
+  categoryId?: string;
+  products?: MyProductsData[];
+  propsLimit?: number;
+  propsSort?: string;
+}
+
+export interface MyProductsData {
+  id: string;
+  key: string;
+  name: string;
+  description: string;
+  sku: string;
+  price: number;
+  priceDiscounted: number;
+  images: Image[];
+}
+
+export type SortDirection = "asc" | "desc";
+
+export interface SearchResult {
+  id: string;
+  key?: string;
+  name: { [key: string]: string };
+}
 
 export interface CustomerAddress {
   id?: string;

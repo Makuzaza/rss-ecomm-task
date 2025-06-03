@@ -1,10 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { SearchInput } from "../search/SearchInput";
+import CategoryDropdown from "../products/ProductCategory/CategoryDropdown";
+
 import "./Header.css";
 
 export const Header = () => {
   const { isAuth, logout, customer } = useAuth();
+
   return (
     <header className="header">
       <nav className="nav-container">
@@ -19,6 +23,16 @@ export const Header = () => {
               About
             </Link>
           </li>
+          <li className="nav-item">
+            {/* <Link to="/category" className="nav-link"> */}
+            <CategoryDropdown />
+            {/* </Link> */}
+          </li>
+          <li className="nav-item">
+            <Link to="/Products" className="nav-link">
+              Products
+            </Link>
+          </li>
           {isAuth && (
             <li className="nav-item">
               <Link to="/profile" className="nav-link">
@@ -27,6 +41,9 @@ export const Header = () => {
             </li>
           )}
         </ul>
+        <div className="search-wrapper">
+          <SearchInput />
+        </div>
         <div className="auth-buttons">
           {isAuth ? (
             <>

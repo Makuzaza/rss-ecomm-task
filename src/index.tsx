@@ -10,11 +10,15 @@ import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/context/ApiClientContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import ProductsList from "@/pages/productsList/ProductsList";
+import Shop from "@/pages/shop/Shop";
 import About from "@/pages/about/About";
-import NotFound from "./pages/notfound/NotFound";
-import Profile from "./pages/profile/Profile";
-import ProductDetails from "./pages/productDetails/ProductDetails";
+import NotFound from "@/pages/notfound/NotFound";
+import Profile from "@/pages/profile/Profile";
+import ProductDetails from "@/pages/productDetails/ProductDetails";
+import Category from "@/pages/category/Category";
+import Products from "@/pages/products/Products";
+import SearchResults from "@/pages/search/SearchResults";
+import CategoryProductsPage from "./pages/category/CategoryProductsPage";
 
 const root = document.getElementById("root");
 
@@ -33,7 +37,7 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <Suspense fallback={"Loading..."}>
-            <ProductsList />
+            <Shop />
           </Suspense>
         ),
       },
@@ -73,7 +77,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/product",
-        element: <Navigate to="/" replace />,
+        element: <Navigate to="/products" replace />,
+      },
+      {
+        path: "/products",
+        element: <Products />,
       },
       {
         path: "/product/:id",
@@ -82,6 +90,18 @@ const router = createBrowserRouter([
             <ProductDetails />
           </Suspense>
         ),
+      },
+      {
+        path: "/category",
+        element: <Category />,
+      },
+      {
+        path: "/category/:categorySlug",
+        element: <CategoryProductsPage />,
+      },
+      {
+        path: "/search",
+        element: <SearchResults />,
       },
       {
         path: "*",

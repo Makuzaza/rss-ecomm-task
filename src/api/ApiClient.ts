@@ -1,21 +1,27 @@
 import CreateApiClient from "./CreateApiClient";
 
-
 import {
+  CategoryPagedQueryResponse,
   CustomerSignInResult,
   MyCustomerDraft,
   Product,
   ProductPagedQueryResponse,
+  ProductProjectionPagedQueryResponse,
   MyCustomerUpdate,
   Customer,
   ClientResponse,
   ApiRoot,
 } from "@commercetools/platform-sdk";
-import { CommerceToolsError } from "../@types/interfaces";
+import {
+  apiDataProcessing,
+  apiDataSearchProcessing,
+} from "@/utils/dataProcessing";
 import { TokenStore } from "@commercetools/ts-client";
+import { CommerceToolsError, MyProductsData } from "../@types/interfaces";
 
 export class ApiClient extends CreateApiClient {
   products: ProductPagedQueryResponse;
+  private customerApiRoot?: ApiRoot;
 
   /**
    * LOGIN CUSTOMER WITH PASSWORD
@@ -23,8 +29,8 @@ export class ApiClient extends CreateApiClient {
   public async loginCustomer(email: string, password: string) {
     try {
       const client = this.buildClientWithPassword(email, password);
-      this.apiRoot = this.getApiRoot(client); 
-      this.customerApiRoot = this.apiRoot; 
+      this.apiRoot = this.getApiRoot(client);
+      this.customerApiRoot = this.apiRoot;
 
       const { body: customer } = await this.customerApiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
@@ -45,7 +51,7 @@ export class ApiClient extends CreateApiClient {
       throw new Error(error.toString());
     }
   }
-  
+
   /**
    * LOGIN CUSTOMER WITH TOKEN
    */
@@ -121,9 +127,34 @@ export class ApiClient extends CreateApiClient {
     }
   }
   /**
+   * GET CATEGORIES
+   */
+  public async getAllCategories(args: {
+    limit?: number;
+    sort?: string;
+    where?: string;
+  }): Promise<CategoryPagedQueryResponse> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .categories()
+        .get({ queryArgs: args })
+        .execute();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /**
    * GET ALL PRODUCTS
    */
-  public async getAllProducts(): Promise<ProductPagedQueryResponse> {
+  public async getAllProducts(args?: {
+    limit?: number;
+    sort?: string | string[];
+  }): Promise<MyProductsData[]> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
     try {
       const { body: data } = await this.apiRoot
@@ -131,6 +162,27 @@ export class ApiClient extends CreateApiClient {
           projectKey: this.PROJECT_KEY,
         })
         .products()
+        .get({ queryArgs: args })
+        .execute();
+
+      this.productData = apiDataProcessing(data);
+      return this.productData;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /**
+   * GET PRODUCT WITH KEY
+   */
+  public async getProduct(key: string): Promise<Product> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .products()
+        .withKey({ key: key })
         .get()
         .execute();
       return data;
@@ -139,18 +191,26 @@ export class ApiClient extends CreateApiClient {
     }
   }
   /**
-   * GET PRODUCT WITH ID
+   * SEARCH PRODUCT
    */
-  public async getProduct(id: string): Promise<Product> {
+  public async searchProductsByName(
+    searchName: string
+  ): Promise<ProductProjectionPagedQueryResponse> {
     this.apiRoot = this.getApiRoot(this.defaultClient);
+
     try {
       const { body: data } = await this.apiRoot
         .withProjectKey({
           projectKey: this.PROJECT_KEY,
         })
-        .products()
-        .withId({ ID: id })
-        .get()
+        .productProjections()
+        .search()
+        .get({
+          queryArgs: {
+            "text.en-US": searchName,
+            limit: 10,
+          },
+        })
         .execute();
       return data;
     } catch (error) {
@@ -158,11 +218,41 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  private customerApiRoot?: ApiRoot;
+  public async searchProductsByCategory(
+    categoryId: string
+  ): Promise<MyProductsData[]> {
+    this.apiRoot = this.getApiRoot(this.defaultClient);
 
-  public async updateCustomer(updatePayload: MyCustomerUpdate): Promise<ClientResponse<Customer>> {
+    try {
+      const { body: data } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .productProjections()
+        .search()
+        .get({
+          queryArgs: {
+            "filter.query": `categories.id:"${categoryId}"`,
+          },
+        })
+        .execute();
+
+      return apiDataSearchProcessing(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+   * UPDATE CUSTOMER
+   */
+  public async updateCustomer(
+    updatePayload: MyCustomerUpdate
+  ): Promise<ClientResponse<Customer>> {
     if (!this.customerApiRoot) {
-      throw new Error("Customer API root is not initialized. Please log in first.");
+      throw new Error(
+        "Customer API root is not initialized. Please log in first."
+      );
     }
 
     return this.customerApiRoot
@@ -198,7 +288,6 @@ export class ApiClient extends CreateApiClient {
     this.customerApiRoot = this.getApiRoot(client);
   }
 
-  
   // end
 }
 

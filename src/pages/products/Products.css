@@ -1,0 +1,32 @@
+.main-container {
+  padding: 20px;
+}
+
+.sort-controls {
+  margin: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  position: relative;
+}
+
+.sort-select {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: white;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.sort-select:disabled {
+  opacity: 0.7;
+  background-color: #f5f5f5;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}

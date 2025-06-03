@@ -1,38 +1,38 @@
-import webpack, { Configuration, DefinePlugin } from "webpack";
+import { Configuration } from "webpack";
 import path from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 // import CopyPlugin from "copy-webpack-plugin";
 import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+import Dotenv from "dotenv-webpack";
 
 // types
 import { BuildOptions } from "./types/types";
-import dotenv from "dotenv";
 
 export function buildPlugins({
   mode,
   paths,
   analyzer,
 }: BuildOptions): Configuration["plugins"] {
-  // const isDev = mode === "development";
+  const isDev = mode === "development";
   const isProd = mode === "production";
-
-  const env = dotenv.config().parsed || {};
-  const envKeys = Object.entries(env).reduce(
-    (acc, [key, value]) => {
-      acc[`process.env.${key}`] = JSON.stringify(value);
-      return acc;
-    },
-    {} as Record<string, string>
-  );
 
   const plugins: Configuration["plugins"] = [
     new HtmlWebpackPlugin({
       template: paths.html,
       favicon: path.resolve(paths.public, "favicon.ico"),
     }),
-    new webpack.DefinePlugin(envKeys),
+    // new Dotenv({
+    //   path: `./.env`,
+    // }),
   ];
+  if (isDev) {
+    plugins.push(
+      new Dotenv({
+        path: `./.env`,
+      })
+    );
+  }
 
   if (isProd) {
     plugins.push(

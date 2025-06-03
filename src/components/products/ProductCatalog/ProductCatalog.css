@@ -1,0 +1,89 @@
+.section__product-catalog {
+  margin: 20px;
+  background-color: #f4f4f4;
+  border-radius: 20px;
+}
+
+.cards-container {
+  display: grid;
+  gap: 20px;
+  grid-template: auto / repeat(auto-fit, minmax(280px, 1fr));
+  justify-content: center;
+  padding: 20px;
+}
+
+.cards-item {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(255, 255, 255);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.cards-item:hover {
+  cursor: pointer;
+  transform: translateY(-5px);
+}
+
+.cards-item-img {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+}
+
+.cards-item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.cards-item:hover {
+  cursor: pointer;
+  transform: translateY(-5px);
+}
+.cards-item-text {
+  padding: 16px;
+}
+
+.cards-item-card {
+  text-align: center;
+}
+
+.cards-item-price-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cards-item-price {
+  color: #888;
+  text-decoration: line-through;
+  font-size: 14px;
+}
+
+.cards-item-price-discount {
+  color: #e53935;
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.button__addToCart {
+  color: rgb(255, 255, 255);
+  background-color: rgba(76, 176, 76, 0.8);
+  border: none;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.button__addToCart:hover {
+  cursor: pointer;
+  background-color: #45a049;
+}

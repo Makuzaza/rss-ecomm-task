@@ -5,33 +5,34 @@ import {
   type ExistingTokenMiddlewareOptions,
   type TokenCache,
   type TokenStore,
-  // ClientResponse,
 } from "@commercetools/ts-client";
 import {
   createApiBuilderFromCtpClient,
   ApiRoot,
 } from "@commercetools/platform-sdk";
+import { MyProductsData } from "@/@types/interfaces";
 
 class CreateApiClient {
-  protected BASE_URI = "https://api.europe-west1.gcp.commercetools.com";
-  protected OAUTH_URI = "https://auth.europe-west1.gcp.commercetools.com";
-  protected PROJECT_KEY = "api-rs-school";
+  protected BASE_URI = process.env.REACT_APP_BASE_URL;
+  protected OAUTH_URI = process.env.REACT_APP_OAUTH_URL;
+  protected PROJECT_KEY = process.env.REACT_APP_PROJECT_KEY;
 
   protected readonly ADMIN_CREDENTIALS = {
-    // Admin client (scope)
-    clientId: "wkSBIH57z7eootNrTs-fx54U",
-    clientSecret: "aDRhkOUKc51Z3-_cp45A_asnITocAjzM",
+    // ADMIN CLIENT (SCOPE)
+    clientId: process.env.REACT_APP_ADMIN_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_ADMIN_CLIENT_SECRET,
   };
 
   protected readonly SPA_CREDENTIALS = {
-    // SPA client (scope)
-    clientId: "DLHBgbFar-WAp5-rUwI_u0nA",
-    clientSecret: "2HUjaA1AZjzqbIranxV9PisjzBJ1zhjW",
+    // SPA CLIENT (SCOPE)
+    clientId: process.env.REACT_APP_SPA_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_SPA_CLIENT_SECRET,
   };
 
   protected defaultClient: Client;
   protected client: Client;
   protected apiRoot: ApiRoot;
+  productData: MyProductsData[];
 
   constructor() {
     this.defaultClient = this.buildDefaultClient(true);
