@@ -1,10 +1,10 @@
 import React from "react";
 import ProductCatalog from "@/components/products/ProductCatalog/ProductCatalog";
 import ProductCategories from "@/components/products/ProductCategory/ProductCategory";
-import "./Shop.css";
 import { Link } from "react-router-dom";
+import "./HomePage.css";
 
-const Shop = () => {
+const HomePage = () => {
   return (
     <div className="main-container">
       <section className="section__categories">
@@ -36,4 +36,4 @@ const Shop = () => {
   );
 };
 
-export default Shop;
+export default HomePage;

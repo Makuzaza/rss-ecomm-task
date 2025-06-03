@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { validateEmail, validatePassword } from "@/utils/loginValidation";
-import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import { MdError } from "react-icons/md";
 import { useNavigate, Link } from "react-router-dom";
+import "./LoginPage.css";
 
 const Login = () => {
   const navigate = useNavigate();

@@ -68,10 +68,11 @@ export interface AuthContextType {
 
 export interface ProductCatalogProps {
   categoryId?: string;
-  products?: MyProductsData[];
+  // products?: MyProductsData[];
   propsLimit?: number;
   propsApiSort?: string;
   propsSort?: string;
+  propsProducts?: MyProductsData[];
 }
 
 export interface MyProductsData {

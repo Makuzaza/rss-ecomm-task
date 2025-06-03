@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApiClient } from "@/context/ApiClientContext";
 import { type Product } from "@commercetools/platform-sdk";
-import "./ProductDetails.css";
+import "./ProductDetailsPage.css";
 
-const ProductDetail = () => {
+const ProductDetailsPage = () => {
   const apiClient = useApiClient();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
@@ -80,4 +80,4 @@ const ProductDetail = () => {
   );
 };
 
-export default ProductDetail;
+export default ProductDetailsPage;

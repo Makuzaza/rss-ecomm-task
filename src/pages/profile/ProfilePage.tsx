@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import "./Profile.css";
 import { useAuth } from "@/context/AuthContext";
 import { useApiClient } from "@/context/ApiClientContext";
 import { CustomerAddress } from "@/@types/interfaces";
 import { Address } from "@commercetools/platform-sdk";
 import europeanCountries from "@/data/europeanCountries.json";
+import "./ProfilePage.css";
 
-const Profile = () => {
+const ProfilePage = () => {
   const { customer, setCustomer } = useAuth();
   const apiClient = useApiClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -410,4 +410,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfilePage;

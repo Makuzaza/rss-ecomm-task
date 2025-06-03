@@ -7,7 +7,7 @@
 .cards-container {
   display: grid;
   gap: 20px;
-  grid-template: auto / repeat(auto-fit, minmax(280px, 1fr));
+  grid-template: auto / repeat(auto-fit, minmax(280px, 300px));
   justify-content: center;
   padding: 20px;
 }
