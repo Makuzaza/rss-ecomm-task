@@ -1,6 +1,6 @@
 import {
   Customer,
-  CustomerSignInResult,
+  // CustomerSignInResult,
   MyCustomerDraft,
 } from "@commercetools/platform-sdk";
 
@@ -57,7 +57,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<Customer>;
   loginWithToken: (token: string) => Promise<void>;
   logout: () => void;
-  register: (customerData: MyCustomerDraft) => Promise<CustomerSignInResult>;
+  register: (customerData: MyCustomerDraft) => Promise<Customer>;
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -69,6 +69,7 @@ export interface ProductCatalogProps {
   categoryId?: string;
   products?: MyProductsData[];
   propsLimit?: number;
+  propsApiSort?: string;
   propsSort?: string;
 }
 

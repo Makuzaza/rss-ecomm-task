@@ -25,7 +25,7 @@ const Shop = () => {
         <div>
           <h2 className="section__header">NEW ARRIVALS</h2>
         </div>
-        <ProductCatalog propsLimit={8} />
+        <ProductCatalog propsLimit={8} propsApiSort={"createdAt desc"} />
         <Link to={"/products"}>
           <div className="section__footer">
             <h2>ALL PRODUCTS</h2>

@@ -17,8 +17,9 @@ export function apiDataProcessing(
       name: currentData.name["en-US"],
       description: currentData.description["en-US"],
       sku: masterVariant.sku,
-      price: masterVariant.prices[0].value.centAmount,
-      priceDiscounted: masterVariant.prices[0].discounted.value.centAmount,
+      price: masterVariant.prices[0].value.centAmount / 100,
+      priceDiscounted:
+        masterVariant.prices[0].discounted.value.centAmount / 100,
       images: masterVariant.images,
     };
   });
@@ -34,9 +35,9 @@ export function apiDataSearchProcessing(
       name: record.name["en-US"],
       description: record.description["en-US"],
       sku: record.masterVariant.sku,
-      price: record.masterVariant.prices[0].value.centAmount,
+      price: record.masterVariant.prices[0].value.centAmount / 100,
       priceDiscounted:
-        record.masterVariant.prices[0].discounted.value.centAmount,
+        record.masterVariant.prices[0].discounted.value.centAmount / 100,
       images: record.masterVariant.images,
     };
   });

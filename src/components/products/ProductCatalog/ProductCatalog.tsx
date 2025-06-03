@@ -10,6 +10,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
   products: propsProducts,
   propsLimit = 10,
+  propsApiSort = undefined,
   propsSort = "name-asc",
 }) => {
   const apiClient = useApiClient();
@@ -37,6 +38,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           setLoading(true);
           const arg = {
             limit: propsLimit,
+            sort: propsApiSort,
           };
 
           const data: MyProductsData[] = await apiClient.getAllProducts(arg);
