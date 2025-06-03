@@ -18,6 +18,54 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // const getAllProducts = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const arg = {
+  //       limit: propsLimit,
+  //       sort: propsApiSort,
+  //     };
+
+  //     const data: MyProductsData[] = await apiClient.getAllProducts(arg);
+  //     let productsData = [];
+  //     switch (propsSort) {
+  //       case "name-desc":
+  //         productsData = sortProducts(data, "name", "desc");
+  //         break;
+  //       case "price-asc":
+  //         productsData = sortProducts(data, "price", "asc");
+  //         break;
+  //       case "price-desc":
+  //         productsData = sortProducts(data, "price", "desc");
+  //         break;
+  //       default:
+  //         productsData = sortProducts(data, "name", "asc");
+  //     }
+  //     setProducts(productsData);
+  //     setError(null);
+  //   } catch (err) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const getProductsByCategory = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const data: MyProductsData[] =
+  //       await apiClient.searchProductsByCategory(categoryId);
+  //     console.log(data);
+  //     setProducts(data);
+  //     setError(null);
+  //   } catch (err) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // const getProductBySearch = () => {};
+
   useEffect(() => {
     const fetchProducts = async () => {
       if (categoryId) {

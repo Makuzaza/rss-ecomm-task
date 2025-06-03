@@ -36,7 +36,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const parsedToken: TokenStore = JSON.parse(storedToken);
           if (parsedToken.expirationTime > Date.now()) {
-            // await apiClient.restoreCustomerSessionFromStorage();
             setToken(parsedToken.token);
             await loginWithToken(parsedToken.token);
           } else {
@@ -60,7 +59,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       clearError();
       let customerProfile: Customer;
       try {
-        const customerSignIn = await apiClient.loginCustomer(email, password);
+        const customerSignIn = await apiClient.getCustomerWithPassword(
+          email,
+          password
+        );
 
         if (customerSignIn) {
           customerProfile = await apiClient.getCustomerProfile();
@@ -92,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       clearError();
       let customerProfile: Customer;
       try {
-        const customerSignIn = await apiClient.loginCustomerWithToken(token);
+        const customerSignIn = await apiClient.getCustomerWithToken(token);
         if (customerSignIn) {
           customerProfile = await apiClient.getCustomerProfile();
           setCustomer(customerProfile);

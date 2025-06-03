@@ -1,32 +1,29 @@
 import CreateApiClient from "./CreateApiClient";
-
-import {
-  CategoryPagedQueryResponse,
-  CustomerSignInResult,
-  MyCustomerDraft,
-  Product,
-  ProductPagedQueryResponse,
-  ProductProjectionPagedQueryResponse,
-  MyCustomerUpdate,
-  Customer,
-  // ClientResponse,
-  ApiRoot,
-} from "@commercetools/platform-sdk";
 import {
   apiDataProcessing,
   apiDataSearchProcessing,
 } from "@/utils/dataProcessing";
-// import { TokenStore } from "@commercetools/ts-client";
-import { CommerceToolsError, MyProductsData } from "../@types/interfaces";
+
+// types
+import {
+  type CategoryPagedQueryResponse,
+  type CustomerSignInResult,
+  type MyCustomerDraft,
+  type Product,
+  type ProductProjectionPagedQueryResponse,
+  type MyCustomerUpdate,
+  type Customer,
+} from "@commercetools/platform-sdk";
+import {
+  type CommerceToolsError,
+  type MyProductsData,
+} from "../@types/interfaces";
 
 export class ApiClient extends CreateApiClient {
-  products: ProductPagedQueryResponse;
-  private customerApiRoot?: ApiRoot;
-
   /**
-   * LOGIN CUSTOMER WITH PASSWORD
+   * BUILD CUSTOMER WITH PASSWORD
    */
-  public async loginCustomer(
+  public async getCustomerWithPassword(
     email: string,
     password: string
   ): Promise<Customer> {
@@ -55,19 +52,41 @@ export class ApiClient extends CreateApiClient {
   }
 
   /**
-   * LOGIN CUSTOMER WITH TOKEN
+   * BUILD CUSTOMER WITH TOKEN
    */
-  public async loginCustomerWithToken(token: string) {
+  public async getCustomerWithToken(token: string) {
     this.client = this.buildClientWithToken(token);
     const apiRoot = this.getApiRoot(this.client);
 
     try {
-      const customer = await apiRoot
+      const { body: customer } = await apiRoot
         .withProjectKey({
           projectKey: this.PROJECT_KEY,
         })
         .me()
         .get()
+        .execute();
+
+      return customer;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+   * SIGN IN CUSTOMER
+   */
+  public async loginCustomer(customerData: MyCustomerDraft) {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+
+    try {
+      const { body: customer } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .me()
+        .login()
+        .post({ body: customerData })
         .execute();
 
       return customer;
@@ -86,7 +105,7 @@ export class ApiClient extends CreateApiClient {
     this.apiRoot = this.getApiRoot(client);
 
     try {
-      const { body } = await this.apiRoot
+      const { body: customer } = await this.apiRoot
         .withProjectKey({
           projectKey: this.PROJECT_KEY,
         })
@@ -95,7 +114,7 @@ export class ApiClient extends CreateApiClient {
         .post({ body: customerData })
         .execute();
 
-      return body;
+      return customer;
     } catch (error) {
       const err = error as CommerceToolsError;
 
@@ -116,6 +135,8 @@ export class ApiClient extends CreateApiClient {
    */
   public async getCustomerProfile() {
     const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
     try {
       const { body: customer } = await apiRoot
         .withProjectKey({
@@ -129,6 +150,7 @@ export class ApiClient extends CreateApiClient {
       console.log(error);
     }
   }
+
   /**
    * GET CATEGORIES
    */
@@ -252,12 +274,9 @@ export class ApiClient extends CreateApiClient {
   public async updateCustomer(
     updatePayload: MyCustomerUpdate
   ): Promise<Customer> {
-    // if (!this.customerApiRoot) {
-    //   throw new Error(
-    //     "Customer API root is not initialized. Please log in first."
-    //   );
-    // }
     const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
     try {
       const { body: data } = await apiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
@@ -270,32 +289,6 @@ export class ApiClient extends CreateApiClient {
       console.log(error);
     }
   }
-
-  // public async restoreCustomerSessionFromStorage(): Promise<void> {
-  //   const storedToken = localStorage.getItem("accessToken");
-
-  //   if (!storedToken) {
-  //     console.warn("No customer token found in storage.");
-  //     return;
-  //   }
-
-  //   const parsedToken: TokenStore = JSON.parse(storedToken);
-  //   const token = parsedToken.token;
-
-  //   //  Decode JWT token to check if expired
-  //   const [, payload] = token.split(".");
-  //   const decoded = JSON.parse(atob(payload));
-  //   const expiryInSec = decoded.exp;
-
-  //   if (Date.now() / 1000 > expiryInSec) {
-  //     console.warn("Stored token is expired.");
-  //     localStorage.removeItem("accessToken");
-  //     return;
-  //   }
-
-  //   const client = this.buildClientWithToken(token);
-  //   this.customerApiRoot = this.getApiRoot(client);
-  // }
 
   // end
 }

@@ -17,9 +17,11 @@ const SearchResults = () => {
 
     if (query) {
       setLoading(true);
+
       apiClient
         .searchProductsByName(query)
         .then((response) => {
+          console.log("Search response:", response);
           const transformedResults = response.results.map((product) => ({
             id: product.id,
             key: product.key || product.id,

@@ -1,7 +1,8 @@
 import {
-  Customer,
+  type Customer,
   // CustomerSignInResult,
-  MyCustomerDraft,
+  type MyCustomerDraft,
+  type Image,
 } from "@commercetools/platform-sdk";
 
 export interface CommerceToolsError {
