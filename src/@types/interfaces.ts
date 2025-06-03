@@ -62,6 +62,7 @@ export interface AuthContextType {
   error: string | null;
   clearError: () => void;
   refreshToken: () => Promise<void>;
+  setCustomer: (customer: Customer | null) => void;
 }
 
 export interface ProductCatalogProps {
@@ -88,4 +89,24 @@ export interface SearchResult {
   id: string;
   key?: string;
   name: { [key: string]: string };
+}
+
+export interface CustomerAddress {
+  id?: string;
+  streetName: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  state?: string;
+}
+
+export interface CustomerProfile {
+  id: string;
+  version: number;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  addresses: CustomerAddress[];
+  defaultBillingAddressId?: string;
+  defaultShippingAddressId?: string;
 }

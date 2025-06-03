@@ -36,6 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const parsedToken: TokenStore = JSON.parse(storedToken);
           if (parsedToken.expirationTime > Date.now()) {
+            await apiClient.restoreCustomerSessionFromStorage();
             setToken(parsedToken.token);
             await loginWithToken(parsedToken.token);
           } else {
@@ -174,6 +175,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error,
     clearError,
     refreshToken,
+    setCustomer,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
