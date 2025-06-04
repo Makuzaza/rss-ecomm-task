@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApiClient } from "@/context/ApiClientContext";
-import { MyProductsData, ProductCatalogProps } from "@/@types/interfaces";
+import { sortProducts } from "@/utils/dataProcessing";
+import DOMPurify from "dompurify";
+import {
+  type MyProductsData,
+  type ProductCatalogProps,
+} from "@/@types/interfaces";
 import "./ProductCatalog.css";
 import "@/pages/home/HomePage.css";
-import { sortProducts } from "@/utils/dataProcessing";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
@@ -75,6 +79,9 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-container">Error: {error}</div>;
 
+  // HTML SANITIZATION
+  // const sanitizedDesc = DOMPurify.sanitize(product.description);
+
   return (
     <div className="cards-container">
       {/* Array of Products */}
@@ -88,13 +95,25 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
               {product.name}
             </div>
             <div className="cards-item-desc cards-item-text">
-              {product.description.slice(0, 54) + "...  "}
+              <div
+                dangerouslySetInnerHTML={{
+                  __html:
+                    DOMPurify.sanitize(product.description).slice(0, 55) +
+                    "...  ",
+                }}
+              />
             </div>
-            <div className="cards-item-price-container">
-              <div className="cards-item-price-discount">
-                {product.priceDiscounted} &euro;
-              </div>
-              <div className="cards-item-price">{product.price} &euro;</div>
+            <div className="product-price-container">
+              {product.priceDiscounted ? (
+                <div className="price-with-discount">
+                  <span className="price-discounted">
+                    {product.priceDiscounted} &euro;
+                  </span>
+                  <span className="price-original">{product.price} &euro;</span>
+                </div>
+              ) : (
+                <span className="price-regular">{product.price} &euro;</span>
+              )}
             </div>
           </Link>
           <div className="cards-item-card cards-item-text">
