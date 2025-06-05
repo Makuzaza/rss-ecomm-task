@@ -42,10 +42,6 @@
   object-position: center;
 }
 
-.cards-item:hover {
-  cursor: pointer;
-  transform: translateY(-5px);
-}
 .cards-item-text {
   padding: 16px;
 }

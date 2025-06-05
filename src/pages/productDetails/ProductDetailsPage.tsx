@@ -61,7 +61,7 @@ const ProductDetailsPage = () => {
     document.body.style.overflow = "auto";
   };
 
-  // ESC key handler for modal
+  // ESC KEY HANDLER FOR MODAL
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -86,6 +86,7 @@ const ProductDetailsPage = () => {
       }
       try {
         const productData = await apiClient.getProduct(id);
+        console.log("Product data: ", productData);
         if (!productData) {
           throw new Error("Product not found");
         }

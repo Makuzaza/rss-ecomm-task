@@ -79,9 +79,6 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-container">Error: {error}</div>;
 
-  // HTML SANITIZATION
-  // const sanitizedDesc = DOMPurify.sanitize(product.description);
-
   return (
     <div className="cards-container">
       {/* Array of Products */}
