@@ -5,6 +5,7 @@
 }
 
 .dropdown-toggle {
+  padding: 0;
   background: none;
   border: none;
   color: white;

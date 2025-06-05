@@ -114,67 +114,11 @@
   margin: 0 20px;
 }
 
-@media screen and (max-width: 550px) {
-  .header {
-    height: 95px;
-  }
-
-  .nav-container {
-    padding: 0;
-    margin: 0;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .nav-item:nth-child(1) {
-    margin-left: 10px;
-  }
-
-  .auth-buttons {
-    display: flex;
-    justify-content: space-around;
-    margin-left: 20px;
-  }
-}
-
-@media screen and (max-width: 365px) {
-  .nav-container {
-    padding: 0;
-    margin: 0;
-    align-items: center;
-  }
-
-  .header {
-    height: 180px;
-  }
-
-  .nav-list {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .nav-item:nth-child(1) {
-    margin-left: 0;
-  }
-
-  .auth-buttons {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    gap: 0.5rem;
-  }
-
-  .welcome-message {
-    margin-right: 0;
-  }
-
-  .auth-buttons {
-    margin-bottom: 5px;
-  }
+.mobile-search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 /* Mobile Controls */
@@ -184,6 +128,8 @@
 
 .mobile-menu-button, 
 .mobile-search-button {
+  display: flex;
+  align-items: center;
   background: none;
   border: none;
   color: white;
@@ -218,6 +164,7 @@
 
 .mobile-nav-link, 
 .mobile-auth-button {
+  font-size: 1rem;
   display: block;
   padding: 1rem;
   color: white;
@@ -240,6 +187,27 @@
   background: #2c3e50;
 }
 
+@media screen and (max-width: 550px) {
+  .header {
+    height: 85px;
+  }
+
+  .nav-container {
+    padding: 0;
+    margin: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .auth-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+}
+
+
 /* Responsive Styles */
 @media (max-width: 768px) {
   .mobile-controls {
@@ -259,20 +227,6 @@
   }
 
   .mobile-search {
-    display: block;
-  }
-}
-
-@media (min-width: 769px) {
-  .mobile-controls,
-  .mobile-menu,
-  .mobile-search {
-    display: none;
-  }
-
-  .desktop-nav,
-  .desktop-search,
-  .desktop-auth {
     display: block;
   }
 }
