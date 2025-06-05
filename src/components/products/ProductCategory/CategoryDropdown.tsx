@@ -8,9 +8,7 @@ interface CategoryWithChildren extends Category {
   children?: CategoryWithChildren[];
 }
 
-type CategoryDropdownProps = {};
-
-const CategoryDropdown: React.FC<CategoryDropdownProps> = () => {
+const CategoryDropdown = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<CategoryWithChildren[]>([]);
   const [isOpen, setIsOpen] = useState(false);
