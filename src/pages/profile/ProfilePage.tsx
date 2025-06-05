@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useApiClient } from "@/context/ApiClientContext";
+import { apiClientFetch } from "@/api/ApiClientFetch";
 import { CustomerAddress } from "@/@types/interfaces";
 import { Address } from "@commercetools/platform-sdk";
 import europeanCountries from "@/data/europeanCountries.json";
@@ -146,8 +147,30 @@ const ProfilePage = () => {
     // No errors → clear and proceed
     setAddressErrors((prev) => ({ ...prev, [index]: "" }));
 
+    // try {
+    //   const updated = await apiClient.updateCustomer({
+    //     version: customer.version,
+    //     actions: [
+    //       {
+    //         action: "changeAddress",
+    //         addressId: address.id,
+    //         address: {
+    //           streetName: address.streetName,
+    //           postalCode: address.postalCode,
+    //           city: address.city,
+    //           state: address.state,
+    //           country: address.country,
+    //         },
+    //       },
+    //     ],
+    //   });
+    //   setCustomer(updated);
+    //   setEditingAddressIndex(null);
+    // } catch (error) {
+    //   console.error("Failed to update address", error);
+    // }
     try {
-      const updated = await apiClient.updateCustomer({
+      const updated = await apiClientFetch.updateCustomer(customer.id, {
         version: customer.version,
         actions: [
           {
@@ -176,8 +199,22 @@ const ProfilePage = () => {
       return;
     }
 
+    // try {
+    //   const updated = await apiClient.updateCustomer({
+    //     version,
+    //     actions: [
+    //       { action: "setFirstName", firstName: editedFirstName },
+    //       { action: "setLastName", lastName: editedLastName },
+    //       { action: "setDateOfBirth", dateOfBirth: editedDOB },
+    //     ],
+    //   });
+    //   setCustomer(updated);
+    //   setIsEditing(false);
+    // } catch (error) {
+    //   console.error("Failed to update customer", error);
+    // }
     try {
-      const updated = await apiClient.updateCustomer({
+      const updated = await apiClientFetch.updateCustomer(customer.id, {
         version,
         actions: [
           { action: "setFirstName", firstName: editedFirstName },
