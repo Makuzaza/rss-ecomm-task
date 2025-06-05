@@ -194,7 +194,7 @@ const ProductDetailsPage = () => {
           {/* PRODUCT VARIANTS */}
           {variants.length > 0 && (
             <div className="variants-section">
-              <h3>Related products:</h3>
+              <h3>Product variants:</h3>
               <div className="variant-thumbnails">
                 {variants.map((variant, index) => (
                   <div
@@ -206,6 +206,7 @@ const ProductDetailsPage = () => {
                       <img
                         src={variant.images[0].url}
                         alt={`Variant ${index}`}
+                        title={`${variants[index].attributes[0].value[0]["en-US"]} - ${variants[index].attributes[1].value["en-US"]}`}
                       />
                     )}
                   </div>
