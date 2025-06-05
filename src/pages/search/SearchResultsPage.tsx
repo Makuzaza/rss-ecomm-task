@@ -3,9 +3,9 @@ import { useLocation } from "react-router-dom";
 import { apiClient } from "@/api/ApiClient";
 import { MyProductsData } from "@/@types/interfaces";
 import ProductCatalog from "@/components/products/ProductCatalog/ProductCatalog";
-import "./SearchResults.css";
+import "./SearchResultsPage.css";
 
-const SearchResults = () => {
+const SearchResultsPage = () => {
   const location = useLocation();
   const [results, setResults] = useState<MyProductsData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,9 +17,12 @@ const SearchResults = () => {
 
     if (query) {
       setLoading(true);
+
       apiClient
         .searchProductsByName(query)
         .then((response) => {
+          console.log("Search response:", response);
+
           const transformedResults = response.results.map((product) => ({
             id: product.id,
             key: product.key || product.id,
@@ -60,13 +63,13 @@ const SearchResults = () => {
         </h2>
 
         <ProductCatalog
-          products={results}
           propsLimit={results.length}
           propsSort="name-asc"
+          propsProducts={results}
         />
       </div>
     </div>
   );
 };
 
-export default SearchResults;
+export default SearchResultsPage;

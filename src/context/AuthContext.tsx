@@ -9,7 +9,7 @@ import React, {
 import { apiClient } from "@/api/ApiClient";
 import {
   Customer,
-  CustomerSignInResult,
+  // CustomerSignInResult,
   MyCustomerDraft,
 } from "@commercetools/platform-sdk";
 import { TokenStore, AuthContextType } from "@/@types/interfaces";
@@ -36,7 +36,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const parsedToken: TokenStore = JSON.parse(storedToken);
           if (parsedToken.expirationTime > Date.now()) {
-            await apiClient.restoreCustomerSessionFromStorage();
             setToken(parsedToken.token);
             await loginWithToken(parsedToken.token);
           } else {
@@ -58,10 +57,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     async (email: string, password: string): Promise<Customer> => {
       setLoading(true);
       clearError();
-
+      let customerProfile: Customer;
       try {
-        const customer = await apiClient.loginCustomer(email, password);
-        setCustomer(customer);
+        const customerSignIn = await apiClient.getCustomerWithPassword(
+          email,
+          password
+        );
+
+        if (customerSignIn) {
+          customerProfile = await apiClient.getCustomerProfile();
+          setCustomer(customerProfile);
+        }
 
         // Get the latest token from localStorage (set by ApiClient)
         const storedToken = localStorage.getItem("accessToken");
@@ -70,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setToken(parsedToken.token);
         }
         navigate("/");
-        return customer;
+        return customerProfile;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Login failed";
         setError(message);
@@ -86,11 +92,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     async (token: string): Promise<void> => {
       setLoading(true);
       clearError();
-
+      let customerProfile: Customer;
       try {
-        const customer = await apiClient.loginCustomerWithToken(token);
-        if (customer?.body) {
-          setCustomer(customer.body);
+        const customerSignIn = await apiClient.getCustomerWithToken(token);
+        if (customerSignIn) {
+          customerProfile = await apiClient.getCustomerProfile();
+          setCustomer(customerProfile);
           setToken(token);
         } else {
           localStorage.removeItem("accessToken");
@@ -114,14 +121,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const register = useCallback(
-    async (customerData: MyCustomerDraft): Promise<CustomerSignInResult> => {
+    async (customerData: MyCustomerDraft): Promise<Customer> => {
       setLoading(true);
       clearError();
 
       try {
-        const result = await apiClient.registerCustomer(customerData);
-        if (result.customer) {
-          setCustomer(result.customer);
+        const customerSignUp = await apiClient.registerCustomer(customerData);
+        let customerProfile: Customer;
+        if (customerSignUp) {
+          customerProfile = await apiClient.getCustomerProfile();
+          setCustomer(customerProfile);
 
           // If registration includes automatic login
           const storedToken = localStorage.getItem("accessToken");
@@ -130,7 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setToken(parsedToken.token);
           }
         }
-        return result;
+        return customerProfile;
       } catch (err) {
         let message = "Registration failed";
 

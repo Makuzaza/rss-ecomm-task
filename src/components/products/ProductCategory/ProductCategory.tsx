@@ -4,7 +4,7 @@ import { useApiClient } from "@/context/ApiClientContext";
 import { ProductCatalogProps } from "@/@types/interfaces";
 import { BiCategory } from "react-icons/bi";
 import "./ProductCategory.css";
-import "@/pages/shop/Shop.css";
+import "@/pages/home/HomePage.css";
 
 const ProductCategory: React.FC<ProductCatalogProps> = ({
   propsLimit,

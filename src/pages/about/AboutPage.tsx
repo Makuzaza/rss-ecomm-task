@@ -1,13 +1,14 @@
 import React from "react";
-import "./About.css";
+import "./AboutPage.css";
 
-const About = () => {
+const AboutPage = () => {
   return (
     <div>
       <section id="about">
         <h2>About the eCommerce Application</h2>
         <p>
-          This eCommerce SPA replicates a real-world shopping experience, enabling users to browse products, view details, manage a shopping
+          This eCommerce SPA replicates a real-world shopping experience,
+          enabling users to browse products, view details, manage a shopping
           basket, and complete purchases. Features include registration, login,
           product search, categorization, and a responsive design for devices
           down to 390px width.
@@ -29,4 +30,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default AboutPage;

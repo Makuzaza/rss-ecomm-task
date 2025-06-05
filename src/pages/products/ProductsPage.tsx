@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import ProductCatalog from "@/components/products/ProductCatalog/ProductCatalog";
-import "./Products.css";
+import "./ProductsPage.css";
 
-const Products = () => {
+const ProductsPage = () => {
   const [sortOption, setSortOption] = useState<string>("name-asc");
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -29,4 +29,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default ProductsPage;

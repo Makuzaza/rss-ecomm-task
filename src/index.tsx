@@ -5,19 +5,21 @@ import {
   Navigate,
   RouterProvider,
 } from "react-router-dom";
-import Login from "@/pages/login/Login";
-import Register from "@/pages/register/Register";
 import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/context/ApiClientContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Shop from "@/pages/shop/Shop";
-import About from "@/pages/about/About";
-import NotFound from "@/pages/notfound/NotFound";
-import Profile from "@/pages/profile/Profile";
-import ProductDetails from "@/pages/productDetails/ProductDetails";
-import Category from "@/pages/category/Category";
-import Products from "@/pages/products/Products";
-import SearchResults from "@/pages/search/SearchResults";
+
+// PAGES
+import HomePage from "@/pages/home/HomePage";
+import LoginPage from "@/pages/login/LoginPage";
+import RegisterPage from "@/pages/register/RegisterPage";
+import AboutPage from "@/pages/about/AboutPage";
+import NotFoundPage from "@/pages/notfound/NotFoundPage";
+import ProfilePage from "@/pages/profile/ProfilePage";
+import ProductDetailsPage from "@/pages/productDetails/ProductDetailsPage";
+import CategoryPage from "@/pages/category/CategoryPage";
+import ProductsPage from "@/pages/products/ProductsPage";
+import SearchResultsPage from "@/pages/search/SearchResultsPage";
 import CategoryProductsPage from "./pages/category/CategoryProductsPage";
 
 const root = document.getElementById("root");
@@ -37,7 +39,7 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <Suspense fallback={"Loading..."}>
-            <Shop />
+            <HomePage />
           </Suspense>
         ),
       },
@@ -45,7 +47,7 @@ const router = createBrowserRouter([
         path: "/login",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Login />
+            <LoginPage />
           </Suspense>
         ),
       },
@@ -53,7 +55,7 @@ const router = createBrowserRouter([
         path: "/register",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Register />
+            <RegisterPage />
           </Suspense>
         ),
       },
@@ -61,7 +63,7 @@ const router = createBrowserRouter([
         path: "/about",
         element: (
           <Suspense fallback={"Loading..."}>
-            <About />
+            <AboutPage />
           </Suspense>
         ),
       },
@@ -70,7 +72,7 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={"Loading..."}>
             <ProtectedRoute>
-              <Profile />
+              <ProfilePage />
             </ProtectedRoute>
           </Suspense>
         ),
@@ -81,19 +83,19 @@ const router = createBrowserRouter([
       },
       {
         path: "/products",
-        element: <Products />,
+        element: <ProductsPage />,
       },
       {
         path: "/product/:id",
         element: (
           <Suspense fallback={"Loading..."}>
-            <ProductDetails />
+            <ProductDetailsPage />
           </Suspense>
         ),
       },
       {
         path: "/category",
-        element: <Category />,
+        element: <CategoryPage />,
       },
       {
         path: "/category/:categorySlug",
@@ -101,13 +103,13 @@ const router = createBrowserRouter([
       },
       {
         path: "/search",
-        element: <SearchResults />,
+        element: <SearchResultsPage />,
       },
       {
         path: "*",
         element: (
           <Suspense fallback={"Loading..."}>
-            <NotFound />
+            <NotFoundPage />
           </Suspense>
         ),
       },
