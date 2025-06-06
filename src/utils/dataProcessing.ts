@@ -10,15 +10,18 @@ export function apiDataProcessing(
   return data.results.map((record) => {
     const currentData = record.masterData.current;
     const masterVariant = currentData.masterVariant;
+    const price = masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
+    const discountedPrice =
+      masterVariant.prices?.[0]?.discounted?.value.centAmount / 100;
 
     return {
       id: record.id,
       key: record.key,
       name: currentData.name["en-US"],
-      description: currentData.description["en-US"],
+      description: currentData.description?.["en-US"] || "",
       sku: masterVariant.sku,
-      price: masterVariant.prices[0].value.centAmount,
-      priceDiscounted: masterVariant.prices[0].discounted.value.centAmount,
+      price: price,
+      priceDiscounted: discountedPrice,
       images: masterVariant.images,
     };
   });
@@ -27,16 +30,21 @@ export function apiDataProcessing(
 export function apiDataSearchProcessing(
   data: ProductProjectionPagedSearchResponse
 ) {
+  console.log("Search data:", data);
   return data.results.map((record) => {
+    const price = record.masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
+    const discountedPrice =
+      record.masterVariant.prices?.[0]?.discounted?.value.centAmount / 100 ||
+      undefined;
+
     return {
       id: record.id,
       key: record.key,
       name: record.name["en-US"],
-      description: record.description["en-US"],
-      sku: record.masterVariant.sku,
-      price: record.masterVariant.prices[0].value.centAmount,
-      priceDiscounted:
-        record.masterVariant.prices[0].discounted.value.centAmount,
+      description: record.description["en-US"] || "",
+      sku: record.masterVariant.sku || "",
+      price: price,
+      priceDiscounted: discountedPrice,
       images: record.masterVariant.images,
     };
   });

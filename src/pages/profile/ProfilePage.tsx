@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import "./Profile.css";
 import { useAuth } from "@/context/AuthContext";
 import { useApiClient } from "@/context/ApiClientContext";
 import { CustomerAddress } from "@/@types/interfaces";
 import { Address } from "@commercetools/platform-sdk";
 import europeanCountries from "@/data/europeanCountries.json";
+import "./ProfilePage.css";
 
-const Profile = () => {
+const ProfilePage = () => {
   const { customer, setCustomer } = useAuth();
   const apiClient = useApiClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -17,12 +17,12 @@ const Profile = () => {
   const [editedDOB, setEditedDOB] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  console.log("apiClient.customerApiRoot", apiClient['customerApiRoot']);
+  // console.log("apiClient.customerApiRoot", apiClient["customerApiRoot"]);
   if (!customer || !apiClient) {
     return <p>Loading...</p>;
   }
 
-   const {
+  const {
     firstName,
     lastName,
     dateOfBirth,
@@ -31,7 +31,6 @@ const Profile = () => {
     defaultShippingAddressId,
     version,
   } = customer;
-  
 
   const normalizeAddresses = (addresses: Address[]): CustomerAddress[] =>
     addresses.map((addr) => ({
@@ -46,14 +45,18 @@ const Profile = () => {
   const [editedAddresses, setEditedAddresses] = useState<CustomerAddress[]>(
     normalizeAddresses(customer.addresses)
   );
-  const [editingAddressIndex, setEditingAddressIndex] = useState<number | null>(null);
+  const [editingAddressIndex, setEditingAddressIndex] = useState<number | null>(
+    null
+  );
 
-  const [addressErrors, setAddressErrors] = useState<Record<number, string>>({});
+  const [addressErrors, setAddressErrors] = useState<Record<number, string>>(
+    {}
+  );
 
   const validatePostalCode = (postalCode: string, country: string): boolean => {
     if (!postalCode) return false;
 
-    const countryRule = europeanCountries.find(c => c.code === country);
+    const countryRule = europeanCountries.find((c) => c.code === country);
     if (!countryRule) return true;
 
     try {
@@ -77,7 +80,11 @@ const Profile = () => {
     setIsEditing(false);
   };
 
-  const handleAddressChange = (index: number, field: keyof CustomerAddress, value: string) => {
+  const handleAddressChange = (
+    index: number,
+    field: keyof CustomerAddress,
+    value: string
+  ) => {
     const updated = [...editedAddresses];
     updated[index] = { ...updated[index], [field]: value };
     setEditedAddresses(updated);
@@ -87,7 +94,9 @@ const Profile = () => {
       const isValid = validatePostalCode(value, country);
       setAddressErrors((prev) => ({
         ...prev,
-        [index]: isValid ? "" : "Invalid postal code format for selected country.",
+        [index]: isValid
+          ? ""
+          : "Invalid postal code format for selected country.",
       }));
     }
 
@@ -113,13 +122,21 @@ const Profile = () => {
 
     const errors: Record<number, string> = {};
 
-    if (!address.streetName || !address.city || !address.country || !address.postalCode) {
+    if (
+      !address.streetName ||
+      !address.city ||
+      !address.country ||
+      !address.postalCode
+    ) {
       errors[index] = "All fields are required.";
       setAddressErrors((prev) => ({ ...prev, ...errors }));
       return;
     }
 
-    const isValidPostal = validatePostalCode(address.postalCode, address.country);
+    const isValidPostal = validatePostalCode(
+      address.postalCode,
+      address.country
+    );
     if (!isValidPostal) {
       errors[index] = "Invalid postal code format for selected country.";
       setAddressErrors((prev) => ({ ...prev, ...errors }));
@@ -146,7 +163,7 @@ const Profile = () => {
           },
         ],
       });
-      setCustomer(updated.body);
+      setCustomer(updated);
       setEditingAddressIndex(null);
     } catch (error) {
       console.error("Failed to update address", error);
@@ -168,7 +185,7 @@ const Profile = () => {
           { action: "setDateOfBirth", dateOfBirth: editedDOB },
         ],
       });
-      setCustomer(updated.body);
+      setCustomer(updated);
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update customer", error);
@@ -192,7 +209,7 @@ const Profile = () => {
           },
         ],
       });
-      setCustomer(updated.body);
+      setCustomer(updated);
     } catch (error) {
       console.error(`Failed to set default ${type} address`, error);
     }
@@ -229,16 +246,28 @@ const Profile = () => {
               className="edit-input"
             />
             <div className="edit-buttons-container">
-              <button onClick={saveChanges} className="save-button">Save</button>
-              <button onClick={cancelEdit} className="close-button">Cancel</button>
+              <button onClick={saveChanges} className="save-button">
+                Save
+              </button>
+              <button onClick={cancelEdit} className="close-button">
+                Cancel
+              </button>
             </div>
           </div>
         ) : (
           <>
-            <p className="p-text"><strong>First Name:</strong> {firstName}</p>
-            <p className="p-text"><strong>Last Name:</strong> {lastName}</p>
-            <p className="p-text"><strong>Date of Birth:</strong> {dateOfBirth}</p>
-            <button onClick={startEdit} className="edit-button">Edit</button>
+            <p className="p-text">
+              <strong>First Name:</strong> {firstName}
+            </p>
+            <p className="p-text">
+              <strong>Last Name:</strong> {lastName}
+            </p>
+            <p className="p-text">
+              <strong>Date of Birth:</strong> {dateOfBirth}
+            </p>
+            <button onClick={startEdit} className="edit-button">
+              Edit
+            </button>
           </>
         )}
       </section>
@@ -253,47 +282,68 @@ const Profile = () => {
                   <input
                     type="text"
                     value={editedAddresses[index].streetName}
-                    onChange={(e) => handleAddressChange(index, "streetName", e.target.value)}
+                    onChange={(e) =>
+                      handleAddressChange(index, "streetName", e.target.value)
+                    }
                     placeholder="Street Name"
                     className="edit-input"
                   />
                   <input
                     type="text"
                     value={editedAddresses[index].postalCode}
-                    onChange={(e) => handleAddressChange(index, "postalCode", e.target.value)}
+                    onChange={(e) =>
+                      handleAddressChange(index, "postalCode", e.target.value)
+                    }
                     placeholder="Postal Code"
                     className="edit-input"
                   />
                   {addressErrors[index] && (
-                      <p className="error-message">{addressErrors[index]}</p>
-                    )}
+                    <p className="error-message">{addressErrors[index]}</p>
+                  )}
                   <input
                     type="text"
                     value={editedAddresses[index].city}
-                    onChange={(e) => handleAddressChange(index, "city", e.target.value)}
+                    onChange={(e) =>
+                      handleAddressChange(index, "city", e.target.value)
+                    }
                     placeholder="City"
                     className="edit-input"
                   />
                   <select
                     value={editedAddresses[index].country}
-                    onChange={(e) => handleAddressChange(index, "country", e.target.value)}
+                    onChange={(e) =>
+                      handleAddressChange(index, "country", e.target.value)
+                    }
                     className="edit-input"
                   >
                     <option value="">Select a country</option>
                     {europeanCountries.map(({ code, name }) => (
-                      <option key={code} value={code}>{name}</option>
+                      <option key={code} value={code}>
+                        {name}
+                      </option>
                     ))}
                   </select>
                   <div className="edit-button-row">
-                    <button onClick={() => saveAddressChanges(index)} className="save-button">Save</button>
-                    <button onClick={cancelAddressEdit} className="close-button">Cancel</button>
+                    <button
+                      onClick={() => saveAddressChanges(index)}
+                      className="save-button"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={cancelAddressEdit}
+                      className="close-button"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
               ) : (
                 <>
                   <h4 className="address-title">Address {index + 1}</h4>
                   <p className="p-text">
-                    {addr.streetName}, {addr.postalCode}, {addr.city}, {addr.state || ""}, {addr.country}
+                    {addr.streetName}, {addr.postalCode}, {addr.city},{" "}
+                    {addr.state || ""}, {addr.country}
                   </p>
                   <div className="label-container">
                     <label
@@ -320,7 +370,9 @@ const Profile = () => {
                   </div>
                   <p
                     className={`address-label ${
-                      addr.id !== defaultBillingAddressId ? "not-default" : "default"
+                      addr.id !== defaultBillingAddressId
+                        ? "not-default"
+                        : "default"
                     }`}
                   >
                     {addr.id === defaultBillingAddressId
@@ -329,7 +381,9 @@ const Profile = () => {
                   </p>
                   <p
                     className={`address-label ${
-                      addr.id !== defaultShippingAddressId ? "not-default" : "default"
+                      addr.id !== defaultShippingAddressId
+                        ? "not-default"
+                        : "default"
                     }`}
                   >
                     {addr.id === defaultShippingAddressId
@@ -337,7 +391,10 @@ const Profile = () => {
                       : "❗ This address is not Default Shipping Address"}
                   </p>
                   <div className="button-container">
-                    <button onClick={() => startAddressEdit(index)} className="edit-button-address">
+                    <button
+                      onClick={() => startAddressEdit(index)}
+                      className="edit-button-address"
+                    >
                       Edit Address
                     </button>
                   </div>
@@ -353,4 +410,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfilePage;

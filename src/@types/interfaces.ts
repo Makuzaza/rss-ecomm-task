@@ -1,7 +1,8 @@
 import {
-  Customer,
-  CustomerSignInResult,
-  MyCustomerDraft,
+  type Customer,
+  // CustomerSignInResult,
+  type MyCustomerDraft,
+  type Image,
 } from "@commercetools/platform-sdk";
 
 export interface CommerceToolsError {
@@ -57,7 +58,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<Customer>;
   loginWithToken: (token: string) => Promise<void>;
   logout: () => void;
-  register: (customerData: MyCustomerDraft) => Promise<CustomerSignInResult>;
+  register: (customerData: MyCustomerDraft) => Promise<Customer>;
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -67,9 +68,10 @@ export interface AuthContextType {
 
 export interface ProductCatalogProps {
   categoryId?: string;
-  products?: MyProductsData[];
   propsLimit?: number;
+  propsApiSort?: string;
   propsSort?: string;
+  propsProducts?: MyProductsData[];
 }
 
 export interface MyProductsData {

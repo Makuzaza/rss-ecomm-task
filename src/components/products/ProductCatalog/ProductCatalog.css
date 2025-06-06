@@ -7,7 +7,7 @@
 .cards-container {
   display: grid;
   gap: 20px;
-  grid-template: auto / repeat(auto-fit, minmax(280px, 1fr));
+  grid-template: auto / repeat(auto-fit, minmax(280px, 300px));
   justify-content: center;
   padding: 20px;
 }
@@ -42,10 +42,6 @@
   object-position: center;
 }
 
-.cards-item:hover {
-  cursor: pointer;
-  transform: translateY(-5px);
-}
 .cards-item-text {
   padding: 16px;
 }
@@ -54,22 +50,38 @@
   text-align: center;
 }
 
-.cards-item-price-container {
+.cards-item-name {
+  text-align: center;
+  font-size: 1rem;
+}
+.product-price-container {
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.cards-item-price {
-  color: #888;
-  text-decoration: line-through;
-  font-size: 14px;
+
+.price-with-discount {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
 }
 
-.cards-item-price-discount {
+.price-discounted {
   color: #e53935;
-  font-size: 18px;
   font-weight: bold;
-  margin-right: 10px;
+  font-size: 1.5rem;
+}
+
+.price-original {
+  color: #888;
+  text-decoration: line-through;
+  font-size: 1rem;
+}
+
+.price-regular {
+  color: #333;
+  font-weight: bold;
+  font-size: 1.5rem;
 }
 
 .button__addToCart {
@@ -80,7 +92,7 @@
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-weight: 500;
-  transition: all 0.3s;
+  transition: background-color 0.2s ease;
 }
 
 .button__addToCart:hover {

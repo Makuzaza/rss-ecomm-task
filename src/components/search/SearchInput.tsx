@@ -6,20 +6,20 @@ import "./SearchInput.css";
 
 export const SearchInput = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleSearch = async (term: string) => {
-    if (term.trim() === "") {
+  const handleSearch = async (value: string) => {
+    if (value.trim() === "") {
       setSearchResults([]);
       return;
     }
 
     try {
-      const response = await apiClient.searchProductsByName(term);
+      const response = await apiClient.searchProductsByName(value);
       setSearchResults(response.results || []);
       setIsDropdownOpen(true);
     } catch (error) {
@@ -30,8 +30,8 @@ export const SearchInput = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
+    if (searchValue.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchValue)}`);
       setIsDropdownOpen(false);
       inputRef.current?.blur();
     }
@@ -40,20 +40,20 @@ export const SearchInput = () => {
   const handleResultClick = (productId: string) => {
     navigate(`/product/${productId}`);
     setIsDropdownOpen(false);
-    setSearchTerm("");
+    setSearchValue("");
   };
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (searchTerm) {
-        handleSearch(searchTerm);
+      if (searchValue) {
+        handleSearch(searchValue);
       } else {
         setSearchResults([]);
       }
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]);
+  }, [searchValue]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -79,12 +79,12 @@ export const SearchInput = () => {
           type="search"
           className="search-input"
           placeholder="Search for products..."
-          value={searchTerm}
+          value={searchValue}
           onChange={(e) => {
-            setSearchTerm(e.target.value);
+            setSearchValue(e.target.value);
             setIsDropdownOpen(true);
           }}
-          onFocus={() => searchTerm && setIsDropdownOpen(true)}
+          onFocus={() => searchValue && setIsDropdownOpen(true)}
         />
       </form>
 
@@ -104,7 +104,7 @@ export const SearchInput = () => {
               </li>
             ))}
           </ul>
-          <Link to={`/search?query=${encodeURIComponent(searchTerm)}`}>
+          <Link to={`/search?query=${encodeURIComponent(searchValue)}`}>
             <div className="search-dropdown-footer">View all results</div>
           </Link>
         </div>

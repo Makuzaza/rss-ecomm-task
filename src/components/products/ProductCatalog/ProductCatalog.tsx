@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApiClient } from "@/context/ApiClientContext";
-import { MyProductsData, ProductCatalogProps } from "@/@types/interfaces";
-import "./ProductCatalog.css";
-import "@/pages/shop/Shop.css";
 import { sortProducts } from "@/utils/dataProcessing";
+import DOMPurify from "dompurify";
+import {
+  type MyProductsData,
+  type ProductCatalogProps,
+} from "@/@types/interfaces";
+import "./ProductCatalog.css";
+import "@/pages/home/HomePage.css";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
-  products: propsProducts,
+  propsProducts,
   propsLimit = 10,
+  propsApiSort = undefined,
   propsSort = "name-asc",
 }) => {
   const apiClient = useApiClient();
@@ -20,11 +25,11 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   useEffect(() => {
     const fetchProducts = async () => {
       if (categoryId) {
+        console.log("Category: products", products);
         try {
           setLoading(true);
           const data: MyProductsData[] =
             await apiClient.searchProductsByCategory(categoryId);
-          console.log(data);
           setProducts(data);
           setError(null);
         } catch (err) {
@@ -32,11 +37,15 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
         } finally {
           setLoading(false);
         }
+      } else if (propsProducts) {
+        setProducts(propsProducts);
+        setLoading(false);
       } else {
         try {
           setLoading(true);
           const arg = {
             limit: propsLimit,
+            sort: propsApiSort,
           };
 
           const data: MyProductsData[] = await apiClient.getAllProducts(arg);
@@ -83,13 +92,25 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
               {product.name}
             </div>
             <div className="cards-item-desc cards-item-text">
-              {product.description.slice(0, 54) + "...  "}
+              <div
+                dangerouslySetInnerHTML={{
+                  __html:
+                    DOMPurify.sanitize(product.description).slice(0, 55) +
+                    "...  ",
+                }}
+              />
             </div>
-            <div className="cards-item-price-container">
-              <div className="cards-item-price-discount">
-                {product.priceDiscounted} &euro;
-              </div>
-              <div className="cards-item-price">{product.price} &euro;</div>
+            <div className="product-price-container">
+              {product.priceDiscounted ? (
+                <div className="price-with-discount">
+                  <span className="price-discounted">
+                    {product.priceDiscounted} &euro;
+                  </span>
+                  <span className="price-original">{product.price} &euro;</span>
+                </div>
+              ) : (
+                <span className="price-regular">{product.price} &euro;</span>
+              )}
             </div>
           </Link>
           <div className="cards-item-card cards-item-text">

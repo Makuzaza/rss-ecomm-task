@@ -7,12 +7,12 @@ import {
 } from "@/utils/registerValitation";
 import europeanCountriesData from "@/data/europeanCountries.json";
 import { RegisterFormFields } from "@/@types/interfaces";
-import "./Register.css";
 import { useAuth } from "@/context/AuthContext";
 import { MdError } from "react-icons/md";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import "./RegisterPage.css";
 
-const Register = () => {
+const RegisterPage = () => {
   const { isAuth, login } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
@@ -694,4 +694,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default RegisterPage;
