@@ -15,6 +15,7 @@ const ProfilePage = () => {
   const [editedFirstName, setEditedFirstName] = useState("");
   const [editedLastName, setEditedLastName] = useState("");
   const [editedDOB, setEditedDOB] = useState("");
+  const [editedEmail, setEditedEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   // console.log("apiClient.customerApiRoot", apiClient["customerApiRoot"]);
@@ -30,6 +31,7 @@ const ProfilePage = () => {
     defaultBillingAddressId,
     defaultShippingAddressId,
     version,
+    email,
   } = customer;
 
   const normalizeAddresses = (addresses: Address[]): CustomerAddress[] =>
@@ -72,6 +74,7 @@ const ProfilePage = () => {
     setEditedFirstName(firstName);
     setEditedLastName(lastName);
     setEditedDOB(dateOfBirth);
+    setEditedEmail(email);
     setErrorMessage("");
     setIsEditing(true);
   };
@@ -183,6 +186,7 @@ const ProfilePage = () => {
           { action: "setFirstName", firstName: editedFirstName },
           { action: "setLastName", lastName: editedLastName },
           { action: "setDateOfBirth", dateOfBirth: editedDOB },
+          { action: "changeEmail", email: editedEmail || email },
         ],
       });
       setCustomer(updated);
@@ -245,6 +249,13 @@ const ProfilePage = () => {
               placeholder="Date of Birth"
               className="edit-input"
             />
+            <input
+              type="text"
+              value={editedEmail}
+              onChange={(e) => setEditedEmail(e.target.value)}
+              placeholder="Date of Birth"
+              className="edit-input"
+            />
             <div className="edit-buttons-container">
               <button onClick={saveChanges} className="save-button">
                 Save
@@ -264,6 +275,9 @@ const ProfilePage = () => {
             </p>
             <p className="p-text">
               <strong>Date of Birth:</strong> {dateOfBirth}
+            </p>
+            <p className="p-text">
+              <strong>Your email adress:</strong> {email}
             </p>
             <button onClick={startEdit} className="edit-button">
               Edit
