@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient } from "@/api/ApiClient";
 import { Category } from "@commercetools/platform-sdk";
@@ -13,11 +13,22 @@ const CategoryDropdown = () => {
   const [categories, setCategories] = useState<CategoryWithChildren[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-  const closeMenu = () => {
+  const closeMenu = useCallback(() => {
     setIsOpen(false);
     setActiveCategory(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 600);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -36,20 +47,34 @@ const CategoryDropdown = () => {
 
   // Closing category menu when ESC key is pressed
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const handleInteraction = (event: MouseEvent | KeyboardEvent | TouchEvent) => {
+      // Handle click outside
+      if (
+        dropdownRef.current &&
+        event instanceof MouseEvent &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        closeMenu();
+      }
+
+      // Handle Escape key
+      if (event instanceof KeyboardEvent && event.key === "Escape") {
         closeMenu();
       }
     };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("mousedown", handleInteraction);
+      document.addEventListener("touchstart", handleInteraction);
+      document.addEventListener("keydown", handleInteraction);
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleInteraction);
+      document.removeEventListener("touchstart", handleInteraction);
+      document.removeEventListener("keydown", handleInteraction);
     };
-  }, [isOpen]);
+  }, [isOpen, closeMenu]);
 
   const buildCategoryTree = (
     allCategories: Category[]
@@ -97,43 +122,62 @@ const CategoryDropdown = () => {
     return category.name?.["en-US"] || category.key || "Unnamed Category";
   };
 
-  return (
-    <div className="category-dropdown">
+  const handleCategoryClick = (category: CategoryWithChildren) => {
+    if (isMobile) {
+      if (category.children?.length) {
+        setActiveCategory(category.id);
+      } else {
+        navigate(`/category/${category.slug?.["en-US"] || category.id}`);
+        closeMenu();
+      }
+    } else {
+      setActiveCategory(category.id);
+    }
+  };
+
+  const handleBackClick = () => {
+    setActiveCategory(null);
+  };
+
+   return (
+    <div className="category-dropdown" ref={dropdownRef}>
       <button
         className="dropdown-toggle"
-        onClick={() => navigate("/category")}
-        onMouseEnter={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setActiveCategory(null);
+        }}
+        onMouseEnter={() => !isMobile && setIsOpen(true)}
       >
         Categories
       </button>
 
       {isOpen && (
-        <div
-          className="mega-menu"
-          onMouseLeave={() => {
-            setIsOpen(false);
-            setActiveCategory(null);
-          }}
-        >
-          <div className="main-categories">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className={`main-category ${activeCategory === category.id ? "active" : ""}`}
-                onMouseEnter={() => setActiveCategory(category.id)}
-              >
-                <Link
-                  to={`/category/${category.slug?.["en-US"] || category.id}`}
-                  className="main-category-link"
+        <div className={`mega-menu ${isMobile ? "mobile-view" : ""}`}>
+          {isMobile && activeCategory && (
+            <button className="back-button" onClick={handleBackClick}>
+              ← Back to Categories
+            </button>
+          )}
+          {(!isMobile || !activeCategory) && (
+            <div className="main-categories">
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  className={`main-category ${activeCategory === category.id ? "active" : ""}`}
+                  onClick={() => handleCategoryClick(category)}
+                  onMouseEnter={() => !isMobile && setActiveCategory(category.id)}
                 >
-                  {getCategoryName(category)}
-                </Link>
-                {category.children && category.children.length > 0 && (
-                  <span className="arrow">›</span>
-                )}
-              </div>
-            ))}
-          </div>
+                  <span className="main-category-link">
+                    {getCategoryName(category)}
+                  </span>
+                  {category.children && category.children.length > 0 && (
+                    <span className="arrow">›</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {activeCategory && (
             <div className="subcategories-panel">
@@ -147,6 +191,7 @@ const CategoryDropdown = () => {
                           <Link
                             to={`/category/${child.slug?.["en-US"] || child.id}`}
                             className="subcategory-link"
+                            onClick={() => !child.children?.length && closeMenu()}
                           >
                             {getCategoryName(child)}
                           </Link>
@@ -156,6 +201,7 @@ const CategoryDropdown = () => {
                             key={subChild.id}
                             to={`/category/${subChild.slug?.["en-US"] || subChild.id}`}
                             className="subcategory-item"
+                            onClick={closeMenu}
                           >
                             {getCategoryName(subChild)}
                           </Link>

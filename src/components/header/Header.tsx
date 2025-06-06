@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { SearchInput } from "../search/SearchInput";
@@ -11,6 +11,7 @@ export const Header = () => {
   const { isAuth, logout, customer } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -21,6 +22,28 @@ export const Header = () => {
     setShowMobileSearch(!showMobileSearch);
     if (isMobileMenuOpen) setIsMobileMenuOpen(false);
   };
+
+  useEffect(() => {
+    interface ClickOutsideEvent extends MouseEvent {
+      target: Node;
+    }
+
+    const handleClickOutside = (event: ClickOutsideEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   return (
     <header className="header">
@@ -103,7 +126,7 @@ export const Header = () => {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="mobile-menu">
+          <div className="mobile-menu" ref={menuRef}>
             <ul className="mobile-nav-list">
               <li className="mobile-nav-item">
                 <Link
@@ -124,8 +147,10 @@ export const Header = () => {
                 </Link>
               </li>
               <li className="mobile-nav-item">
-                <div className="mobile-nav-link"
-                style={{ paddingLeft: "14px" }}>
+                <div
+                  className="mobile-nav-link"
+                  style={{ paddingLeft: "14px" }}
+                >
                   <CategoryDropdown />
                 </div>
               </li>
