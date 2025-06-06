@@ -5,6 +5,9 @@ import { CustomerAddress } from "@/@types/interfaces";
 import { Address, MyCustomerUpdateAction } from "@commercetools/platform-sdk";
 import europeanCountries from "@/data/europeanCountries.json";
 import "./ProfilePage.css";
+import { validateEmailFormat } from "../../utils/loginValidation";
+import { validateField } from "../../utils/registerValitation";
+import { validatePostalCode } from "../../utils/editValidation";
 
 const ProfilePage = () => {
   const { customer, setCustomer } = useAuth();
@@ -37,6 +40,44 @@ const ProfilePage = () => {
     email,
   } = customer;
 
+  const isChanged =
+    editedFirstName !== firstName ||
+    editedLastName !== lastName ||
+    editedDOB !== dateOfBirth ||
+    editedEmail !== email;  
+
+  const emailError = validateField(
+    "email",
+    editedEmail,
+    {
+      email: editedEmail,
+      password: "",
+      confirmPassword: "",
+      firstName: editedFirstName,
+      lastName: editedLastName,
+      dateOfBirth: editedDOB,
+      shippingCountry: "",
+      shippingCity: "",
+      shippingStreet: "",
+      shippingPostalCode: "",
+      billingCountry: "",
+      billingCity: "",
+      billingStreet: "",
+      billingPostalCode: "",
+    },
+    europeanCountries,
+    false
+  );  
+
+  const isSaveDisabled =
+    !editedFirstName.trim() ||
+    !editedLastName.trim() ||
+    !editedDOB.trim() ||
+    !editedEmail.trim() ||
+    !!emailError ||
+    !isChanged;
+  
+
   const normalizeAddresses = (addresses: Address[]): CustomerAddress[] =>
     addresses.map((addr) => ({
       id: addr.id,
@@ -54,24 +95,7 @@ const ProfilePage = () => {
     null
   );
 
-  const [addressErrors, setAddressErrors] = useState<Record<number, string>>(
-    {}
-  );
-
-  const validatePostalCode = (postalCode: string, country: string): boolean => {
-    if (!postalCode) return false;
-
-    const countryRule = europeanCountries.find((c) => c.code === country);
-    if (!countryRule) return true;
-
-    try {
-      const regex = new RegExp(countryRule.codeRegex);
-      return regex.test(postalCode);
-    } catch (err) {
-      console.warn(`Invalid regex for ${country}`, err);
-      return true;
-    }
-  };
+  const [addressErrors, setAddressErrors] = useState<string[]>([]);
 
   const startEdit = () => {
     setEditedFirstName(firstName);
@@ -91,25 +115,24 @@ const ProfilePage = () => {
     field: keyof CustomerAddress,
     value: string
   ) => {
-    const updated = [...editedAddresses];
-    updated[index] = { ...updated[index], [field]: value };
-    setEditedAddresses(updated);
+    const updatedAddresses = [...editedAddresses];
+    const updatedAddress = { ...updatedAddresses[index], [field]: value };
 
-    if (field === "postalCode") {
-      const country = updated[index].country;
-      const isValid = validatePostalCode(value, country);
-      setAddressErrors((prev) => ({
-        ...prev,
-        [index]: isValid
-          ? ""
-          : "Invalid postal code format for selected country.",
-      }));
+    // Если изменяется страна — сбрасываем почтовый индекс
+    if (field === "country") {
+      updatedAddress.postalCode = "";
     }
 
-    if (field === "country") {
-      updated[index].postalCode = "";
-      setEditedAddresses(updated);
-      setAddressErrors((prev) => ({ ...prev, [index]: "" }));
+    updatedAddresses[index] = updatedAddress;
+    setEditedAddresses(updatedAddresses);
+
+    const newErrors = [...addressErrors];
+
+    // Валидация почтового индекса при изменении индекса или страны
+    if (field === "postalCode" || field === "country") {
+      const error = validatePostalCode(updatedAddress.country, updatedAddress.postalCode);
+      newErrors[index] = error || "";
+      setAddressErrors(newErrors);
     }
   };
 
@@ -182,6 +205,11 @@ const ProfilePage = () => {
       return;
     }
 
+    if (editedEmail && !validateEmailFormat(editedEmail)) {
+      setErrorMessage("Invalid email address format.");
+      return;
+    }
+
     try {
       const updated = await apiClient.updateCustomer({
         version,
@@ -198,6 +226,7 @@ const ProfilePage = () => {
       console.error("Failed to update customer", error);
     }
   };
+
 
   const setDefaultAddress = async (
     addressId: string,
@@ -240,8 +269,6 @@ const ProfilePage = () => {
       console.error("Failed to update default address", error);
     }
   };
-
-
 
 
   const [newAddress, setNewAddress] = useState<CustomerAddress>({
@@ -324,6 +351,9 @@ const ProfilePage = () => {
               placeholder="First Name"
               className="edit-input"
             />
+            {!editedFirstName.trim() && (
+              <p className="error-message">First name is required</p>
+            )}
             <input
               type="text"
               value={editedLastName}
@@ -331,6 +361,9 @@ const ProfilePage = () => {
               placeholder="Last Name"
               className="edit-input"
             />
+            {!editedLastName.trim() && (
+              <p className="error-message">Last name is required</p>
+            )}
             <input
               type="date"
               value={editedDOB}
@@ -338,15 +371,28 @@ const ProfilePage = () => {
               placeholder="Date of Birth"
               className="edit-input"
             />
+            {!editedDOB.trim() && (
+              <p className="error-message">Date of birth is required</p>
+            )}
             <input
               type="text"
               value={editedEmail}
-              onChange={(e) => setEditedEmail(e.target.value)}
+              onChange={(e) => {
+                setEditedEmail(e.target.value);
+              }}
               placeholder="Email Address"
               className="edit-input"
             />
+            {!editedEmail.trim() && (
+              <p className="error-message">Email is required</p>
+            )}
+            {emailError && <p className="error-message">{emailError}</p>}
             <div className="edit-buttons-container">
-              <button onClick={saveChanges} className="save-button">
+              <button
+                onClick={saveChanges}
+                className={`save-button ${isSaveDisabled ? "disabled" : ""}`}
+                disabled={isSaveDisabled}
+              >
                 Save
               </button>
               <button onClick={cancelEdit} className="close-button">
