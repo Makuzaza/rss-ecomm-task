@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useApiClient } from "@/context/ApiClientContext";
 import { CustomerAddress } from "@/@types/interfaces";
-import { Address } from "@commercetools/platform-sdk";
+import { Address, MyCustomerUpdateAction } from "@commercetools/platform-sdk";
 import europeanCountries from "@/data/europeanCountries.json";
 import "./ProfilePage.css";
 
@@ -17,6 +17,9 @@ const ProfilePage = () => {
   const [editedDOB, setEditedDOB] = useState("");
   const [editedEmail, setEditedEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [missingAddressType, setMissingAddressType] = useState<null | "billing" | "shipping">(null);
+  const [canAddNewAddress, setCanAddNewAddress] = useState(true);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
   // console.log("apiClient.customerApiRoot", apiClient["customerApiRoot"]);
   if (!customer || !apiClient) {
@@ -200,24 +203,110 @@ const ProfilePage = () => {
     addressId: string,
     type: "shipping" | "billing"
   ) => {
+    const isCurrentlySet =
+      type === "shipping"
+        ? defaultShippingAddressId === addressId
+        : defaultBillingAddressId === addressId;
+
+    const action =
+      type === "shipping"
+        ? "setDefaultShippingAddress"
+        : "setDefaultBillingAddress";
+
+    const payload = {
+      action,
+      addressId: isCurrentlySet ? null : addressId,
+    };
+
+    try {
+      const updated = await apiClient.updateCustomer({
+        version: customer.version,
+        actions: [payload as MyCustomerUpdateAction],
+      });
+
+      setCustomer(updated);
+
+      const shippingSet = !!updated.defaultShippingAddressId;
+      const billingSet = !!updated.defaultBillingAddressId;
+      const isSame =
+        updated.defaultShippingAddressId === updated.defaultBillingAddressId;
+
+      setCanAddNewAddress(!isSame && shippingSet !== billingSet);
+
+      if (!shippingSet) setMissingAddressType("shipping");
+      else if (!billingSet) setMissingAddressType("billing");
+      else setMissingAddressType(null);
+    } catch (error) {
+      console.error("Failed to update default address", error);
+    }
+  };
+
+
+
+
+  const [newAddress, setNewAddress] = useState<CustomerAddress>({
+    id: "",
+    streetName: "",
+    postalCode: "",
+    city: "",
+    state: "",
+    country: "",
+  });
+
+  const handleAddNewAddress = async () => {
+    if (
+      !newAddress.streetName ||
+      !newAddress.city ||
+      !newAddress.country ||
+      !newAddress.postalCode
+    ) {
+      setErrorMessage("Please fill all fields for new address.");
+      return;
+    }
+
+    const isValidPostal = validatePostalCode(newAddress.postalCode, newAddress.country);
+    if (!isValidPostal) {
+      setErrorMessage("Invalid postal code for selected country.");
+      return;
+    }
+
     try {
       const updated = await apiClient.updateCustomer({
         version: customer.version,
         actions: [
           {
-            action:
-              type === "shipping"
-                ? "setDefaultShippingAddress"
-                : "setDefaultBillingAddress",
-            addressId,
+            action: "addAddress",
+            address: {
+              streetName: newAddress.streetName,
+              postalCode: newAddress.postalCode,
+              city: newAddress.city,
+              state: newAddress.state,
+              country: newAddress.country,
+            },
           },
         ],
       });
-      setCustomer(updated);
+
+      const newAddrId = updated.addresses[updated.addresses.length - 1].id;
+
+      const setTypeAction: MyCustomerUpdateAction =
+        missingAddressType === "billing"
+          ? { action: "setDefaultBillingAddress", addressId: newAddrId }
+          : { action: "setDefaultShippingAddress", addressId: newAddrId };
+
+      const updatedWithDefault = await apiClient.updateCustomer({
+        version: updated.version,
+        actions: [setTypeAction],
+      });
+
+      setCustomer(updatedWithDefault);
+      setShowNewAddressForm(false);
+      setNewAddress({ id: "", streetName: "", postalCode: "", city: "", state: "", country: "" });
     } catch (error) {
-      console.error(`Failed to set default ${type} address`, error);
+      console.error("Failed to add new address", error);
     }
   };
+
 
   return (
     <div className="profile-page">
@@ -253,7 +342,7 @@ const ProfilePage = () => {
               type="text"
               value={editedEmail}
               onChange={(e) => setEditedEmail(e.target.value)}
-              placeholder="Date of Birth"
+              placeholder="Email Address"
               className="edit-input"
             />
             <div className="edit-buttons-container">
@@ -277,7 +366,7 @@ const ProfilePage = () => {
               <strong>Date of Birth:</strong> {dateOfBirth}
             </p>
             <p className="p-text">
-              <strong>Your email adress:</strong> {email}
+              <strong>Your email address:</strong> {email}
             </p>
             <button onClick={startEdit} className="edit-button">
               Edit
@@ -356,8 +445,7 @@ const ProfilePage = () => {
                 <>
                   <h4 className="address-title">Address {index + 1}</h4>
                   <p className="p-text">
-                    {addr.streetName}, {addr.postalCode}, {addr.city},{" "}
-                    {addr.state || ""}, {addr.country}
+                    {addr.streetName}, {addr.postalCode}, {addr.city}, {addr.state || ""}, {addr.country}
                   </p>
                   <div className="label-container">
                     <label
@@ -384,9 +472,7 @@ const ProfilePage = () => {
                   </div>
                   <p
                     className={`address-label ${
-                      addr.id !== defaultBillingAddressId
-                        ? "not-default"
-                        : "default"
+                      addr.id !== defaultBillingAddressId ? "not-default" : "default"
                     }`}
                   >
                     {addr.id === defaultBillingAddressId
@@ -395,9 +481,7 @@ const ProfilePage = () => {
                   </p>
                   <p
                     className={`address-label ${
-                      addr.id !== defaultShippingAddressId
-                        ? "not-default"
-                        : "default"
+                      addr.id !== defaultShippingAddressId ? "not-default" : "default"
                     }`}
                   >
                     {addr.id === defaultShippingAddressId
@@ -419,9 +503,83 @@ const ProfilePage = () => {
         ) : (
           <p>No addresses found.</p>
         )}
+
+        {addresses.length < 2 && canAddNewAddress && !showNewAddressForm && (
+          <button
+            onClick={() => setShowNewAddressForm(true)}
+            className="add-address-button"
+          >
+            {missingAddressType === "billing"
+              ? "Add Billing Address"
+              : "Add Shipping Address"}
+          </button>
+        )}
+
+        {showNewAddressForm && (
+          <div className="address-edit-form">
+            <input
+              type="text"
+              value={newAddress.streetName}
+              onChange={(e) =>
+                setNewAddress({ ...newAddress, streetName: e.target.value })
+              }
+              placeholder="Street Name"
+              className="edit-input"
+            />
+            <input
+              type="text"
+              value={newAddress.postalCode}
+              onChange={(e) =>
+                setNewAddress({ ...newAddress, postalCode: e.target.value })
+              }
+              placeholder="Postal Code"
+              className="edit-input"
+            />
+            <input
+              type="text"
+              value={newAddress.city}
+              onChange={(e) =>
+                setNewAddress({ ...newAddress, city: e.target.value })
+              }
+              placeholder="City"
+              className="edit-input"
+            />
+            <select
+              value={newAddress.country}
+              onChange={(e) =>
+                setNewAddress({ ...newAddress, country: e.target.value })
+              }
+              className="edit-input"
+            >
+              <option value="">Select a country</option>
+              {europeanCountries.map(({ code, name }) => (
+                <option key={code} value={code}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <div className="edit-button-row">
+              <button
+                onClick={handleAddNewAddress}
+                className="save-button"
+              >
+                Save New Address
+              </button>
+              <button
+                onClick={() => setShowNewAddressForm(false)}
+                className="close-button"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );
+
+
+
 };
 
 export default ProfilePage;

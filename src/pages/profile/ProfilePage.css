@@ -6,7 +6,11 @@
   box-sizing: border-box;
 }
 
-section {
+section.personal-info {
+  border: 1.6px solid #333;
+}
+
+section.addresses {
   border: 1.6px solid #333;
 }
 
@@ -101,6 +105,22 @@ section {
   padding: 5px 12px;
 }
 
+.add-address-button {
+  margin-top: 10px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, padding 0.3s;
+}
+
+.add-address-button:hover {
+  background-color: rgb(12, 106, 199);
+  padding: 5px 12px;
+}
+
 .address-edit-form {
   padding: 10px; 
   transition: all 0.3s ease-in-out;
@@ -169,7 +189,8 @@ section {
   gap: 2px;
   font-weight: 500;
   font-size: 12px;
-  color: #333;
+  color: #444;
+  transition: color 0.3s ease;
 }
 
 .checkbox-toggle input[type="checkbox"] {
@@ -177,6 +198,7 @@ section {
   height: 18px;
   accent-color: gray;
   cursor: pointer;
+  transition: accent-color 0.3s ease; 
 }
 
 .checkbox-toggle.active {
