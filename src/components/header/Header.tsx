@@ -1,10 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { SearchInput } from "../search/SearchInput";
 import CategoryDropdown from "../products/ProductCategory/CategoryDropdown";
 import { FaBars, FaTimes, FaSearch } from "react-icons/fa";
-import { useClickOutside } from "@/hooks/useClickOutside";
+// import { useClickOutside } from "@/hooks/useClickOutside";
+import { ClickOutsideEvent } from "@/@types/interfaces";
 
 import "./Header.css";
 
@@ -24,7 +25,25 @@ export const Header = () => {
     if (isMobileMenuOpen) setIsMobileMenuOpen(false);
   };
 
-  useClickOutside(menuRef, () => setIsMobileMenuOpen(false), isMobileMenuOpen);
+  useEffect(() => {
+    const handleClickOutside = (event: ClickOutsideEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
+
+  // useClickOutside(menuRef, () => setIsMobileMenuOpen(false), isMobileMenuOpen);
 
   return (
     <header className="header">

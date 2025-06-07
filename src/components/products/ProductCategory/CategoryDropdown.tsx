@@ -158,7 +158,7 @@ const CategoryDropdown = () => {
                             to={`/category/${child.slug?.["en-US"] || child.id}`}
                             className="subcategory-link"
                             onClick={() =>
-                              !child.children?.length && closeMenu()
+                              closeMenu()
                             }
                           >
                             {getCategoryName(child)}
