@@ -290,6 +290,23 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
+  public async changePassword(currentPassword: string, newPassword: string, version: number) {
+    const apiRoot = this.getApiRoot(this.client);
+
+    await apiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .me()
+      .password()
+      .post({
+        body: {
+          version,
+          currentPassword,
+          newPassword,
+        },
+      })
+      .execute();
+  }
+
   // end
 }
 

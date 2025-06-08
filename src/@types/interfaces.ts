@@ -65,6 +65,7 @@ export interface AuthContextType {
   clearError: () => void;
   refreshToken: () => Promise<void>;
   setCustomer: (customer: Customer | null) => void;
+  relogin: (params: { email: string; password: string }) => Promise<void>;
 }
 
 export interface ProductCatalogProps {

@@ -1,7 +1,17 @@
 .profile-page {
-  max-width: 600px;
+  width: 100%;
   margin: 0 auto;
   font-family: Arial, sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+section.personal-info {
+  border: 1.6px solid #333;
+}
+
+section.addresses {
+  border: 1.6px solid #333;
 }
 
 .p-text {
@@ -14,7 +24,6 @@
   font-size: 12px;
   color: #333;
   margin-bottom: 7px;
-
 }
 .personal-info,
 .addresses {
@@ -30,7 +39,7 @@
   margin-bottom: 1rem;
   margin-top: 12px;
 }
-.h3-addresses{
+.h3-addresses {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 5px;
@@ -63,36 +72,70 @@
   font-weight: bold;
   margin-bottom: 0.5rem;
 }
+.edit-form-container .error-message {
+  margin-top: 0px;
+}
 
 .edit-button {
-  background-color: #0070f3;
+  background-color: #333;
   color: white;
   border: none;
   padding: 5px 10px;
+  margin-right: 6px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
+}
+
+.edit-button:hover {
+  background-color: #555;
+  padding: 5px 12px;
 }
 
 .edit-button-address {
-  background-color: #0070f3;
+  background-color: #333;
   margin: 5px 0px 6px 0px;
   color: white;
   border: none;
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
+}
+
+.edit-button-address:hover {
+  background-color: #555;
+  padding: 5px 12px;
+}
+
+.add-address-button {
+  margin-top: 10px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
+}
+
+.add-address-button:hover {
+  background-color: rgb(12, 106, 199);
+  padding: 5px 12px;
 }
 
 .address-edit-form {
-  max-width: 390px;
-  padding: 10px; 
+  padding: 10px;
   transition: all 0.3s ease-in-out;
 }
 
 .personal-info {
-  max-width: 390px; 
   transition: all 0.3s ease-in-out;
 }
 
@@ -155,7 +198,8 @@
   gap: 2px;
   font-weight: 500;
   font-size: 12px;
-  color: #333;
+  color: #444;
+  transition: color 0.3s ease;
 }
 
 .checkbox-toggle input[type="checkbox"] {
@@ -163,6 +207,7 @@
   height: 18px;
   accent-color: gray;
   cursor: pointer;
+  transition: accent-color 0.3s ease;
 }
 
 .checkbox-toggle.active {
@@ -175,4 +220,58 @@
 
 .button-container {
   margin-top: 10px;
+}
+
+.edit-form-container .error-icon {
+  top: 5px;
+  right: 10px;
+}
+
+.save-button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transition: all 0.2s ease-in-out;
+}
+
+.p-text-password {
+  margin: 0px 0px 5px 0px;
+  font-size: 12px;
+}
+
+.password-input-wrapper {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 4%;
+  top: 59%;
+  transform: translateY(-45%);
+  cursor: pointer;
+  color: #666;
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+}
+
+.toast .close-toast {
+  background: none;
+  border: none;
+  color: white;
+  margin-left: 10px;
+  font-size: 18px;
+  cursor: pointer;
 }
