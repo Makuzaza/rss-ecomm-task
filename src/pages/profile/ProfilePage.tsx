@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useApiClient } from "@/context/ApiClientContext";
-import { CustomerAddress } from "@/@types/interfaces";
+import { CustomerAddress, RegisterFormFields } from "@/@types/interfaces";
 import { Address, MyCustomerUpdateAction } from "@commercetools/platform-sdk";
 import europeanCountries from "@/data/europeanCountries.json";
 import "./ProfilePage.css";
 import { validateEmailFormat } from "../../utils/loginValidation";
 import { validateField } from "../../utils/registerValitation";
 import { validatePostalCode } from "../../utils/editValidation";
+
 
 const ProfilePage = () => {
   const { customer, setCustomer } = useAuth();
@@ -23,6 +24,60 @@ const ProfilePage = () => {
   const [missingAddressType, setMissingAddressType] = useState<null | "billing" | "shipping">(null);
   const [canAddNewAddress, setCanAddNewAddress] = useState(true);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  const [touchedAddressFields, setTouchedAddressFields] = useState<Record<number, Set<keyof CustomerAddress>>>({});
+
+
+  const [newAddress, setNewAddress] = useState<CustomerAddress>({
+    id: "",
+    streetName: "",
+    postalCode: "",
+    city: "",
+    state: "",
+    country: "",
+  });
+    
+  const formData = {
+    email: editedEmail,
+    password: "",
+    confirmPassword: "",
+    firstName: editedFirstName,
+    lastName: editedLastName,
+    dateOfBirth: editedDOB,
+    shippingCountry: newAddress.country,
+    shippingCity: newAddress.city,
+    shippingStreet: newAddress.streetName,
+    shippingPostalCode: newAddress.postalCode,
+    billingCountry: "",
+    billingCity: "",
+    billingStreet: "",
+    billingPostalCode: "",
+  };
+  
+  const newAddressFormData = {
+    email: editedEmail,
+    password: "",
+    confirmPassword: "",
+    firstName: editedFirstName,
+    lastName: editedLastName,
+    dateOfBirth: editedDOB,
+    shippingCountry: newAddress.country,
+    shippingCity: newAddress.city,
+    shippingStreet: newAddress.streetName,
+    shippingPostalCode: newAddress.postalCode,
+    billingCountry: "",
+    billingCity: "",
+    billingStreet: "",
+    billingPostalCode: "",
+  };
+
+  const newAddressErrors = {
+    streetName: !newAddress.streetName.trim() ? "Street address is required" : "",
+    city: !newAddress.city.trim() ? "City is required" : "",
+    country: !newAddress.country.trim() ? "Country is required" : "",
+    postalCode: validateField("shippingPostalCode", newAddress.postalCode, newAddressFormData, europeanCountries, false),
+  };
+
+  const isNewAddressSaveDisabled = Object.values(newAddressErrors).some(Boolean);
 
   // console.log("apiClient.customerApiRoot", apiClient["customerApiRoot"]);
   if (!customer || !apiClient) {
@@ -44,7 +99,18 @@ const ProfilePage = () => {
     editedFirstName !== firstName ||
     editedLastName !== lastName ||
     editedDOB !== dateOfBirth ||
-    editedEmail !== email;  
+    editedEmail !== email; 
+    
+
+  const fieldErrors = {
+    firstName: validateField("firstName", editedFirstName, formData, europeanCountries, false),
+    lastName: validateField("lastName", editedLastName, formData, europeanCountries, false),
+    dateOfBirth: validateField("dateOfBirth", editedDOB, formData, europeanCountries, false),
+    email: validateField("email", editedEmail, formData, europeanCountries, false),
+  };
+
+  const isPersonalSaveDisabled = Object.values(fieldErrors).some(Boolean) || !isChanged;
+
 
   const emailError = validateField(
     "email",
@@ -69,15 +135,6 @@ const ProfilePage = () => {
     false
   );  
 
-  const isSaveDisabled =
-    !editedFirstName.trim() ||
-    !editedLastName.trim() ||
-    !editedDOB.trim() ||
-    !editedEmail.trim() ||
-    !!emailError ||
-    !isChanged;
-  
-
   const normalizeAddresses = (addresses: Address[]): CustomerAddress[] =>
     addresses.map((addr) => ({
       id: addr.id,
@@ -95,7 +152,91 @@ const ProfilePage = () => {
     null
   );
 
-  const [addressErrors, setAddressErrors] = useState<string[]>([]);
+  const [addressErrors, setAddressErrors] = useState<Record<number, Partial<Record<keyof CustomerAddress, string>>>>({});
+
+
+  const handleAddressChange = (
+    index: number,
+    field: keyof CustomerAddress,
+    value: string
+  ) => {
+    const updatedAddresses = [...editedAddresses];
+    const updatedAddress = { ...updatedAddresses[index], [field]: value };
+
+    if (field === "country") {
+      updatedAddress.postalCode = "";
+    }
+
+    updatedAddresses[index] = updatedAddress;
+    setEditedAddresses(updatedAddresses);
+
+    setTouchedAddressFields((prev) => {
+      const current = new Set(prev[index] || []);
+      current.add(field);
+      return { ...prev, [index]: current };
+    });
+
+    const formData: RegisterFormFields = {
+      email: editedEmail,
+      password: "",
+      confirmPassword: "",
+      firstName: editedFirstName,
+      lastName: editedLastName,
+      dateOfBirth: editedDOB,
+      shippingCountry: updatedAddress.country,
+      shippingCity: updatedAddress.city,
+      shippingStreet: updatedAddress.streetName,
+      shippingPostalCode: updatedAddress.postalCode,
+      billingCountry: "",
+      billingCity: "",
+      billingStreet: "",
+      billingPostalCode: "",
+    };
+
+    const fieldNameMap: Record<keyof CustomerAddress, keyof RegisterFormFields> = {
+      streetName: "shippingStreet",
+      city: "shippingCity",
+      postalCode: "shippingPostalCode",
+      country: "shippingCountry",
+      state: "shippingCity",
+      id: "email",
+    };
+
+    const fieldKey = fieldNameMap[field];
+
+    if (!fieldKey) return;
+
+    const error = validateField(
+      fieldKey,
+      value,
+      formData,
+      europeanCountries,
+      false
+    );
+
+    setAddressErrors((prev) => ({
+      ...prev,
+      [index]: {
+        ...(prev[index] || {}),
+        [field]: error || "",
+      },
+    }));
+  };
+
+
+  const isAddressSaveDisabled = (index: number) => {
+    const errors = addressErrors[index];
+    const address = editedAddresses[index];
+    return (
+      !address.streetName ||
+      !address.city ||
+      !address.country ||
+      !address.postalCode ||
+      Object.values(errors || {}).some(Boolean)
+    );
+  };
+
+
 
   const startEdit = () => {
     setEditedFirstName(firstName);
@@ -110,70 +251,74 @@ const ProfilePage = () => {
     setIsEditing(false);
   };
 
-  const handleAddressChange = (
-    index: number,
-    field: keyof CustomerAddress,
-    value: string
-  ) => {
-    const updatedAddresses = [...editedAddresses];
-    const updatedAddress = { ...updatedAddresses[index], [field]: value };
-
-    // Если изменяется страна — сбрасываем почтовый индекс
-    if (field === "country") {
-      updatedAddress.postalCode = "";
-    }
-
-    updatedAddresses[index] = updatedAddress;
-    setEditedAddresses(updatedAddresses);
-
-    const newErrors = [...addressErrors];
-
-    // Валидация почтового индекса при изменении индекса или страны
-    if (field === "postalCode" || field === "country") {
-      const error = validatePostalCode(updatedAddress.country, updatedAddress.postalCode);
-      newErrors[index] = error || "";
-      setAddressErrors(newErrors);
-    }
-  };
-
   const startAddressEdit = (index: number) => {
     setEditingAddressIndex(index);
+    setAddressErrors((prev) => ({
+      ...prev,
+      [index]: {},
+    }));
+
+    setTouchedAddressFields((prev) => ({
+      ...prev,
+      [index]: new Set<keyof CustomerAddress>(),
+    }));
   };
 
   const cancelAddressEdit = () => {
     setEditingAddressIndex(null);
     setEditedAddresses(normalizeAddresses(customer.addresses));
+    setAddressErrors((prev) => ({
+      ...prev,
+      [editingAddressIndex!]: {},
+    }));
+
+    setTouchedAddressFields((prev) => ({
+      ...prev,
+      [editingAddressIndex!]: new Set(),
+    }));
   };
 
   const saveAddressChanges = async (index: number) => {
     const address = editedAddresses[index];
     if (!address.id) return;
 
-    const errors: Record<number, string> = {};
+    const errors: Partial<Record<keyof CustomerAddress, string>> = {};
 
-    if (
-      !address.streetName ||
-      !address.city ||
-      !address.country ||
-      !address.postalCode
-    ) {
-      errors[index] = "All fields are required.";
-      setAddressErrors((prev) => ({ ...prev, ...errors }));
+    if (!address.streetName) {
+      errors.streetName = "Street name is required.";
+    }
+
+    if (!address.city) {
+      errors.city = "City is required.";
+    }
+
+    if (!address.country) {
+      errors.country = "Country is required.";
+    }
+
+    if (!address.postalCode) {
+      errors.postalCode = "Postal code is required.";
+    } else if (!validatePostalCode(address.postalCode, address.country)) {
+      errors.postalCode = "Invalid postal code format for selected country.";
+    }
+
+    // Если есть ошибки — сохранить и выйти
+    if (Object.keys(errors).length > 0) {
+      setAddressErrors((prev) => ({
+        ...prev,
+        [index]: {
+          ...(prev[index] || {}),
+          ...errors,
+        },
+      }));
       return;
     }
 
-    const isValidPostal = validatePostalCode(
-      address.postalCode,
-      address.country
-    );
-    if (!isValidPostal) {
-      errors[index] = "Invalid postal code format for selected country.";
-      setAddressErrors((prev) => ({ ...prev, ...errors }));
-      return;
-    }
-
-    // No errors → clear and proceed
-    setAddressErrors((prev) => ({ ...prev, [index]: "" }));
+    // Ошибок нет — очищаем
+    setAddressErrors((prev) => ({
+      ...prev,
+      [index]: {},
+    }));
 
     try {
       const updated = await apiClient.updateCustomer({
@@ -198,6 +343,7 @@ const ProfilePage = () => {
       console.error("Failed to update address", error);
     }
   };
+
 
   const saveChanges = async () => {
     if (!editedFirstName || !editedLastName || !editedDOB) {
@@ -270,32 +416,8 @@ const ProfilePage = () => {
     }
   };
 
-
-  const [newAddress, setNewAddress] = useState<CustomerAddress>({
-    id: "",
-    streetName: "",
-    postalCode: "",
-    city: "",
-    state: "",
-    country: "",
-  });
-
   const handleAddNewAddress = async () => {
-    if (
-      !newAddress.streetName ||
-      !newAddress.city ||
-      !newAddress.country ||
-      !newAddress.postalCode
-    ) {
-      setErrorMessage("Please fill all fields for new address.");
-      return;
-    }
-
-    const isValidPostal = validatePostalCode(newAddress.postalCode, newAddress.country);
-    if (!isValidPostal) {
-      setErrorMessage("Invalid postal code for selected country.");
-      return;
-    }
+    if (isNewAddressSaveDisabled) return;
 
     try {
       const updated = await apiClient.updateCustomer({
@@ -305,35 +427,28 @@ const ProfilePage = () => {
             action: "addAddress",
             address: {
               streetName: newAddress.streetName,
-              postalCode: newAddress.postalCode,
               city: newAddress.city,
-              state: newAddress.state,
               country: newAddress.country,
+              postalCode: newAddress.postalCode,
             },
           },
         ],
       });
 
-      const newAddrId = updated.addresses[updated.addresses.length - 1].id;
-
-      const setTypeAction: MyCustomerUpdateAction =
-        missingAddressType === "billing"
-          ? { action: "setDefaultBillingAddress", addressId: newAddrId }
-          : { action: "setDefaultShippingAddress", addressId: newAddrId };
-
-      const updatedWithDefault = await apiClient.updateCustomer({
-        version: updated.version,
-        actions: [setTypeAction],
+      setCustomer(updated);
+      setNewAddress({
+        id: "",
+        streetName: "",
+        postalCode: "",
+        city: "",
+        state: "",
+        country: "",
       });
-
-      setCustomer(updatedWithDefault);
       setShowNewAddressForm(false);
-      setNewAddress({ id: "", streetName: "", postalCode: "", city: "", state: "", country: "" });
     } catch (error) {
       console.error("Failed to add new address", error);
     }
   };
-
 
   return (
     <div className="profile-page">
@@ -390,8 +505,8 @@ const ProfilePage = () => {
             <div className="edit-buttons-container">
               <button
                 onClick={saveChanges}
-                className={`save-button ${isSaveDisabled ? "disabled" : ""}`}
-                disabled={isSaveDisabled}
+                className={`save-button ${isPersonalSaveDisabled ? "disabled" : ""}`}
+                disabled={isPersonalSaveDisabled}
               >
                 Save
               </button>
@@ -437,6 +552,9 @@ const ProfilePage = () => {
                     placeholder="Street Name"
                     className="edit-input"
                   />
+                  {touchedAddressFields[index]?.has("streetName") && addressErrors[index]?.streetName && (
+                    <p className="error-message">{addressErrors[index]!.streetName}</p>
+                  )}
                   <input
                     type="text"
                     value={editedAddresses[index].postalCode}
@@ -446,8 +564,8 @@ const ProfilePage = () => {
                     placeholder="Postal Code"
                     className="edit-input"
                   />
-                  {addressErrors[index] && (
-                    <p className="error-message">{addressErrors[index]}</p>
+                  {touchedAddressFields[index]?.has("postalCode") && addressErrors[index] && (
+                    <p className="error-message">{addressErrors[index].postalCode}</p>
                   )}
                   <input
                     type="text"
@@ -458,6 +576,9 @@ const ProfilePage = () => {
                     placeholder="City"
                     className="edit-input"
                   />
+                   {touchedAddressFields[index]?.has("city") && addressErrors[index]?.city && (
+                      <p className="error-message">{addressErrors[index]!.city}</p>
+                    )}
                   <select
                     value={editedAddresses[index].country}
                     onChange={(e) =>
@@ -472,10 +593,14 @@ const ProfilePage = () => {
                       </option>
                     ))}
                   </select>
+                  {touchedAddressFields[index]?.has("country") && addressErrors[index] && (
+                    <p className="error-message">{addressErrors[index].country}</p>
+                  )}
                   <div className="edit-button-row">
                     <button
                       onClick={() => saveAddressChanges(index)}
                       className="save-button"
+                      disabled={isAddressSaveDisabled(index)} 
                     >
                       Save
                     </button>
@@ -491,7 +616,7 @@ const ProfilePage = () => {
                 <>
                   <h4 className="address-title">Address {index + 1}</h4>
                   <p className="p-text">
-                    {addr.streetName}, {addr.postalCode}, {addr.city}, {addr.state || ""}, {addr.country}
+                    {addr.streetName}, {addr.postalCode}, {addr.city}, {addr.country}
                   </p>
                   <div className="label-container">
                     <label
@@ -562,6 +687,12 @@ const ProfilePage = () => {
         )}
 
         {showNewAddressForm && (
+        <>
+          <h4 className="address-subtitle">
+            {missingAddressType === "billing"
+              ? "Adding Billing Address"
+              : "Adding Shipping Address"}
+          </h4>
           <div className="address-edit-form">
             <input
               type="text"
@@ -572,6 +703,10 @@ const ProfilePage = () => {
               placeholder="Street Name"
               className="edit-input"
             />
+            {newAddressErrors.streetName && (
+              <p className="error-message">{newAddressErrors.streetName}</p>
+            )}
+
             <input
               type="text"
               value={newAddress.postalCode}
@@ -581,6 +716,10 @@ const ProfilePage = () => {
               placeholder="Postal Code"
               className="edit-input"
             />
+            {newAddressErrors.postalCode && (
+              <p className="error-message">{newAddressErrors.postalCode}</p>
+            )}
+
             <input
               type="text"
               value={newAddress.city}
@@ -590,6 +729,10 @@ const ProfilePage = () => {
               placeholder="City"
               className="edit-input"
             />
+            {newAddressErrors.city && (
+              <p className="error-message">{newAddressErrors.city}</p>
+            )}
+
             <select
               value={newAddress.country}
               onChange={(e) =>
@@ -604,10 +747,14 @@ const ProfilePage = () => {
                 </option>
               ))}
             </select>
+            {newAddressErrors.country && (
+              <p className="error-message">{newAddressErrors.country}</p>
+            )}
             <div className="edit-button-row">
               <button
                 onClick={handleAddNewAddress}
-                className="save-button"
+                className={`save-button ${isNewAddressSaveDisabled ? "disabled" : ""}`}
+                disabled={isNewAddressSaveDisabled}
               >
                 Save New Address
               </button>
@@ -619,6 +766,7 @@ const ProfilePage = () => {
               </button>
             </div>
           </div>
+          </>
         )}
       </section>
     </div>
