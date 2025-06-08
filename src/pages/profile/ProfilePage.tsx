@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useApiClient } from "@/context/ApiClientContext";
-import { CustomerAddress, RegisterFormFields } from "@/@types/interfaces";
+import { CustomerAddress, RegisterFormFields, ApiError } from "@/@types/interfaces";
 import { Address, MyCustomerUpdateAction } from "@commercetools/platform-sdk";
 import europeanCountries from "@/data/europeanCountries.json";
 import "./ProfilePage.css";
-import { validateEmailFormat } from "../../utils/loginValidation";
+import { validateEmailFormat, validatePassword } from "../../utils/loginValidation";
 import { validateField } from "../../utils/registerValitation";
 import { validatePostalCode } from "../../utils/editValidation";
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const ProfilePage = () => {
   const { customer, setCustomer, relogin } = useAuth();
@@ -29,7 +29,24 @@ const ProfilePage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [currentPasswordError, setCurrentPasswordError] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  useEffect(() => {
+    setPasswordError(validatePassword(newPassword));
+  }, [newPassword]);
+
+  const resetPasswordState = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setPasswordError("");
+    setErrorMessage("");
+    setCurrentPasswordError("");
+  };
 
   const [newAddress, setNewAddress] = useState<CustomerAddress>({
     id: "",
@@ -355,7 +372,7 @@ const ProfilePage = () => {
     }
   };
 
-
+  
   const saveChanges = async () => {
     if (!editedFirstName || !editedLastName || !editedDOB) {
       setErrorMessage("All fields are required.");
@@ -393,25 +410,20 @@ const ProfilePage = () => {
     }
 
     try {
-      // Сначала обновляем остальные поля
       await apiClient.updateCustomer({
         version,
         actions,
       });
 
-      // Получаем обновлённую информацию (включая новую версию)
       const updatedCustomer = await apiClient.getCustomerProfile();
       setCustomer(updatedCustomer);
 
-      // Если нужно — отдельно меняем пароль с новой версией
       if (wantsToChangePassword) {
         await apiClient.changePassword(
           currentPassword,
           newPassword,
           updatedCustomer.version
         );
-
-        // Обновляем данные ещё раз после смены пароля
         const refreshedCustomer = await apiClient.getCustomerProfile();
         setCustomer(refreshedCustomer);
       }
@@ -525,6 +537,8 @@ const ProfilePage = () => {
     }
   };
 
+  
+
   return (
     <div className="profile-page">
       <h2>User Profile</h2>
@@ -532,7 +546,6 @@ const ProfilePage = () => {
      <section className="personal-info">
         <h3>Personal Information</h3>
         {errorMessage && <p className="error-message">{errorMessage}</p>}
-
         {isEditing ? (
           <div className="edit-form-container">
             <input
@@ -582,45 +595,133 @@ const ProfilePage = () => {
 
             {showPasswordForm && (
               <>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Current Password"
-                  className="edit-input"
-                />
-                {!currentPassword && (
-                  <p className="error-message">Current password is required</p>
-                )}
-
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="New Password"
-                  className="edit-input"
-                />
-                {!newPassword && (
-                  <p className="error-message">New password is required</p>
-                )}
-
-                <input
-                  type="password"
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  placeholder="Confirm New Password"
-                  className="edit-input"
-                />
-                {!confirmNewPassword && (
-                  <p className="error-message">Confirm new password is required</p>
-                )}
-                {newPassword &&
-                  confirmNewPassword &&
-                  newPassword !== confirmNewPassword && (
-                    <p className="error-message">New passwords do not match</p>
+                <h4 className="password-change-title">Change Password</h4>
+                <div className="edit-form-container">
+                  {/* Current Password */}
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showCurrentPassword ? "text" : "password"}
+                      value={currentPassword}
+                      onChange={(e) => {
+                        setCurrentPassword(e.target.value);
+                        setCurrentPasswordError(""); 
+                      }}
+                      placeholder="Current Password"
+                      className="edit-input"
+                    />
+                    <span
+                      onClick={() => setShowCurrentPassword((prev) => !prev)}
+                      className="eye-icon"
+                    >
+                      {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
+                  {currentPasswordError && (
+                    <p className="error-message" style={{color: 'red', marginTop: '5px'}}>
+                      {currentPasswordError}
+                    </p>
                   )}
+
+                  {/* New Password */}
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setNewPassword(value);
+                        setPasswordError(validatePassword(value));
+                      }}
+                      placeholder="New Password"
+                      className="edit-input"
+                    />
+                    <span
+                      onClick={() => setShowNewPassword((prev) => !prev)}
+                      className="eye-icon"
+                    >
+                      {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
+                  {passwordError && <p className="error-message">{passwordError}</p>}
+
+                  {/* Confirm New Password */}
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      placeholder="Confirm New Password"
+                      className="edit-input"
+                    />
+                    <span
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="eye-icon"
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
+                  {!confirmNewPassword && (
+                    <p className="error-message">Confirm new password is required</p>
+                  )}
+                  {newPassword &&
+                    confirmNewPassword &&
+                    newPassword !== confirmNewPassword && (
+                      <p className="error-message">New passwords do not match</p>
+                    )}
+
+                  <div className="edit-buttons-container">
+                    <button
+                      className="save-button"
+                      disabled={
+                        !currentPassword ||
+                        !newPassword ||
+                        !confirmNewPassword ||
+                        newPassword !== confirmNewPassword ||
+                        !!passwordError
+                      }
+                      onClick={async () => {
+                      try {
+                        await apiClient.changePassword(currentPassword, newPassword, customer.version);
+                        localStorage.removeItem("accessToken");
+                        await relogin({ email, password: newPassword });
+                        const updatedCustomer = await apiClient.getCustomerProfile();
+                        setCustomer(updatedCustomer);
+                        setShowPasswordForm(false);
+                        resetPasswordState();
+                      } catch (err) {
+                          setCurrentPasswordError(""); // Сброс предыдущих ошибок
+                          
+                          // Улучшенная проверка ошибок
+                          const error = err as ApiError;
+                          
+                          const isInvalidPassword = error?.response?.data?.errors?.some(
+                            e => e.code === "InvalidCurrentPassword"
+                          );
+                          
+                          if (isInvalidPassword) {
+                            setCurrentPasswordError("Current password is incorrect");
+                          } else {
+                            setErrorMessage("Password change failed. Please try again later.");
+                          }
+                        }
+                    }}
+                    >
+                      Save Password
+                    </button>
+                    <button
+                      className="close-button"
+                      onClick={() => {
+                        setShowPasswordForm(false);
+                        resetPasswordState();
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
               </>
             )}
+
 
             <div className="edit-buttons-container">
               <button
@@ -666,35 +767,61 @@ const ProfilePage = () => {
               <>
                 <h4 className="password-change-title">Change Password</h4>
                 <div className="edit-form-container">
-                  <input
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Current Password"
-                    className="edit-input"
-                  />
+
+                  {/* Current Password */}
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showCurrentPassword ? "text" : "password"}
+                      value={currentPassword}
+                      onChange={(e) => {
+                        setCurrentPassword(e.target.value);
+                        setCurrentPasswordError(""); // сброс при вводе
+                      }}
+                      placeholder="Current Password"
+                      className="edit-input"
+                    />
+                    <span
+                      onClick={() => setShowCurrentPassword((prev) => !prev)}
+                      className="eye-icon"
+                    >
+                      {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
                   {!currentPassword && (
                     <p className="error-message">Current password is required</p>
                   )}
-
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="New Password"
-                    className="edit-input"
-                  />
-                  {!newPassword && (
-                    <p className="error-message">New password is required</p>
+                  {currentPasswordError && (
+                    <p className="error-message">{currentPasswordError}</p>
                   )}
 
-                  <input
-                    type="password"
-                    value={confirmNewPassword}
-                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    placeholder="Confirm New Password"
-                    className="edit-input"
-                  />
+                  {/* New Password */}
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="New Password"
+                      className="edit-input"
+                    />
+                    <span onClick={() => setShowNewPassword((prev) => !prev)} className="eye-icon">
+                      {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
+                  {passwordError && <p className="error-message">{passwordError}</p>}
+
+                  {/* Confirm New Password */}
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      placeholder="Confirm New Password"
+                      className="edit-input"
+                    />
+                    <span onClick={() => setShowConfirmPassword((prev) => !prev)} className="eye-icon">
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
                   {!confirmNewPassword && (
                     <p className="error-message">Confirm new password is required</p>
                   )}
@@ -707,39 +834,39 @@ const ProfilePage = () => {
                   <div className="edit-buttons-container">
                     <button
                       className="save-button"
-                      disabled={
+                       disabled={
                         !currentPassword ||
                         !newPassword ||
                         !confirmNewPassword ||
-                        newPassword !== confirmNewPassword
+                        newPassword !== confirmNewPassword ||
+                        !!passwordError
                       }
                       onClick={async () => {
                         try {
-                          // 1. Change password using the API
                           await apiClient.changePassword(currentPassword, newPassword, customer.version);
-
-                          // 2. remove the access token from localStorage
                           localStorage.removeItem("accessToken");
-
-                          // 3. relogin with new password
                           await relogin({ email, password: newPassword });
-
-                          // 4. update customer profile
                           const updatedCustomer = await apiClient.getCustomerProfile();
                           setCustomer(updatedCustomer);
-
-                          // 5. clean up state
                           setShowPasswordForm(false);
-                          setCurrentPassword("");
-                          setNewPassword("");
-                          setConfirmNewPassword("");
-                          setErrorMessage("");
+                          resetPasswordState();
                         } catch (err) {
-                          setErrorMessage("Failed to change password. Please check credentials.");
-                          console.error(err);
+                          setCurrentPasswordError(""); // Сброс предыдущих ошибок
+                          
+                          // Улучшенная проверка ошибок
+                          const error = err as ApiError;
+                          
+                          const isInvalidPassword = error?.response?.data?.errors?.some(
+                            e => e.code === "InvalidCurrentPassword"
+                          );
+                          
+                          if (isInvalidPassword) {
+                            setCurrentPasswordError("Current password is incorrect");
+                          } else {
+                            setErrorMessage("Password change failed. Please try again later.");
+                          }
                         }
                       }}
-
                     >
                       Save Password
                     </button>
@@ -747,10 +874,7 @@ const ProfilePage = () => {
                       className="close-button"
                       onClick={() => {
                         setShowPasswordForm(false);
-                        setCurrentPassword("");
-                        setNewPassword("");
-                        setConfirmNewPassword("");
-                        setErrorMessage("");
+                        resetPasswordState();
                       }}
                     >
                       Cancel
@@ -779,9 +903,10 @@ const ProfilePage = () => {
                     placeholder="Street Name"
                     className="edit-input"
                   />
-                  {touchedAddressFields[index]?.has("streetName") && addressErrors[index]?.streetName && (
-                    <p className="error-message">{addressErrors[index]!.streetName}</p>
-                  )}
+                  {touchedAddressFields[index]?.has("streetName") &&
+                    addressErrors[index]?.streetName && (
+                      <p className="error-message">{addressErrors[index]!.streetName}</p>
+                    )}
                   <input
                     type="text"
                     value={editedAddresses[index].postalCode}
@@ -791,9 +916,10 @@ const ProfilePage = () => {
                     placeholder="Postal Code"
                     className="edit-input"
                   />
-                  {touchedAddressFields[index]?.has("postalCode") && addressErrors[index] && (
-                    <p className="error-message">{addressErrors[index].postalCode}</p>
-                  )}
+                  {touchedAddressFields[index]?.has("postalCode") &&
+                    addressErrors[index]?.postalCode && (
+                      <p className="error-message">{addressErrors[index]!.postalCode}</p>
+                    )}
                   <input
                     type="text"
                     value={editedAddresses[index].city}
@@ -803,7 +929,8 @@ const ProfilePage = () => {
                     placeholder="City"
                     className="edit-input"
                   />
-                   {touchedAddressFields[index]?.has("city") && addressErrors[index]?.city && (
+                  {touchedAddressFields[index]?.has("city") &&
+                    addressErrors[index]?.city && (
                       <p className="error-message">{addressErrors[index]!.city}</p>
                     )}
                   <select
@@ -820,14 +947,15 @@ const ProfilePage = () => {
                       </option>
                     ))}
                   </select>
-                  {touchedAddressFields[index]?.has("country") && addressErrors[index] && (
-                    <p className="error-message">{addressErrors[index].country}</p>
-                  )}
+                  {touchedAddressFields[index]?.has("country") &&
+                    addressErrors[index]?.country && (
+                      <p className="error-message">{addressErrors[index]!.country}</p>
+                    )}
                   <div className="edit-button-row">
                     <button
                       onClick={() => saveAddressChanges(index)}
                       className="save-button"
-                      disabled={isAddressSaveDisabled(index)} 
+                      disabled={isAddressSaveDisabled(index)}
                     >
                       Save
                     </button>
@@ -847,7 +975,9 @@ const ProfilePage = () => {
                   </p>
                   <div className="label-container">
                     <label
-                      className={`checkbox-toggle ${addr.id === defaultShippingAddressId ? "active" : ""}`}
+                      className={`checkbox-toggle ${
+                        addr.id === defaultShippingAddressId ? "active" : ""
+                      }`}
                     >
                       <input
                         type="checkbox"
@@ -858,7 +988,9 @@ const ProfilePage = () => {
                     </label>
 
                     <label
-                      className={`checkbox-toggle ${addr.id === defaultBillingAddressId ? "active" : ""}`}
+                      className={`checkbox-toggle ${
+                        addr.id === defaultBillingAddressId ? "active" : ""
+                      }`}
                     >
                       <input
                         type="checkbox"
@@ -914,85 +1046,86 @@ const ProfilePage = () => {
         )}
 
         {showNewAddressForm && (
-        <>
-          <h4 className="address-subtitle">
-            {missingAddressType === "billing"
-              ? "Adding Billing Address"
-              : "Adding Shipping Address"}
-          </h4>
-          <div className="address-edit-form">
-            <input
-              type="text"
-              value={newAddress.streetName}
-              onChange={(e) =>
-                setNewAddress({ ...newAddress, streetName: e.target.value })
-              }
-              placeholder="Street Name"
-              className="edit-input"
-            />
-            {newAddressErrors.streetName && (
-              <p className="error-message">{newAddressErrors.streetName}</p>
-            )}
+          <>
+            <h4 className="address-subtitle">
+              {missingAddressType === "billing"
+                ? "Adding Billing Address"
+                : "Adding Shipping Address"}
+            </h4>
+            <div className="address-edit-form">
+              <input
+                type="text"
+                value={newAddress.streetName}
+                onChange={(e) =>
+                  setNewAddress({ ...newAddress, streetName: e.target.value })
+                }
+                placeholder="Street Name"
+                className="edit-input"
+              />
+              {newAddressErrors.streetName && (
+                <p className="error-message">{newAddressErrors.streetName}</p>
+              )}
 
-            <input
-              type="text"
-              value={newAddress.postalCode}
-              onChange={(e) =>
-                setNewAddress({ ...newAddress, postalCode: e.target.value })
-              }
-              placeholder="Postal Code"
-              className="edit-input"
-            />
-            {newAddressErrors.postalCode && (
-              <p className="error-message">{newAddressErrors.postalCode}</p>
-            )}
+              <input
+                type="text"
+                value={newAddress.postalCode}
+                onChange={(e) =>
+                  setNewAddress({ ...newAddress, postalCode: e.target.value })
+                }
+                placeholder="Postal Code"
+                className="edit-input"
+              />
+              {newAddressErrors.postalCode && (
+                <p className="error-message">{newAddressErrors.postalCode}</p>
+              )}
 
-            <input
-              type="text"
-              value={newAddress.city}
-              onChange={(e) =>
-                setNewAddress({ ...newAddress, city: e.target.value })
-              }
-              placeholder="City"
-              className="edit-input"
-            />
-            {newAddressErrors.city && (
-              <p className="error-message">{newAddressErrors.city}</p>
-            )}
+              <input
+                type="text"
+                value={newAddress.city}
+                onChange={(e) =>
+                  setNewAddress({ ...newAddress, city: e.target.value })
+                }
+                placeholder="City"
+                className="edit-input"
+              />
+              {newAddressErrors.city && (
+                <p className="error-message">{newAddressErrors.city}</p>
+              )}
 
-            <select
-              value={newAddress.country}
-              onChange={(e) =>
-                setNewAddress({ ...newAddress, country: e.target.value })
-              }
-              className="edit-input"
-            >
-              <option value="">Select a country</option>
-              {europeanCountries.map(({ code, name }) => (
-                <option key={code} value={code}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            {newAddressErrors.country && (
-              <p className="error-message">{newAddressErrors.country}</p>
-            )}
-            <div className="edit-button-row">
-              <button
-                onClick={handleAddNewAddress}
-                className={`save-button ${isNewAddressSaveDisabled ? "disabled" : ""}`}
-                disabled={isNewAddressSaveDisabled}
+              <select
+                value={newAddress.country}
+                onChange={(e) =>
+                  setNewAddress({ ...newAddress, country: e.target.value })
+                }
+                className="edit-input"
               >
-                Save New Address
-              </button>
-              <button
-                onClick={() => setShowNewAddressForm(false)}
-                className="close-button"
-              >
-                Cancel
-              </button>
+                <option value="">Select a country</option>
+                {europeanCountries.map(({ code, name }) => (
+                  <option key={code} value={code}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              {newAddressErrors.country && (
+                <p className="error-message">{newAddressErrors.country}</p>
+              )}
+
+              <div className="edit-button-row">
+                <button
+                  onClick={handleAddNewAddress}
+                  className={`save-button ${isNewAddressSaveDisabled ? "disabled" : ""}`}
+                  disabled={isNewAddressSaveDisabled}
+                >
+                  Save New Address
+                </button>
+                <button
+                  onClick={() => setShowNewAddressForm(false)}
+                  className="close-button"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-          </div>
           </>
         )}
       </section>
