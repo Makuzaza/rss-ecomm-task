@@ -82,6 +82,7 @@ section.addresses {
   color: white;
   border: none;
   padding: 5px 10px;
+  margin-right: 6px;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s, padding 0.3s;
@@ -227,4 +228,9 @@ section.addresses {
   cursor: not-allowed;
   opacity: 0.7;
   transition: all 0.2s ease-in-out;
+}
+
+.p-text-password {
+  margin: 0px 0px 5px 0px;
+  font-size: 12px;
 }

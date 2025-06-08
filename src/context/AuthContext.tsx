@@ -172,6 +172,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [token, loginWithToken, logout]);
 
+  const relogin = useCallback(
+    async ({ email, password }: { email: string; password: string }) => {
+      try {
+        await login(email, password);
+      } catch (err) {
+        console.error("Relogin failed", err);
+      }
+    },
+    [login]
+  );
+
   const value: AuthContextType = {
     isAuth: !!customer,
     customer,
@@ -179,6 +190,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     loginWithToken,
     logout,
+    relogin,
     register,
     loading,
     error,
@@ -197,3 +209,4 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
