@@ -4,6 +4,7 @@ import {
   type MyCustomerDraft,
   type Image,
 } from "@commercetools/platform-sdk";
+import { Category } from "@commercetools/platform-sdk";
 
 export interface CommerceToolsError {
   body: {
@@ -113,3 +114,13 @@ export interface CustomerProfile {
   defaultBillingAddressId?: string;
   defaultShippingAddressId?: string;
 }
+
+export interface ClickOutsideEvent extends MouseEvent {
+  target: Node;
+}
+
+export interface CategoryWithChildren extends Category {
+  children?: CategoryWithChildren[];
+}
+
+export type InteractionEvent = MouseEvent | KeyboardEvent | TouchEvent;
