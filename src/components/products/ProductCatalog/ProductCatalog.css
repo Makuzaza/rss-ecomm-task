@@ -4,6 +4,15 @@
   border-radius: 20px;
 }
 
+.no-found {
+  font-family: monospace;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  text-align: center;
+}
+
 .cards-container {
   display: grid;
   gap: 20px;

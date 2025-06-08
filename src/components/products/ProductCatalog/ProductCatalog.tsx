@@ -16,11 +16,28 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   propsLimit = 10,
   propsApiSort = undefined,
   propsSort = "name-asc",
+  filterMinPrice,
+  filterMaxPrice,
+  filterDiscountOnly = false,
 }) => {
   const apiClient = useApiClient();
   const [products, setProducts] = useState<MyProductsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const applyFilters = (data: MyProductsData[]) => {
+    return data.filter((product) => {
+      const price = product.priceDiscounted || product.price;
+
+      const passesMin = filterMinPrice ? price >= Number(filterMinPrice) : true;
+      const passesMax = filterMaxPrice ? price <= Number(filterMaxPrice) : true;
+      const passesDiscount = filterDiscountOnly
+        ? !!product.priceDiscounted
+        : true;
+
+      return passesMin && passesMax && passesDiscount;
+    });
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -49,21 +66,22 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           };
 
           const data: MyProductsData[] = await apiClient.getAllProducts(arg);
-          let productsData = [];
+          let sorted = [];
           switch (propsSort) {
             case "name-desc":
-              productsData = sortProducts(data, "name", "desc");
+              sorted = sortProducts(data, "name", "desc");
               break;
             case "price-asc":
-              productsData = sortProducts(data, "price", "asc");
+              sorted = sortProducts(data, "price", "asc");
               break;
             case "price-desc":
-              productsData = sortProducts(data, "price", "desc");
+              sorted = sortProducts(data, "price", "desc");
               break;
             default:
-              productsData = sortProducts(data, "name", "asc");
+              sorted = sortProducts(data, "name", "asc");
           }
-          setProducts(productsData);
+          const filtered = applyFilters(sorted);
+          setProducts(filtered);
           setError(null);
         } catch (err) {
           setError(err.message);
@@ -74,10 +92,28 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
     };
 
     fetchProducts();
-  }, [categoryId, apiClient, propsProducts, propsSort, propsLimit]);
+  }, [
+    categoryId,
+    apiClient,
+    propsProducts,
+    propsSort,
+    propsLimit,
+    propsApiSort,
+    filterMinPrice,
+    filterMaxPrice,
+    filterDiscountOnly,
+  ]);
 
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-container">Error: {error}</div>;
+
+  if (products.length === 0) {
+    return (
+      <div className="main-container">
+        <p className="no-found">No products were found matching your filters.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="cards-container">

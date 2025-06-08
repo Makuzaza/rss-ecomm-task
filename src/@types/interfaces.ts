@@ -73,6 +73,9 @@ export interface ProductCatalogProps {
   propsApiSort?: string;
   propsSort?: string;
   propsProducts?: MyProductsData[];
+  filterMinPrice?: string;
+  filterMaxPrice?: string;
+  filterDiscountOnly?: boolean;
 }
 
 export interface MyProductsData {
