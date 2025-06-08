@@ -26,3 +26,40 @@
   border-color: #4a90e2;
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
+
+.filter-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.price-filter label {
+  display: flex;
+  flex-direction: column;
+  margin-right: 1rem;
+}
+
+.price-input {
+  width: 100px;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.discount-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-controls {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 350px) {
+  .filter-controls {
+  display: flex;
+  flex-direction: column;
+}
+}

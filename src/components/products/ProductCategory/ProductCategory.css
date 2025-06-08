@@ -12,13 +12,15 @@
   justify-content: center;
   text-align: center;
   align-items: center;
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(232, 228, 228);
   border-radius: 20px;
   transition: all 0.3s ease;
 }
 
 .category-cards-item:hover {
   background-color: #f8f8f8;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .category-cards-item h2 {
@@ -28,10 +30,12 @@
 }
 
 .cards-item-img {
+  height: 120px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  object-fit: cover;
 }
+
 .img__category {
   width: 32px;
   height: 32px;
