@@ -105,6 +105,7 @@ const CategoryDropdown = () => {
       <button
         className="dropdown-toggle"
         onClick={() => {
+          navigate("/category");
           setIsOpen(!isOpen);
           setActiveCategory(null);
         }}

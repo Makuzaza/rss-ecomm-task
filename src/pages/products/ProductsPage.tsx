@@ -24,53 +24,94 @@ const ProductsPage = () => {
     setOnlyDiscounted(e.target.checked);
   };
 
+  function resetAllFilters(): void {
+    setSortOption("name-asc");
+    setMinPrice("");
+    setMaxPrice("");
+    setOnlyDiscounted(false);
+  }
+  
   return (
     <div className="main-container">
-      <div className="filter-controls">
-        <div className="price-filter">
-          <label>
-            Min Price:
+      <div className="products-filters">
+        <div className="filter-controls">
+          <div className="price-filter">
+            <label>
+              Min Price:
+              <input
+                type="number"
+                value={minPrice}
+                onChange={handleMinPriceChange}
+                placeholder="0"
+                className="price-input"
+              />
+            </label>
+            <label>
+              Max Price:
+              <input
+                type="number"
+                value={maxPrice}
+                onChange={handleMaxPriceChange}
+                placeholder="0"
+                className="price-input"
+              />
+            </label>
+          </div>
+          <label className="discount-toggle">
             <input
-              type="number"
-              value={minPrice}
-              onChange={handleMinPriceChange}
-              placeholder="0"
-              className="price-input"
+              type="checkbox"
+              checked={onlyDiscounted}
+              onChange={handleDiscountToggle}
             />
-          </label>
-          <label>
-            Max Price:
-            <input
-              type="number"
-              value={maxPrice}
-              onChange={handleMaxPriceChange}
-              placeholder="0"
-              className="price-input"
-            />
+            Only Discounted
           </label>
         </div>
-        <label className="discount-toggle">
-          <input
-            type="checkbox"
-            checked={onlyDiscounted}
-            onChange={handleDiscountToggle}
-          />
-          Only Discounted
-        </label>
+        <div className="sort-controls">
+          <label htmlFor="sort">Sort by:</label>
+          <select
+            id="sort"
+            value={sortOption}
+            onChange={handleSortChange}
+            className="sort-select"
+          >
+            <option value="name-asc">Name (A-Z)</option>
+            <option value="name-desc">Name (Z-A)</option>
+            <option value="price-asc">Price (Low to High)</option>
+            <option value="price-desc">Price (High to Low)</option>
+          </select>
+        </div>
       </div>
-      <div className="sort-controls">
-        <label htmlFor="sort">Sort by:</label>
-        <select
-          id="sort"
-          value={sortOption}
-          onChange={handleSortChange}
-          className="sort-select"
-        >
-          <option value="name-asc">Name (A-Z)</option>
-          <option value="name-desc">Name (Z-A)</option>
-          <option value="price-asc">Price (Low to High)</option>
-          <option value="price-desc">Price (High to Low)</option>
-        </select>
+      <div className="applied-filters-container">
+        {(minPrice ||
+          maxPrice ||
+          onlyDiscounted ||
+          sortOption !== "name-asc") && (
+          <div className="applied-filters">
+            <strong>Applied Filters:</strong>
+            <ul>
+              {minPrice && <li>Min Price: {minPrice}</li>}
+              {maxPrice && <li>Max Price: {maxPrice}</li>}
+              {onlyDiscounted && <li>Only Discounted</li>}
+              {sortOption !== "name-asc" && (
+                <li>
+                  Sort:{" "}
+                  {
+                    {
+                      "name-asc": "Name (A-Z)",
+                      "name-desc": "Name (Z-A)",
+                      "price-asc": "Price (Low to High)",
+                      "price-desc": "Price (High to Low)",
+                    }[sortOption]
+                  }
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+
+        <button onClick={resetAllFilters} className="reset-button">
+          Reset Filters
+        </button>
       </div>
       <ProductCatalog
         propsLimit={20}
