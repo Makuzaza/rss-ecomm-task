@@ -54,10 +54,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const clearError = useCallback(() => setError(null), []);
 
   const login = useCallback(
-    async (email: string, password: string): Promise<Customer> => {
+    async (
+      email: string,
+      password: string,
+      options?: { preventRedirect?: boolean }
+    ): Promise<Customer> => {
       setLoading(true);
       clearError();
       let customerProfile: Customer;
+
       try {
         const customerSignIn = await apiClient.getCustomerWithPassword(
           email,
@@ -69,13 +74,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setCustomer(customerProfile);
         }
 
-        // Get the latest token from localStorage (set by ApiClient)
         const storedToken = localStorage.getItem("accessToken");
         if (storedToken) {
           const parsedToken: TokenStore = JSON.parse(storedToken);
           setToken(parsedToken.token);
         }
-        navigate("/");
+
+        if (!options?.preventRedirect) {
+          navigate("/");
+        }
+
         return customerProfile;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Login failed";
@@ -85,8 +93,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
       }
     },
-    [clearError]
+    [clearError, navigate]
   );
+
 
   const loginWithToken = useCallback(
     async (token: string): Promise<void> => {
@@ -175,7 +184,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const relogin = useCallback(
     async ({ email, password }: { email: string; password: string }) => {
       try {
-        await login(email, password);
+        await login(email, password, { preventRedirect: true }); 
       } catch (err) {
         console.error("Relogin failed", err);
       }

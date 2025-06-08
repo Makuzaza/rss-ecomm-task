@@ -41,6 +41,7 @@ const ProfilePage = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     setPasswordError(validatePassword(newPassword));
@@ -462,7 +463,6 @@ const ProfilePage = () => {
         setCustomer(refreshedCustomer);
       }
 
-      // Сброс состояний
       setIsEditing(false);
       resetPasswordState();
     } catch (error: unknown) {
@@ -578,6 +578,10 @@ const ProfilePage = () => {
 
       setShowPasswordForm(false);
       resetPasswordState();
+      console.log("✅ Password change succeeded");
+      setSuccessMessage("Password was successfully changed!");
+      console.log("✅ setSuccessMessage called");
+      setTimeout(() => setSuccessMessage(""), 5000);
     } catch (err: unknown) {
       if (
         typeof err === "object" &&
@@ -602,15 +606,14 @@ const ProfilePage = () => {
     }
   };
 
-
   return (
+  
     <div className="profile-page">
       <h2>User Profile</h2>
-
+      
       <section className="personal-info">
         <h3>Personal Information</h3>
         {errorMessage && <p className="error-message">{errorMessage}</p>}
-
         {/* 👉 Edit personal info */}
         {isEditing ? (
           <div className="edit-form-container">
@@ -783,6 +786,7 @@ const ProfilePage = () => {
                 newPassword !== confirmNewPassword && (
                   <p className="error-message">New passwords do not match</p>
                 )}
+              {successMessage && <p className="success-message">{successMessage}</p>}
 
               <div className="edit-buttons-container">
                 <button
