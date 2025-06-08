@@ -36,7 +36,6 @@ export class ApiClient extends CreateApiClient {
         .me()
         .get()
         .execute();
-
       return customer;
     } catch (error) {
       if (
