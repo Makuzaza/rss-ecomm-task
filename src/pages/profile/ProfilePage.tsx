@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useApiClient } from "@/context/ApiClientContext";
-import { CustomerAddress, RegisterFormFields, ApiError } from "@/@types/interfaces";
+import { CustomerAddress, RegisterFormFields } from "@/@types/interfaces";
 import { Address, MyCustomerUpdateAction } from "@commercetools/platform-sdk";
 import europeanCountries from "@/data/europeanCountries.json";
 import "./ProfilePage.css";
-import { validateEmailFormat, validatePassword } from "../../utils/loginValidation";
+import {
+  validateEmailFormat,
+  validatePassword,
+} from "../../utils/loginValidation";
 import { validateField } from "../../utils/registerValitation";
 import { validatePostalCode } from "../../utils/editValidation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -21,10 +24,14 @@ const ProfilePage = () => {
   const [editedDOB, setEditedDOB] = useState("");
   const [editedEmail, setEditedEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [missingAddressType, setMissingAddressType] = useState<null | "billing" | "shipping">(null);
+  const [missingAddressType, setMissingAddressType] = useState<
+    null | "billing" | "shipping"
+  >(null);
   const [canAddNewAddress, setCanAddNewAddress] = useState(true);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
-  const [touchedAddressFields, setTouchedAddressFields] = useState<Record<number, Set<keyof CustomerAddress>>>({});
+  const [touchedAddressFields, setTouchedAddressFields] = useState<
+    Record<number, Set<keyof CustomerAddress>>
+  >({});
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -56,7 +63,7 @@ const ProfilePage = () => {
     state: "",
     country: "",
   });
-    
+
   const formData = {
     email: editedEmail,
     password: "",
@@ -73,7 +80,7 @@ const ProfilePage = () => {
     billingStreet: "",
     billingPostalCode: "",
   };
-  
+
   const newAddressFormData = {
     email: editedEmail,
     password: "",
@@ -92,13 +99,22 @@ const ProfilePage = () => {
   };
 
   const newAddressErrors = {
-    streetName: !newAddress.streetName.trim() ? "Street address is required" : "",
+    streetName: !newAddress.streetName.trim()
+      ? "Street address is required"
+      : "",
     city: !newAddress.city.trim() ? "City is required" : "",
     country: !newAddress.country.trim() ? "Country is required" : "",
-    postalCode: validateField("shippingPostalCode", newAddress.postalCode, newAddressFormData, europeanCountries, false),
+    postalCode: validateField(
+      "shippingPostalCode",
+      newAddress.postalCode,
+      newAddressFormData,
+      europeanCountries,
+      false,
+    ),
   };
 
-  const isNewAddressSaveDisabled = Object.values(newAddressErrors).some(Boolean);
+  const isNewAddressSaveDisabled =
+    Object.values(newAddressErrors).some(Boolean);
 
   // console.log("apiClient.customerApiRoot", apiClient["customerApiRoot"]);
   if (!customer || !apiClient) {
@@ -120,14 +136,37 @@ const ProfilePage = () => {
     editedFirstName !== firstName ||
     editedLastName !== lastName ||
     editedDOB !== dateOfBirth ||
-    editedEmail !== email; 
-    
+    editedEmail !== email;
 
   const fieldErrors = {
-    firstName: validateField("firstName", editedFirstName, formData, europeanCountries, false),
-    lastName: validateField("lastName", editedLastName, formData, europeanCountries, false),
-    dateOfBirth: validateField("dateOfBirth", editedDOB, formData, europeanCountries, false),
-    email: validateField("email", editedEmail, formData, europeanCountries, false),
+    firstName: validateField(
+      "firstName",
+      editedFirstName,
+      formData,
+      europeanCountries,
+      false,
+    ),
+    lastName: validateField(
+      "lastName",
+      editedLastName,
+      formData,
+      europeanCountries,
+      false,
+    ),
+    dateOfBirth: validateField(
+      "dateOfBirth",
+      editedDOB,
+      formData,
+      europeanCountries,
+      false,
+    ),
+    email: validateField(
+      "email",
+      editedEmail,
+      formData,
+      europeanCountries,
+      false,
+    ),
   };
 
   const passwordMismatch =
@@ -135,10 +174,7 @@ const ProfilePage = () => {
     newPassword !== confirmNewPassword;
 
   const isPersonalSaveDisabled =
-    Object.values(fieldErrors).some(Boolean) ||
-    !isChanged ||
-    passwordMismatch;
-
+    Object.values(fieldErrors).some(Boolean) || !isChanged || passwordMismatch;
 
   const emailError = validateField(
     "email",
@@ -160,8 +196,8 @@ const ProfilePage = () => {
       billingPostalCode: "",
     },
     europeanCountries,
-    false
-  );  
+    false,
+  );
 
   const normalizeAddresses = (addresses: Address[]): CustomerAddress[] =>
     addresses.map((addr) => ({
@@ -174,19 +210,20 @@ const ProfilePage = () => {
     }));
 
   const [editedAddresses, setEditedAddresses] = useState<CustomerAddress[]>(
-    normalizeAddresses(customer.addresses)
+    normalizeAddresses(customer.addresses),
   );
   const [editingAddressIndex, setEditingAddressIndex] = useState<number | null>(
-    null
+    null,
   );
 
-  const [addressErrors, setAddressErrors] = useState<Record<number, Partial<Record<keyof CustomerAddress, string>>>>({});
-
+  const [addressErrors, setAddressErrors] = useState<
+    Record<number, Partial<Record<keyof CustomerAddress, string>>>
+  >({});
 
   const handleAddressChange = (
     index: number,
     field: keyof CustomerAddress,
-    value: string
+    value: string,
   ) => {
     const updatedAddresses = [...editedAddresses];
     const updatedAddress = { ...updatedAddresses[index], [field]: value };
@@ -221,7 +258,10 @@ const ProfilePage = () => {
       billingPostalCode: "",
     };
 
-    const fieldNameMap: Record<keyof CustomerAddress, keyof RegisterFormFields> = {
+    const fieldNameMap: Record<
+      keyof CustomerAddress,
+      keyof RegisterFormFields
+    > = {
       streetName: "shippingStreet",
       city: "shippingCity",
       postalCode: "shippingPostalCode",
@@ -239,7 +279,7 @@ const ProfilePage = () => {
       value,
       formData,
       europeanCountries,
-      false
+      false,
     );
 
     setAddressErrors((prev) => ({
@@ -250,7 +290,6 @@ const ProfilePage = () => {
       },
     }));
   };
-
 
   const isAddressSaveDisabled = (index: number) => {
     const errors = addressErrors[index];
@@ -263,8 +302,6 @@ const ProfilePage = () => {
       Object.values(errors || {}).some(Boolean)
     );
   };
-
-
 
   const startEdit = () => {
     setEditedFirstName(firstName);
@@ -330,7 +367,6 @@ const ProfilePage = () => {
       errors.postalCode = "Invalid postal code format for selected country.";
     }
 
-    // Если есть ошибки — сохранить и выйти
     if (Object.keys(errors).length > 0) {
       setAddressErrors((prev) => ({
         ...prev,
@@ -342,7 +378,6 @@ const ProfilePage = () => {
       return;
     }
 
-    // Ошибок нет — очищаем
     setAddressErrors((prev) => ({
       ...prev,
       [index]: {},
@@ -372,7 +407,6 @@ const ProfilePage = () => {
     }
   };
 
-  
   const saveChanges = async () => {
     if (!editedFirstName || !editedLastName || !editedDOB) {
       setErrorMessage("All fields are required.");
@@ -422,7 +456,7 @@ const ProfilePage = () => {
         await apiClient.changePassword(
           currentPassword,
           newPassword,
-          updatedCustomer.version
+          updatedCustomer.version,
         );
         const refreshedCustomer = await apiClient.getCustomerProfile();
         setCustomer(refreshedCustomer);
@@ -430,11 +464,7 @@ const ProfilePage = () => {
 
       // Сброс состояний
       setIsEditing(false);
-      setShowPasswordForm(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmNewPassword("");
-      setErrorMessage("");
+      resetPasswordState();
     } catch (error: unknown) {
       console.error("Failed to update customer", error);
 
@@ -458,12 +488,11 @@ const ProfilePage = () => {
 
       setErrorMessage(msg);
     }
-  } 
-
+  };
 
   const setDefaultAddress = async (
     addressId: string,
-    type: "shipping" | "billing"
+    type: "shipping" | "billing",
   ) => {
     const isCurrentlySet =
       type === "shipping"
@@ -537,15 +566,52 @@ const ProfilePage = () => {
     }
   };
 
-  
+  const handlePasswordChange = async () => {
+    try {
+      await apiClient.changePassword(currentPassword, newPassword, customer.version);
+
+      localStorage.removeItem("accessToken");
+      await relogin({ email, password: newPassword });
+
+      const updatedCustomer = await apiClient.getCustomerProfile();
+      setCustomer(updatedCustomer);
+
+      setShowPasswordForm(false);
+      resetPasswordState();
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "body" in err &&
+        typeof (err as { body?: unknown }).body === "object" &&
+        (err as { body: { errors?: unknown } }).body?.errors &&
+        Array.isArray((err as { body: { errors: unknown } }).body.errors)
+      ) {
+        const errorList = (err as { body: { errors: { code: string }[] } }).body.errors;
+
+        const isInvalidPassword = errorList.some(
+          (e) => e.code === "InvalidCurrentPassword"
+        );
+
+        if (isInvalidPassword) {
+          setCurrentPasswordError("Current password is incorrect");
+          return;
+        }
+      }
+      setErrorMessage("Password change failed. Please try again later.");
+    }
+  };
+
 
   return (
     <div className="profile-page">
       <h2>User Profile</h2>
 
-     <section className="personal-info">
+      <section className="personal-info">
         <h3>Personal Information</h3>
         {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+        {/* 👉 Edit personal info */}
         {isEditing ? (
           <div className="edit-form-container">
             <input
@@ -593,136 +659,6 @@ const ProfilePage = () => {
             )}
             {emailError && <p className="error-message">{emailError}</p>}
 
-            {showPasswordForm && (
-              <>
-                <h4 className="password-change-title">Change Password</h4>
-                <div className="edit-form-container">
-                  {/* Current Password */}
-                  <div className="password-input-wrapper">
-                    <input
-                      type={showCurrentPassword ? "text" : "password"}
-                      value={currentPassword}
-                      onChange={(e) => {
-                        setCurrentPassword(e.target.value);
-                        setCurrentPasswordError(""); 
-                      }}
-                      placeholder="Current Password"
-                      className="edit-input"
-                    />
-                    <span
-                      onClick={() => setShowCurrentPassword((prev) => !prev)}
-                      className="eye-icon"
-                    >
-                      {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                  </div>
-                  {currentPasswordError && (
-                    <p className="error-message" style={{color: 'red', marginTop: '5px'}}>
-                      {currentPasswordError}
-                    </p>
-                  )}
-
-                  {/* New Password */}
-                  <div className="password-input-wrapper">
-                    <input
-                      type={showNewPassword ? "text" : "password"}
-                      value={newPassword}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setNewPassword(value);
-                        setPasswordError(validatePassword(value));
-                      }}
-                      placeholder="New Password"
-                      className="edit-input"
-                    />
-                    <span
-                      onClick={() => setShowNewPassword((prev) => !prev)}
-                      className="eye-icon"
-                    >
-                      {showNewPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                  </div>
-                  {passwordError && <p className="error-message">{passwordError}</p>}
-
-                  {/* Confirm New Password */}
-                  <div className="password-input-wrapper">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmNewPassword}
-                      onChange={(e) => setConfirmNewPassword(e.target.value)}
-                      placeholder="Confirm New Password"
-                      className="edit-input"
-                    />
-                    <span
-                      onClick={() => setShowConfirmPassword((prev) => !prev)}
-                      className="eye-icon"
-                    >
-                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                  </div>
-                  {!confirmNewPassword && (
-                    <p className="error-message">Confirm new password is required</p>
-                  )}
-                  {newPassword &&
-                    confirmNewPassword &&
-                    newPassword !== confirmNewPassword && (
-                      <p className="error-message">New passwords do not match</p>
-                    )}
-
-                  <div className="edit-buttons-container">
-                    <button
-                      className="save-button"
-                      disabled={
-                        !currentPassword ||
-                        !newPassword ||
-                        !confirmNewPassword ||
-                        newPassword !== confirmNewPassword ||
-                        !!passwordError
-                      }
-                      onClick={async () => {
-                      try {
-                        await apiClient.changePassword(currentPassword, newPassword, customer.version);
-                        localStorage.removeItem("accessToken");
-                        await relogin({ email, password: newPassword });
-                        const updatedCustomer = await apiClient.getCustomerProfile();
-                        setCustomer(updatedCustomer);
-                        setShowPasswordForm(false);
-                        resetPasswordState();
-                      } catch (err) {
-                          setCurrentPasswordError(""); // Сброс предыдущих ошибок
-                          
-                          // Улучшенная проверка ошибок
-                          const error = err as ApiError;
-                          
-                          const isInvalidPassword = error?.response?.data?.errors?.some(
-                            e => e.code === "InvalidCurrentPassword"
-                          );
-                          
-                          if (isInvalidPassword) {
-                            setCurrentPasswordError("Current password is incorrect");
-                          } else {
-                            setErrorMessage("Password change failed. Please try again later.");
-                          }
-                        }
-                    }}
-                    >
-                      Save Password
-                    </button>
-                    <button
-                      className="close-button"
-                      onClick={() => {
-                        setShowPasswordForm(false);
-                        resetPasswordState();
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-
             <div className="edit-buttons-container">
               <button
                 onClick={saveChanges}
@@ -759,130 +695,120 @@ const ProfilePage = () => {
                 onClick={() => setShowPasswordForm((prev) => !prev)}
                 className="edit-button"
               >
-                {showPasswordForm ? "Cancel Password Change" : "Change Password"}
+                {showPasswordForm
+                  ? "Cancel Password Change"
+                  : "Change Password"}
               </button>
             </div>
+          </>
+        )}
 
-            {showPasswordForm && (
-              <>
-                <h4 className="password-change-title">Change Password</h4>
-                <div className="edit-form-container">
+        {/* ✅ form to change password */}
+        {showPasswordForm && (
+          <>
+            <h4 className="password-change-title">Change Password</h4>
+            <div className="edit-form-container">
+              {/* Current Password */}
+              <div className="password-input-wrapper">
+                <p className="p-text-password">Your current password:</p>
+                <input
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => {
+                    setCurrentPassword(e.target.value);
+                    setCurrentPasswordError("");
+                  }}
+                  placeholder="Current Password"
+                  className="edit-input"
+                />
+                <span
+                  onClick={() => setShowCurrentPassword((prev) => !prev)}
+                  className="eye-icon"
+                >
+                  {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+              {!currentPassword && (
+                <p className="error-message">Current password is required</p>
+              )}
+              {currentPasswordError && (
+                <p className="error-message">{currentPasswordError}</p>
+              )}
 
-                  {/* Current Password */}
-                  <div className="password-input-wrapper">
-                    <input
-                      type={showCurrentPassword ? "text" : "password"}
-                      value={currentPassword}
-                      onChange={(e) => {
-                        setCurrentPassword(e.target.value);
-                        setCurrentPasswordError(""); // сброс при вводе
-                      }}
-                      placeholder="Current Password"
-                      className="edit-input"
-                    />
-                    <span
-                      onClick={() => setShowCurrentPassword((prev) => !prev)}
-                      className="eye-icon"
-                    >
-                      {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                  </div>
-                  {!currentPassword && (
-                    <p className="error-message">Current password is required</p>
-                  )}
-                  {currentPasswordError && (
-                    <p className="error-message">{currentPasswordError}</p>
-                  )}
+              {/* New Password */}
+              <div className="password-input-wrapper">
+                <p className="p-text-password">Your new password:</p>
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="New Password"
+                  className="edit-input"
+                />
+                <span
+                  onClick={() => setShowNewPassword((prev) => !prev)}
+                  className="eye-icon"
+                >
+                  {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+              {passwordError && (
+                <p className="error-message">{passwordError}</p>
+              )}
 
-                  {/* New Password */}
-                  <div className="password-input-wrapper">
-                    <input
-                      type={showNewPassword ? "text" : "password"}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="New Password"
-                      className="edit-input"
-                    />
-                    <span onClick={() => setShowNewPassword((prev) => !prev)} className="eye-icon">
-                      {showNewPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                  </div>
-                  {passwordError && <p className="error-message">{passwordError}</p>}
+              {/* Confirm New Password */}
+              <div className="password-input-wrapper">
+                <p className="p-text-password">Confirm your new password:</p>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="Confirm New Password"
+                  className="edit-input"
+                />
+                <span
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="eye-icon"
+                >
+                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+              {!confirmNewPassword && (
+                <p className="error-message">
+                  Confirm new password is required
+                </p>
+              )}
+              {newPassword &&
+                confirmNewPassword &&
+                newPassword !== confirmNewPassword && (
+                  <p className="error-message">New passwords do not match</p>
+                )}
 
-                  {/* Confirm New Password */}
-                  <div className="password-input-wrapper">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmNewPassword}
-                      onChange={(e) => setConfirmNewPassword(e.target.value)}
-                      placeholder="Confirm New Password"
-                      className="edit-input"
-                    />
-                    <span onClick={() => setShowConfirmPassword((prev) => !prev)} className="eye-icon">
-                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                  </div>
-                  {!confirmNewPassword && (
-                    <p className="error-message">Confirm new password is required</p>
-                  )}
-                  {newPassword &&
-                    confirmNewPassword &&
-                    newPassword !== confirmNewPassword && (
-                      <p className="error-message">New passwords do not match</p>
-                    )}
-
-                  <div className="edit-buttons-container">
-                    <button
-                      className="save-button"
-                       disabled={
-                        !currentPassword ||
-                        !newPassword ||
-                        !confirmNewPassword ||
-                        newPassword !== confirmNewPassword ||
-                        !!passwordError
-                      }
-                      onClick={async () => {
-                        try {
-                          await apiClient.changePassword(currentPassword, newPassword, customer.version);
-                          localStorage.removeItem("accessToken");
-                          await relogin({ email, password: newPassword });
-                          const updatedCustomer = await apiClient.getCustomerProfile();
-                          setCustomer(updatedCustomer);
-                          setShowPasswordForm(false);
-                          resetPasswordState();
-                        } catch (err) {
-                          setCurrentPasswordError(""); // Сброс предыдущих ошибок
-                          
-                          // Улучшенная проверка ошибок
-                          const error = err as ApiError;
-                          
-                          const isInvalidPassword = error?.response?.data?.errors?.some(
-                            e => e.code === "InvalidCurrentPassword"
-                          );
-                          
-                          if (isInvalidPassword) {
-                            setCurrentPasswordError("Current password is incorrect");
-                          } else {
-                            setErrorMessage("Password change failed. Please try again later.");
-                          }
-                        }
-                      }}
-                    >
-                      Save Password
-                    </button>
-                    <button
-                      className="close-button"
-                      onClick={() => {
-                        setShowPasswordForm(false);
-                        resetPasswordState();
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
+              <div className="edit-buttons-container">
+                <button
+                  className="save-button"
+                  disabled={
+                    !currentPassword ||
+                    !newPassword ||
+                    !confirmNewPassword ||
+                    newPassword !== confirmNewPassword ||
+                    !!passwordError
+                  }
+                  onClick={handlePasswordChange}
+                >
+                  Save Password
+                </button>
+                <button
+                  className="close-button"
+                  onClick={() => {
+                    setShowPasswordForm(false);
+                    resetPasswordState();
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </>
         )}
       </section>
@@ -905,7 +831,9 @@ const ProfilePage = () => {
                   />
                   {touchedAddressFields[index]?.has("streetName") &&
                     addressErrors[index]?.streetName && (
-                      <p className="error-message">{addressErrors[index]!.streetName}</p>
+                      <p className="error-message">
+                        {addressErrors[index]!.streetName}
+                      </p>
                     )}
                   <input
                     type="text"
@@ -918,7 +846,9 @@ const ProfilePage = () => {
                   />
                   {touchedAddressFields[index]?.has("postalCode") &&
                     addressErrors[index]?.postalCode && (
-                      <p className="error-message">{addressErrors[index]!.postalCode}</p>
+                      <p className="error-message">
+                        {addressErrors[index]!.postalCode}
+                      </p>
                     )}
                   <input
                     type="text"
@@ -931,7 +861,9 @@ const ProfilePage = () => {
                   />
                   {touchedAddressFields[index]?.has("city") &&
                     addressErrors[index]?.city && (
-                      <p className="error-message">{addressErrors[index]!.city}</p>
+                      <p className="error-message">
+                        {addressErrors[index]!.city}
+                      </p>
                     )}
                   <select
                     value={editedAddresses[index].country}
@@ -949,7 +881,9 @@ const ProfilePage = () => {
                   </select>
                   {touchedAddressFields[index]?.has("country") &&
                     addressErrors[index]?.country && (
-                      <p className="error-message">{addressErrors[index]!.country}</p>
+                      <p className="error-message">
+                        {addressErrors[index]!.country}
+                      </p>
                     )}
                   <div className="edit-button-row">
                     <button
@@ -971,7 +905,8 @@ const ProfilePage = () => {
                 <>
                   <h4 className="address-title">Address {index + 1}</h4>
                   <p className="p-text">
-                    {addr.streetName}, {addr.postalCode}, {addr.city}, {addr.country}
+                    {addr.streetName}, {addr.postalCode}, {addr.city},{" "}
+                    {addr.country}
                   </p>
                   <div className="label-container">
                     <label
@@ -1002,7 +937,9 @@ const ProfilePage = () => {
                   </div>
                   <p
                     className={`address-label ${
-                      addr.id !== defaultBillingAddressId ? "not-default" : "default"
+                      addr.id !== defaultBillingAddressId
+                        ? "not-default"
+                        : "default"
                     }`}
                   >
                     {addr.id === defaultBillingAddressId
@@ -1011,7 +948,9 @@ const ProfilePage = () => {
                   </p>
                   <p
                     className={`address-label ${
-                      addr.id !== defaultShippingAddressId ? "not-default" : "default"
+                      addr.id !== defaultShippingAddressId
+                        ? "not-default"
+                        : "default"
                     }`}
                   >
                     {addr.id === defaultShippingAddressId
@@ -1130,8 +1069,7 @@ const ProfilePage = () => {
         )}
       </section>
     </div>
-    );
-  
+  );
 };
 
 export default ProfilePage;

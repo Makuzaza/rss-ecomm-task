@@ -113,11 +113,3 @@ export interface CustomerProfile {
   defaultBillingAddressId?: string;
   defaultShippingAddressId?: string;
 }
-
-export interface ApiError {
-  response?: {
-    data?: {
-      errors?: Array<{ code?: string }>;
-    };
-  };
-}

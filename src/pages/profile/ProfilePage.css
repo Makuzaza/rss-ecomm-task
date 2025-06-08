@@ -24,7 +24,6 @@ section.addresses {
   font-size: 12px;
   color: #333;
   margin-bottom: 7px;
-
 }
 .personal-info,
 .addresses {
@@ -40,7 +39,7 @@ section.addresses {
   margin-bottom: 1rem;
   margin-top: 12px;
 }
-.h3-addresses{
+.h3-addresses {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 5px;
@@ -85,7 +84,9 @@ section.addresses {
   margin-right: 6px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s, padding 0.3s;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
 }
 
 .edit-button:hover {
@@ -101,7 +102,9 @@ section.addresses {
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s, padding 0.3s;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
 }
 
 .edit-button-address:hover {
@@ -117,7 +120,9 @@ section.addresses {
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s, padding 0.3s;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
 }
 
 .add-address-button:hover {
@@ -126,7 +131,7 @@ section.addresses {
 }
 
 .address-edit-form {
-  padding: 10px; 
+  padding: 10px;
   transition: all 0.3s ease-in-out;
 }
 
@@ -202,7 +207,7 @@ section.addresses {
   height: 18px;
   accent-color: gray;
   cursor: pointer;
-  transition: accent-color 0.3s ease; 
+  transition: accent-color 0.3s ease;
 }
 
 .checkbox-toggle.active {
@@ -215,7 +220,7 @@ section.addresses {
 
 .button-container {
   margin-top: 10px;
-} 
+}
 
 .edit-form-container .error-icon {
   top: 5px;
@@ -241,9 +246,9 @@ section.addresses {
 
 .eye-icon {
   position: absolute;
-  right: 10px;
-  top: 40%;
-  transform: translateY(-50%);
+  right: 4%;
+  top: 59%;
+  transform: translateY(-45%);
   cursor: pointer;
   color: #666;
 }
