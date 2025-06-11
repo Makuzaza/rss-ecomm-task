@@ -23,6 +23,7 @@ export function productDataNormalization(data: Product): MyProductsData {
   return {
     id: data.id,
     key: data.key,
+    date: data.createdAt,
     name: currentData.name["en-US"],
     description: currentData.description?.["en-US"] || "",
     sku: masterVariant.sku,
@@ -45,6 +46,7 @@ export function productSearchNormalization(
     return {
       id: record.id,
       key: record.key,
+      data: record.createdAt,
       name: record.name["en-US"],
       description: record.description["en-US"] || "",
       sku: record.masterVariant.sku || "",

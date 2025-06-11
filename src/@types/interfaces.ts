@@ -83,6 +83,7 @@ export interface ProductCatalogProps {
 export interface MyProductsData {
   id: string;
   key: string;
+  date: string;
   name: string;
   description: string;
   sku: string;

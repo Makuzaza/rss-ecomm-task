@@ -78,6 +78,8 @@ const ProductsPage = () => {
             <option value="name-desc">Name (Z-A)</option>
             <option value="price-asc">Price (Low to High)</option>
             <option value="price-desc">Price (High to Low)</option>
+            <option value="date-desc">Date (New Products)</option>
+            <option value="date-asc">Date (Old Products)</option>
           </select>
         </div>
       </div>
@@ -101,6 +103,8 @@ const ProductsPage = () => {
                       "name-desc": "Name (Z-A)",
                       "price-asc": "Price (Low to High)",
                       "price-desc": "Price (High to Low)",
+                      "date-asc": "Date (New First)",
+                      "date-desc": "Date (Old First)",
                     }[sortOption]
                   }
                 </li>

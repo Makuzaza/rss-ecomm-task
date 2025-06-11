@@ -24,6 +24,14 @@ export function sortProducts(
       key = "price";
       direction = "desc";
       break;
+    case "date-asc":
+      key = "date";
+      direction = "asc";
+      break;
+    case "date-desc":
+      key = "date";
+      direction = "desc";
+      break;
     default:
       key = "name";
       direction = "asc";
@@ -34,6 +42,13 @@ export function sortProducts(
       return direction === "asc"
         ? String(a[key]).localeCompare(String(b[key]))
         : String(b[key]).localeCompare(String(a[key]));
+    }
+
+    if (key === "price") {
+      const priceA = a.priceDiscounted || a.price;
+      const priceB = b.priceDiscounted || b.price;
+
+      return direction === "asc" ? priceA - priceB : priceB - priceA;
     }
 
     if (typeof a[key] === "number") {
