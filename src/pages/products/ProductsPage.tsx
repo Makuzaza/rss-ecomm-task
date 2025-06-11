@@ -30,7 +30,7 @@ const ProductsPage = () => {
     setMaxPrice("");
     setOnlyDiscounted(false);
   }
-  
+
   return (
     <div className="main-container">
       <div className="products-filters">
@@ -114,7 +114,7 @@ const ProductsPage = () => {
         </button>
       </div>
       <ProductCatalog
-        propsLimit={20}
+        propsLimit={200}
         propsSort={sortOption}
         filterMinPrice={minPrice}
         filterMaxPrice={maxPrice}

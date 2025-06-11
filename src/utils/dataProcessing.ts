@@ -1,69 +1,41 @@
-import { MyProductsData, SortDirection } from "@/@types/interfaces";
 import {
-  ProductPagedQueryResponse,
-  ProductProjectionPagedSearchResponse,
-} from "@commercetools/platform-sdk";
-
-export function apiDataProcessing(
-  data: ProductPagedQueryResponse
-): MyProductsData[] {
-  return data.results.map((record) => {
-    const currentData = record.masterData.current;
-    const masterVariant = currentData.masterVariant;
-    const price = masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
-    const discountedPrice =
-      masterVariant.prices?.[0]?.discounted?.value.centAmount / 100;
-
-    return {
-      id: record.id,
-      key: record.key,
-      name: currentData.name["en-US"],
-      description: currentData.description?.["en-US"] || "",
-      sku: masterVariant.sku,
-      price: price,
-      priceDiscounted: discountedPrice,
-      images: masterVariant.images,
-    };
-  });
-}
-
-export function apiDataSearchProcessing(
-  data: ProductProjectionPagedSearchResponse
-) {
-  console.log("Search data:", data);
-  return data.results.map((record) => {
-    const price = record.masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
-    const discountedPrice =
-      record.masterVariant.prices?.[0]?.discounted?.value.centAmount / 100 ||
-      undefined;
-
-    return {
-      id: record.id,
-      key: record.key,
-      name: record.name["en-US"],
-      description: record.description["en-US"] || "",
-      sku: record.masterVariant.sku || "",
-      price: price,
-      priceDiscounted: discountedPrice,
-      images: record.masterVariant.images,
-    };
-  });
-}
+  MyProductFilter,
+  MyProductsData,
+  SortDirection,
+} from "@/@types/interfaces";
 
 export function sortProducts(
   products: MyProductsData[],
-  key: keyof MyProductsData,
-  direction: SortDirection = "asc"
+  arg: string
 ): MyProductsData[] {
+  let key: keyof MyProductsData;
+  let direction: SortDirection;
+
+  switch (arg) {
+    case "name-desc":
+      key = "name";
+      direction = "desc";
+      break;
+    case "price-asc":
+      key = "price";
+      direction = "asc";
+      break;
+    case "price-desc":
+      key = "price";
+      direction = "desc";
+      break;
+    default:
+      key = "name";
+      direction = "asc";
+  }
+
   return [...products].sort((a, b) => {
-    // Handle string comparison
     if (typeof a[key] === "string") {
       return direction === "asc"
         ? String(a[key]).localeCompare(String(b[key]))
         : String(b[key]).localeCompare(String(a[key]));
     }
 
-    // Handle number comparison
     if (typeof a[key] === "number") {
       return direction === "asc"
         ? Number(a[key]) - Number(b[key])
@@ -71,5 +43,17 @@ export function sortProducts(
     }
 
     return 0;
+  });
+}
+
+export function filterProducts(data: MyProductsData[], arg: MyProductFilter) {
+  return data.filter((product) => {
+    const price = product.priceDiscounted || product.price;
+
+    const passesMin = arg.minPrice ? price >= Number(arg.minPrice) : true;
+    const passesMax = arg.maxPrice ? price <= Number(arg.maxPrice) : true;
+    const passesDiscount = arg.discountOnly ? !!product.priceDiscounted : true;
+
+    return passesMin && passesMax && passesDiscount;
   });
 }

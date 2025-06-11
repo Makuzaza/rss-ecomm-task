@@ -1,15 +1,15 @@
 import CreateApiClient from "./CreateApiClient";
 import {
-  apiDataProcessing,
-  apiDataSearchProcessing,
-} from "@/utils/dataProcessing";
+  allProductsNormalization,
+  productDataNormalization,
+  productSearchNormalization,
+} from "@/utils/dataNormalization";
 
 // types
 import {
   type CategoryPagedQueryResponse,
   type CustomerSignInResult,
   type MyCustomerDraft,
-  type Product,
   type ProductProjectionPagedQueryResponse,
   type MyCustomerUpdate,
   type Customer,
@@ -189,8 +189,7 @@ export class ApiClient extends CreateApiClient {
         .get({ queryArgs: args })
         .execute();
 
-      this.productData = apiDataProcessing(data);
-      return this.productData;
+      return allProductsNormalization(data);
     } catch (error) {
       console.log(error);
     }
@@ -198,7 +197,7 @@ export class ApiClient extends CreateApiClient {
   /**
    * GET PRODUCT WITH KEY
    */
-  public async getProduct(key: string): Promise<Product> {
+  public async getProduct(key: string): Promise<MyProductsData> {
     const apiRoot = this.getApiRoot(this.defaultClient);
     try {
       const { body: data } = await apiRoot
@@ -209,7 +208,8 @@ export class ApiClient extends CreateApiClient {
         .withKey({ key: key })
         .get()
         .execute();
-      return data;
+
+      return productDataNormalization(data);
     } catch (error) {
       console.log(error);
     }
@@ -261,7 +261,7 @@ export class ApiClient extends CreateApiClient {
         })
         .execute();
 
-      return apiDataSearchProcessing(data);
+      return productSearchNormalization(data);
     } catch (error) {
       console.log(error);
     }
@@ -289,7 +289,11 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  public async changePassword(currentPassword: string, newPassword: string, version: number) {
+  public async changePassword(
+    currentPassword: string,
+    newPassword: string,
+    version: number
+  ) {
     const apiRoot = this.getApiRoot(this.client);
 
     await apiRoot

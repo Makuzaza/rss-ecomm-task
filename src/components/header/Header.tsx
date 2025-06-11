@@ -88,7 +88,7 @@ export const Header = () => {
             </div>
           </li>
           <li className="nav-item">
-            <Link to="/Products" className="nav-link">
+            <Link to="/products" className="nav-link">
               Products
             </Link>
           </li>

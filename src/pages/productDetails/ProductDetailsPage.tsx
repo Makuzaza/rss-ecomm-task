@@ -8,13 +8,13 @@ import {
 import DOMPurify from "dompurify";
 import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 
-import { type Product } from "@commercetools/platform-sdk";
 import "./ProductDetailsPage.css";
+import { type MyProductsData } from "@/@types/interfaces";
 
 const ProductDetailsPage = () => {
   const apiClient = useApiClient();
   const navigate = useNavigate();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<MyProductsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -27,19 +27,19 @@ const ProductDetailsPage = () => {
 
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === allImages.length - 1 ? 0 : prevIndex + 1
+      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
     );
     setModalImageIndex((prev) =>
-      prev === allImages.length - 1 ? 0 : prev + 1
+      prev === product.images.length - 1 ? 0 : prev + 1
     );
   };
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? allImages.length - 1 : prevIndex - 1
+      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
     );
     setModalImageIndex((prev) =>
-      prev === 0 ? allImages.length - 1 : prev - 1
+      prev === 0 ? product.images.length - 1 : prev - 1
     );
   };
 
@@ -54,7 +54,7 @@ const ProductDetailsPage = () => {
   };
 
   const handleAddToCart = () => {
-    console.log("Added to cart:", productName);
+    console.log("Added to cart:", product.name);
   };
   const closeImageModal = () => {
     setIsModalOpen(false);
@@ -85,8 +85,9 @@ const ProductDetailsPage = () => {
         return;
       }
       try {
+        // GET PRODUCT DATA
         const productData = await apiClient.getProduct(id);
-        console.log("Product data: ", productData);
+
         if (!productData) {
           throw new Error("Product not found");
         }
@@ -114,31 +115,17 @@ const ProductDetailsPage = () => {
       </div>
     );
   }
-  // PRODUCT
-  const productName = product.masterData.current.name["en-US"];
-  const productDesc =
-    product.masterData.current.description?.["en-US"] ||
-    "No description available";
-  const productPrice =
-    product.masterData.current.masterVariant.prices?.[0]?.value.centAmount /
-      100 || 0;
-  const productPriceDiscounted =
-    product.masterData.current.masterVariant.prices?.[0]?.discounted?.value
-      .centAmount / 100;
-  const allImages = product.masterData.current.masterVariant.images || [];
-  const variants = product.masterData.current.variants || [];
 
   // HTML SANITIZATION
-  const sanitizedDesc = DOMPurify.sanitize(productDesc);
+  const sanitizedDesc = DOMPurify.sanitize(product.description);
 
-  console.log(product);
   return (
     <div className="main-content">
       <div className="product-detail-container">
         {/* PRODUCT GALLERY */}
         <div className="product-gallery">
           <div className="slider-container">
-            {allImages.length > 1 && (
+            {product.images.length > 1 && (
               <>
                 <button
                   className="slider-arrow left-arrow"
@@ -161,18 +148,21 @@ const ProductDetailsPage = () => {
               className="main-image"
               onClick={() =>
                 openImageModal(
-                  allImages[currentImageIndex]?.url,
+                  product.images[currentImageIndex]?.url,
                   currentImageIndex
                 )
               }
             >
-              <img src={allImages[currentImageIndex]?.url} alt={productName} />
+              <img
+                src={product.images[currentImageIndex]?.url}
+                alt={product.name}
+              />
             </div>
           </div>
 
-          {allImages.length > 1 && (
+          {product.images.length > 1 && (
             <div className="thumbnail-container">
-              {allImages.map((image, index) => (
+              {product.images.map((image, index) => (
                 <div
                   key={index}
                   className={`thumbnail ${currentImageIndex === index ? "active" : ""}`}
@@ -180,7 +170,7 @@ const ProductDetailsPage = () => {
                 >
                   <img
                     src={image.url}
-                    alt={`${productName} thumbnail ${index}`}
+                    alt={`${product.name} thumbnail ${index}`}
                   />
                 </div>
               ))}
@@ -190,13 +180,13 @@ const ProductDetailsPage = () => {
 
         <div className="product-info">
           {/* PRODUCT NAME */}
-          <h2 className="product-title">{productName}</h2>
+          <h2 className="product-title">{product.name}</h2>
           {/* PRODUCT VARIANTS */}
-          {variants.length > 0 && (
+          {product.variants.length > 0 && (
             <div className="variants-section">
               <h3>Product variants:</h3>
               <div className="variant-thumbnails">
-                {variants.map((variant, index) => (
+                {product.variants.map((variant, index) => (
                   <div
                     key={index}
                     className={`variant-thumbnail ${selectedVariant === index ? "active" : ""}`}
@@ -206,7 +196,7 @@ const ProductDetailsPage = () => {
                       <img
                         src={variant.images[0].url}
                         alt={`Variant ${index}`}
-                        title={`${variants[index].attributes[0].value[0]["en-US"]} - ${variants[index].attributes[1].value["en-US"]}`}
+                        title={`${product.variants[index].attributes[0].value[0]["en-US"]} - ${product.variants[index].attributes[1].value["en-US"]}`}
                       />
                     )}
                   </div>
@@ -254,15 +244,15 @@ const ProductDetailsPage = () => {
 
           {/* PRODUCT PRICE */}
           <div className="product-price-container">
-            {productPriceDiscounted ? (
+            {product.priceDiscounted ? (
               <div className="price-with-discount">
                 <span className="price-discounted">
-                  {productPriceDiscounted} &euro;
+                  {product.priceDiscounted} &euro;
                 </span>
-                <span className="price-original">{productPrice} &euro;</span>
+                <span className="price-original">{product.price} &euro;</span>
               </div>
             ) : (
-              <span className="price-regular">{productPrice} &euro;</span>
+              <span className="price-regular">{product.price} &euro;</span>
             )}
           </div>
           {/* ADD TO CART BUTTON */}
@@ -281,7 +271,7 @@ const ProductDetailsPage = () => {
               <FiX size={24} />
             </button>
 
-            {allImages.length > 1 && (
+            {product.images.length > 1 && (
               <>
                 <button
                   className="modal-arrow left-arrow"
@@ -305,13 +295,13 @@ const ProductDetailsPage = () => {
             )}
 
             <img
-              src={allImages[modalImageIndex]?.url}
-              alt={`Enlarged ${productName}`}
+              src={product.images[modalImageIndex]?.url}
+              alt={`Enlarged ${product.name}`}
             />
 
-            {allImages.length > 1 && (
+            {product.images.length > 1 && (
               <div className="modal-image-counter">
-                {modalImageIndex + 1} / {allImages.length}
+                {modalImageIndex + 1} / {product.images.length}
               </div>
             )}
           </div>
