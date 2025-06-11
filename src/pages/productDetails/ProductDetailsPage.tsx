@@ -27,19 +27,19 @@ const ProductDetailsPage = () => {
 
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1,
     );
     setModalImageIndex((prev) =>
-      prev === product.images.length - 1 ? 0 : prev + 1
+      prev === product.images.length - 1 ? 0 : prev + 1,
     );
   };
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1,
     );
     setModalImageIndex((prev) =>
-      prev === 0 ? product.images.length - 1 : prev - 1
+      prev === 0 ? product.images.length - 1 : prev - 1,
     );
   };
 
@@ -149,7 +149,7 @@ const ProductDetailsPage = () => {
               onClick={() =>
                 openImageModal(
                   product.images[currentImageIndex]?.url,
-                  currentImageIndex
+                  currentImageIndex,
                 )
               }
             >
@@ -196,7 +196,7 @@ const ProductDetailsPage = () => {
                       <img
                         src={variant.images[0].url}
                         alt={`Variant ${index}`}
-                        title={`${product.variants[index].attributes[0].value[0]["en-US"]} - ${product.variants[index].attributes[1].value["en-US"]}`}
+                        title={`${product.variants[index]?.attributes[0]?.value[0]?.["en-US"]} - ${product.variants[index]?.attributes[1]?.value?.["en-US"]}`}
                       />
                     )}
                   </div>

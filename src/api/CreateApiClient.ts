@@ -49,7 +49,7 @@ class CreateApiClient {
         this.BASE_URI,
         credentials,
         this.OAUTH_URI,
-        this.PROJECT_KEY
+        this.PROJECT_KEY,
       )
       .build();
   }

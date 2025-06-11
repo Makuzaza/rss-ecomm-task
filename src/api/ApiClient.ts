@@ -10,11 +10,11 @@ import {
   type CategoryPagedQueryResponse,
   type CustomerSignInResult,
   type MyCustomerDraft,
-  type ProductProjectionPagedQueryResponse,
   type MyCustomerUpdate,
   type Customer,
 } from "@commercetools/platform-sdk";
 import {
+  SearchTypes,
   type CommerceToolsError,
   type MyProductsData,
 } from "../@types/interfaces";
@@ -25,7 +25,7 @@ export class ApiClient extends CreateApiClient {
    */
   public async getCustomerWithPassword(
     email: string,
-    password: string
+    password: string,
   ): Promise<Customer> {
     try {
       this.client = this.buildClientWithPassword(email, password);
@@ -98,7 +98,7 @@ export class ApiClient extends CreateApiClient {
    * REGISTER CUSTOMER
    */
   public async registerCustomer(
-    customerData: MyCustomerDraft
+    customerData: MyCustomerDraft,
   ): Promise<CustomerSignInResult> {
     const client = this.buildDefaultClient(false);
     this.apiRoot = this.getApiRoot(client);
@@ -118,7 +118,7 @@ export class ApiClient extends CreateApiClient {
       const err = error as CommerceToolsError;
 
       const duplicateEmail = err.body.errors?.find(
-        (e) => e.code === "DuplicateField" && e.field === "email"
+        (e) => e.code === "DuplicateField" && e.field === "email",
       );
 
       if (duplicateEmail) {
@@ -215,38 +215,25 @@ export class ApiClient extends CreateApiClient {
     }
   }
   /**
-   * SEARCH PRODUCT
+   * SEARCH DATA
    */
-  public async searchProductsByName(
-    searchName: string
-  ): Promise<ProductProjectionPagedQueryResponse> {
-    const apiRoot = this.getApiRoot(this.defaultClient);
 
-    try {
-      const { body: data } = await apiRoot
-        .withProjectKey({
-          projectKey: this.PROJECT_KEY,
-        })
-        .productProjections()
-        .search()
-        .get({
-          queryArgs: {
-            "text.en-US": searchName,
-            limit: 10,
-          },
-        })
-        .execute();
-      return data;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  public async searchProductsByCategory(
-    categoryId: string
+  public async searchData(
+    searchType: SearchTypes,
+    searchValue: string,
   ): Promise<MyProductsData[]> {
     const apiRoot = this.getApiRoot(this.defaultClient);
 
+    let searchArgs = {};
+    switch (searchType) {
+      case "name":
+        searchArgs = { "text.en-US": searchValue, limit: 10 };
+        break;
+      case "category":
+        searchArgs = { "filter.query": `categories.id:"${searchValue}"` };
+        break;
+    }
+
     try {
       const { body: data } = await apiRoot
         .withProjectKey({
@@ -255,12 +242,9 @@ export class ApiClient extends CreateApiClient {
         .productProjections()
         .search()
         .get({
-          queryArgs: {
-            "filter.query": `categories.id:"${categoryId}"`,
-          },
+          queryArgs: searchArgs,
         })
         .execute();
-
       return productSearchNormalization(data);
     } catch (error) {
       console.log(error);
@@ -271,7 +255,7 @@ export class ApiClient extends CreateApiClient {
    * UPDATE CUSTOMER
    */
   public async updateCustomer(
-    updatePayload: MyCustomerUpdate
+    updatePayload: MyCustomerUpdate,
   ): Promise<Customer> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -292,7 +276,7 @@ export class ApiClient extends CreateApiClient {
   public async changePassword(
     currentPassword: string,
     newPassword: string,
-    version: number
+    version: number,
   ) {
     const apiRoot = this.getApiRoot(this.client);
 

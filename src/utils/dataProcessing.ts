@@ -6,7 +6,7 @@ import {
 
 export function sortProducts(
   products: MyProductsData[],
-  arg: string
+  arg: string,
 ): MyProductsData[] {
   let key: keyof MyProductsData;
   let direction: SortDirection;

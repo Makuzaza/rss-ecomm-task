@@ -82,15 +82,15 @@ export interface ProductCatalogProps {
 
 export interface MyProductsData {
   id: string;
-  key: string;
-  date: string;
+  key?: string;
+  date?: string;
   name: string;
-  description: string;
+  description?: string;
   sku: string;
   price: number;
   priceDiscounted: number;
-  images: Image[];
-  variants: ProductVariant[];
+  images?: Image[];
+  variants?: ProductVariant[];
 }
 
 export interface MyProductFilter {
@@ -100,12 +100,7 @@ export interface MyProductFilter {
 }
 
 export type SortDirection = "asc" | "desc";
-
-export interface SearchResult {
-  id: string;
-  key?: string;
-  name: { [key: string]: string };
-}
+export type SearchTypes = "name" | "category";
 
 export interface CustomerAddress {
   id?: string;

@@ -6,7 +6,7 @@ import {
 } from "@commercetools/platform-sdk";
 
 export function allProductsNormalization(
-  data: ProductPagedQueryResponse
+  data: ProductPagedQueryResponse,
 ): MyProductsData[] {
   return data.results.map((data) => {
     return productDataNormalization(data);
@@ -35,7 +35,7 @@ export function productDataNormalization(data: Product): MyProductsData {
 }
 
 export function productSearchNormalization(
-  data: ProductProjectionPagedSearchResponse
+  data: ProductProjectionPagedSearchResponse,
 ) {
   return data.results.map((record) => {
     const price = record.masterVariant.prices?.[0]?.value.centAmount / 100 || 0;

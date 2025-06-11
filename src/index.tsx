@@ -120,5 +120,5 @@ const router = createBrowserRouter([
 container.render(
   <ApiClientProvider>
     <RouterProvider router={router} />
-  </ApiClientProvider>
+  </ApiClientProvider>,
 );

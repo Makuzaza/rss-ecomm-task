@@ -31,8 +31,10 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
       if (categoryId) {
         try {
           setLoading(true);
-          const data: MyProductsData[] =
-            await apiClient.searchProductsByCategory(categoryId);
+          const data: MyProductsData[] = await apiClient.searchData(
+            "category",
+            categoryId,
+          );
           setProducts(data);
           setError(null);
         } catch (err) {
