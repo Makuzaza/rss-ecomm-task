@@ -9,9 +9,22 @@ import {
   validateEmailFormat,
   validatePassword,
 } from "../../utils/loginValidation";
+import ValidatedInput from "../../components/profile/ValidatedInput";
 import { validateField } from "../../utils/registerValitation";
-import { validatePostalCode } from "../../utils/editValidation";
+import { validateAddress } from "../../utils/editValidation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+
+const fieldNameMap: Record<
+      keyof CustomerAddress,
+      keyof RegisterFormFields
+    > = {
+      streetName: "shippingStreet",
+      city: "shippingCity",
+      postalCode: "shippingPostalCode",
+      country: "shippingCountry",
+      state: "shippingCity",
+      id: "email",
+    };
 
 const ProfilePage = () => {
   const { customer, setCustomer, relogin } = useAuth();
@@ -41,11 +54,53 @@ const ProfilePage = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Success message state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  // Field errors state
+  const [fieldErrors, setFieldErrors] = useState({
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    email: "",
+  });
 
   useEffect(() => {
     setPasswordError(validatePassword(newPassword));
   }, [newPassword]);
+
+  useEffect(() => {
+    setFieldErrors({
+      firstName: validateField(
+        "firstName",
+        editedFirstName,
+        formData,
+        europeanCountries,
+        false,
+      ),
+      lastName: validateField(
+        "lastName",
+        editedLastName,
+        formData,
+        europeanCountries,
+        false,
+      ),
+      dateOfBirth: validateField(
+        "dateOfBirth",
+        editedDOB,
+        formData,
+        europeanCountries,
+        false,
+      ),
+      email: validateField(
+        "email",
+        editedEmail,
+        formData,
+        europeanCountries,
+        false,
+      ),
+    });
+  }, [editedFirstName, editedLastName, editedDOB, editedEmail]);
 
   const resetPasswordState = () => {
     setCurrentPassword("");
@@ -133,42 +188,25 @@ const ProfilePage = () => {
     email,
   } = customer;
 
+  useEffect(() => {
+    const shippingSet = !!defaultShippingAddressId;
+    const billingSet  = !!defaultBillingAddressId;
+    const isSame      = defaultShippingAddressId === defaultBillingAddressId;
+
+    setCanAddNewAddress(!isSame && shippingSet !== billingSet);
+
+    if (!shippingSet) setMissingAddressType("shipping");
+    else if (!billingSet) setMissingAddressType("billing");
+    else setMissingAddressType(null);
+  }, [defaultShippingAddressId, defaultBillingAddressId]);
+
   const isChanged =
     editedFirstName !== firstName ||
     editedLastName !== lastName ||
     editedDOB !== dateOfBirth ||
     editedEmail !== email;
 
-  const fieldErrors = {
-    firstName: validateField(
-      "firstName",
-      editedFirstName,
-      formData,
-      europeanCountries,
-      false,
-    ),
-    lastName: validateField(
-      "lastName",
-      editedLastName,
-      formData,
-      europeanCountries,
-      false,
-    ),
-    dateOfBirth: validateField(
-      "dateOfBirth",
-      editedDOB,
-      formData,
-      europeanCountries,
-      false,
-    ),
-    email: validateField(
-      "email",
-      editedEmail,
-      formData,
-      europeanCountries,
-      false,
-    ),
-  };
+  
 
   const passwordMismatch =
     (newPassword || confirmNewPassword || currentPassword) &&
@@ -259,18 +297,6 @@ const ProfilePage = () => {
       billingPostalCode: "",
     };
 
-    const fieldNameMap: Record<
-      keyof CustomerAddress,
-      keyof RegisterFormFields
-    > = {
-      streetName: "shippingStreet",
-      city: "shippingCity",
-      postalCode: "shippingPostalCode",
-      country: "shippingCountry",
-      state: "shippingCity",
-      id: "email",
-    };
-
     const fieldKey = fieldNameMap[field];
 
     if (!fieldKey) return;
@@ -348,25 +374,7 @@ const ProfilePage = () => {
     const address = editedAddresses[index];
     if (!address.id) return;
 
-    const errors: Partial<Record<keyof CustomerAddress, string>> = {};
-
-    if (!address.streetName) {
-      errors.streetName = "Street name is required.";
-    }
-
-    if (!address.city) {
-      errors.city = "City is required.";
-    }
-
-    if (!address.country) {
-      errors.country = "Country is required.";
-    }
-
-    if (!address.postalCode) {
-      errors.postalCode = "Postal code is required.";
-    } else if (!validatePostalCode(address.postalCode, address.country)) {
-      errors.postalCode = "Invalid postal code format for selected country.";
-    }
+    const errors = validateAddress(address);
 
     if (Object.keys(errors).length > 0) {
       setAddressErrors((prev) => ({
@@ -578,10 +586,9 @@ const ProfilePage = () => {
 
       setShowPasswordForm(false);
       resetPasswordState();
-      console.log("✅ Password change succeeded");
       setSuccessMessage("Password was successfully changed!");
-      console.log("✅ setSuccessMessage called");
-      setTimeout(() => setSuccessMessage(""), 5000);
+      setShowSuccessModal(true);
+      setTimeout(() => setShowSuccessModal(false), 3000); // Clear message after 3 seconds
     } catch (err: unknown) {
       if (
         typeof err === "object" &&
@@ -606,8 +613,25 @@ const ProfilePage = () => {
     }
   };
 
+  useEffect(() => {
+  if (!successMessage) return;
+
+  setShowSuccessModal(true);
+  const timer = setTimeout(() => {
+    setShowSuccessModal(false);
+    setSuccessMessage("");
+  }, 3000);
+
+  return () => clearTimeout(timer);
+}, [successMessage]);
+
   return (
-  
+  <>
+    {showSuccessModal && (
+      <div className="success-modal">
+        <p className="success-message">{successMessage}</p>
+      </div>
+    )}
     <div className="profile-page">
       <h2>User Profile</h2>
       
@@ -617,50 +641,41 @@ const ProfilePage = () => {
         {/* 👉 Edit personal info */}
         {isEditing ? (
           <div className="edit-form-container">
-            <input
+            <ValidatedInput
+              label="First Name"
               type="text"
               value={editedFirstName}
-              onChange={(e) => setEditedFirstName(e.target.value)}
               placeholder="First Name"
-              className="edit-input"
+              error={fieldErrors.firstName || (!editedFirstName.trim() ? "First name is required" : undefined)}
+              onChange={setEditedFirstName}
             />
-            {!editedFirstName.trim() && (
-              <p className="error-message">First name is required</p>
-            )}
 
-            <input
+            <ValidatedInput
+              label="Last Name"
               type="text"
               value={editedLastName}
-              onChange={(e) => setEditedLastName(e.target.value)}
               placeholder="Last Name"
-              className="edit-input"
+              error={fieldErrors.lastName || (!editedLastName.trim() ? "Last name is required" : undefined)}
+              onChange={setEditedLastName}
             />
-            {!editedLastName.trim() && (
-              <p className="error-message">Last name is required</p>
-            )}
 
-            <input
+            <ValidatedInput
+              label="Date of Birth"
               type="date"
               value={editedDOB}
-              onChange={(e) => setEditedDOB(e.target.value)}
               placeholder="Date of Birth"
-              className="edit-input"
+              error={fieldErrors.dateOfBirth || (!editedDOB ? "Date of birth is required" : undefined)}
+              onChange={setEditedDOB}
             />
-            {!editedDOB.trim() && (
-              <p className="error-message">Date of birth is required</p>
-            )}
 
-            <input
+            <ValidatedInput
+              label="Email Address"
               type="text"
               value={editedEmail}
-              onChange={(e) => setEditedEmail(e.target.value)}
               placeholder="Email Address"
-              className="edit-input"
+              error={emailError || (!editedEmail.trim() ? "Email is required" : undefined)}
+              onChange={setEditedEmail}
             />
-            {!editedEmail.trim() && (
-              <p className="error-message">Email is required</p>
-            )}
-            {emailError && <p className="error-message">{emailError}</p>}
 
             <div className="edit-buttons-container">
               <button
@@ -790,6 +805,7 @@ const ProfilePage = () => {
 
               <div className="edit-buttons-container">
                 <button
+                  type="button"    
                   className="save-button"
                   disabled={
                     !currentPassword ||
@@ -1073,6 +1089,7 @@ const ProfilePage = () => {
         )}
       </section>
     </div>
+     </>
   );
 };
 

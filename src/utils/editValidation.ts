@@ -1,3 +1,4 @@
+import { CustomerAddress } from "@/@types/interfaces";
 import europeanCountries from "@/data/europeanCountries.json";
 
 export function validatePostalCode(countryCode: string, postalCode: string): string | null {
@@ -14,4 +15,19 @@ export function validatePostalCode(countryCode: string, postalCode: string): str
   }
 
   return null;
+}
+
+export function validateAddress(address: CustomerAddress): Partial<Record<keyof CustomerAddress, string>> {
+  const errors: Partial<Record<keyof CustomerAddress, string>> = {};
+
+  if (!address.streetName) errors.streetName = "Street name is required.";
+  if (!address.city) errors.city = "City is required.";
+  if (!address.country) errors.country = "Country is required.";
+  if (!address.postalCode) {
+    errors.postalCode = "Postal code is required.";
+  } else if (!validatePostalCode(address.postalCode, address.country)) {
+    errors.postalCode = "Invalid postal code format for selected country.";
+  }
+
+  return errors;
 }

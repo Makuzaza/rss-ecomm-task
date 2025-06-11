@@ -124,3 +124,15 @@ export interface CategoryWithChildren extends Category {
 }
 
 export type InteractionEvent = MouseEvent | KeyboardEvent | TouchEvent;
+
+export interface ValidatedInputProps {
+  label: string;
+  type: string;
+  value: string;
+  placeholder?: string;
+  error?: string;
+  onChange: (v: string) => void;
+  showToggle?: boolean;
+  isShown?: boolean;
+  onToggleShow?: () => void;
+}
