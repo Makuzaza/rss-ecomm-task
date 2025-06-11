@@ -13,6 +13,7 @@ import ValidatedInput from "../../components/profile/ValidatedInput";
 import { validateField } from "../../utils/registerValitation";
 import { validateAddress } from "../../utils/editValidation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const fieldNameMap: Record<
       keyof CustomerAddress,
@@ -25,6 +26,16 @@ const fieldNameMap: Record<
       state: "shippingCity",
       id: "email",
     };
+    
+function isAddressEqual(a: CustomerAddress, b: CustomerAddress) {
+  return (
+    a.streetName === b.streetName &&
+    a.postalCode === b.postalCode &&
+    a.city === b.city &&
+    a.country === b.country &&
+    a.state === b.state
+  );
+}   
 
 const ProfilePage = () => {
   const { customer, setCustomer, relogin } = useAuth();
@@ -54,9 +65,6 @@ const ProfilePage = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  // Success message state
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   // Field errors state
   const [fieldErrors, setFieldErrors] = useState({
     firstName: "",
@@ -251,6 +259,7 @@ const ProfilePage = () => {
   const [editedAddresses, setEditedAddresses] = useState<CustomerAddress[]>(
     normalizeAddresses(customer.addresses),
   );
+  const originalAddresses = normalizeAddresses(customer.addresses);
   const [editingAddressIndex, setEditingAddressIndex] = useState<number | null>(
     null,
   );
@@ -321,12 +330,15 @@ const ProfilePage = () => {
   const isAddressSaveDisabled = (index: number) => {
     const errors = addressErrors[index];
     const address = editedAddresses[index];
+    const originalAddress = originalAddresses[index];
+    const notChanged = isAddressEqual(address, originalAddress);
     return (
       !address.streetName ||
       !address.city ||
       !address.country ||
       !address.postalCode ||
-      Object.values(errors || {}).some(Boolean)
+      Object.values(errors || {}).some(Boolean) ||
+      notChanged
     );
   };
 
@@ -411,8 +423,10 @@ const ProfilePage = () => {
       });
       setCustomer(updated);
       setEditingAddressIndex(null);
+      toast.success("Address updated successfully!");
     } catch (error) {
       console.error("Failed to update address", error);
+      toast.error("Failed to update address.");
     }
   };
 
@@ -461,6 +475,8 @@ const ProfilePage = () => {
       const updatedCustomer = await apiClient.getCustomerProfile();
       setCustomer(updatedCustomer);
 
+      toast.success("Profile information updated!");
+
       if (wantsToChangePassword) {
         await apiClient.changePassword(
           currentPassword,
@@ -474,8 +490,7 @@ const ProfilePage = () => {
       setIsEditing(false);
       resetPasswordState();
     } catch (error: unknown) {
-      console.error("Failed to update customer", error);
-
+      toast.error("Failed to update profile.");
       let msg = "Failed to update profile. Please try again.";
       if (
         typeof error === "object" &&
@@ -586,9 +601,10 @@ const ProfilePage = () => {
 
       setShowPasswordForm(false);
       resetPasswordState();
-      setSuccessMessage("Password was successfully changed!");
-      setShowSuccessModal(true);
-      setTimeout(() => setShowSuccessModal(false), 3000); // Clear message after 3 seconds
+
+      //show success message
+      toast.success("Password was successfully changed!");
+      
     } catch (err: unknown) {
       if (
         typeof err === "object" &&
@@ -609,29 +625,13 @@ const ProfilePage = () => {
           return;
         }
       }
-      setErrorMessage("Password change failed. Please try again later.");
+      toast.error("Password change failed. Please try again later.");
     }
   };
 
-  useEffect(() => {
-  if (!successMessage) return;
-
-  setShowSuccessModal(true);
-  const timer = setTimeout(() => {
-    setShowSuccessModal(false);
-    setSuccessMessage("");
-  }, 3000);
-
-  return () => clearTimeout(timer);
-}, [successMessage]);
 
   return (
   <>
-    {showSuccessModal && (
-      <div className="success-modal">
-        <p className="success-message">{successMessage}</p>
-      </div>
-    )}
     <div className="profile-page">
       <h2>User Profile</h2>
       
@@ -801,7 +801,6 @@ const ProfilePage = () => {
                 newPassword !== confirmNewPassword && (
                   <p className="error-message">New passwords do not match</p>
                 )}
-              {successMessage && <p className="success-message">{successMessage}</p>}
 
               <div className="edit-buttons-container">
                 <button
@@ -840,6 +839,8 @@ const ProfilePage = () => {
             <div key={addr.id || index} className="address-card">
               {editingAddressIndex === index ? (
                 <div className="address-edit-form">
+                  <h4 className="address-title">Editing Address {index + 1}</h4>
+                  <p className="p-text-address">Your full adress:</p>
                   <input
                     type="text"
                     value={editedAddresses[index].streetName}
@@ -855,6 +856,7 @@ const ProfilePage = () => {
                         {addressErrors[index]!.streetName}
                       </p>
                     )}
+                  <p className="p-text-address">Postal code:</p>  
                   <input
                     type="text"
                     value={editedAddresses[index].postalCode}
@@ -870,6 +872,7 @@ const ProfilePage = () => {
                         {addressErrors[index]!.postalCode}
                       </p>
                     )}
+                  <p className="p-text-address">Your city:</p>  
                   <input
                     type="text"
                     value={editedAddresses[index].city}
@@ -885,6 +888,7 @@ const ProfilePage = () => {
                         {addressErrors[index]!.city}
                       </p>
                     )}
+                  <p className="p-text-address">Select your country:</p>
                   <select
                     value={editedAddresses[index].country}
                     onChange={(e) =>

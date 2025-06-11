@@ -7,7 +7,7 @@ const ValidatedInput: React.FC<ValidatedInputProps> = ({
   onChange, showToggle, isShown, onToggleShow,
 }) => (
   <div className="validated-input">
-    <label htmlFor={labelId(label)}>
+    <label htmlFor={labelId(label)} className="p-text-personal">
       {label}
       <input
         id={labelId(label)}
