@@ -3,6 +3,7 @@ import {
   // CustomerSignInResult,
   type MyCustomerDraft,
   type Image,
+  type ProductVariant,
 } from "@commercetools/platform-sdk";
 import { Category } from "@commercetools/platform-sdk";
 
@@ -81,22 +82,25 @@ export interface ProductCatalogProps {
 
 export interface MyProductsData {
   id: string;
-  key: string;
+  key?: string;
+  date?: string;
   name: string;
-  description: string;
+  description?: string;
   sku: string;
   price: number;
   priceDiscounted: number;
-  images: Image[];
+  images?: Image[];
+  variants?: ProductVariant[];
+}
+
+export interface MyProductFilter {
+  minPrice: string;
+  maxPrice: string;
+  discountOnly: boolean;
 }
 
 export type SortDirection = "asc" | "desc";
-
-export interface SearchResult {
-  id: string;
-  key?: string;
-  name: { [key: string]: string };
-}
+export type SearchTypes = "name" | "category";
 
 export interface CustomerAddress {
   id?: string;

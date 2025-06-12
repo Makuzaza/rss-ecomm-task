@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient } from "@/api/ApiClient";
-import { SearchResult } from "@/@types/interfaces";
+import { MyProductsData } from "@/@types/interfaces";
 import "./SearchInput.css";
 
 export const SearchInput = () => {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<MyProductsData[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -19,8 +19,8 @@ export const SearchInput = () => {
     }
 
     try {
-      const response = await apiClient.searchProductsByName(value);
-      setSearchResults(response.results || []);
+      const response = await apiClient.searchData("name", value);
+      setSearchResults(response || []);
       setIsDropdownOpen(true);
     } catch (error) {
       console.error("Search error:", error);
@@ -100,7 +100,7 @@ export const SearchInput = () => {
                 className="search-result-item"
                 onClick={() => handleResultClick(product.key)}
               >
-                {product.name?.["en-US"] || "Unnamed product"}
+                {product.name || "Unnamed product"}
               </li>
             ))}
           </ul>

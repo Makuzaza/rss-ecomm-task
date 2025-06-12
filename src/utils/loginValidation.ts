@@ -16,12 +16,10 @@ export const validatePassword = (password: string): string => {
   return "";
 };
 
-
 export const validateEmailFormat = (email: string): boolean => {
   if (!email || email.length > 320) return false;
 
-  const emailRegex =
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   return emailRegex.test(email);
 };

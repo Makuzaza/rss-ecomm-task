@@ -10,7 +10,6 @@ import {
   createApiBuilderFromCtpClient,
   ApiRoot,
 } from "@commercetools/platform-sdk";
-import { MyProductsData } from "@/@types/interfaces";
 
 class CreateApiClient {
   protected BASE_URI = process.env.REACT_APP_BASE_URL;
@@ -32,7 +31,6 @@ class CreateApiClient {
   protected defaultClient: Client;
   protected client: Client;
   protected apiRoot: ApiRoot;
-  productData: MyProductsData[];
 
   constructor() {
     this.defaultClient = this.buildDefaultClient(true);
@@ -51,7 +49,7 @@ class CreateApiClient {
         this.BASE_URI,
         credentials,
         this.OAUTH_URI,
-        this.PROJECT_KEY
+        this.PROJECT_KEY,
       )
       .build();
   }
@@ -109,7 +107,6 @@ class CreateApiClient {
       .build();
   }
 
-  
   // end
 }
 

@@ -42,9 +42,7 @@ export const Footer = () => {
               rel="noreferrer"
             ></a>
           </li>
-          <li className="year">
-            &copy; {new Date().getFullYear()}
-          </li>
+          <li className="year">&copy; {new Date().getFullYear()}</li>
         </div>
       </div>
     </footer>

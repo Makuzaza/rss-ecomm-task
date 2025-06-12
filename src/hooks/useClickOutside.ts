@@ -4,7 +4,7 @@ import { ClickOutsideEvent } from "@/@types/interfaces";
 export const useClickOutside = (
   ref: RefObject<HTMLElement>,
   callback: () => void,
-  isActive: boolean
+  isActive: boolean,
 ) => {
   useEffect(() => {
     const handleClickOutside = (event: ClickOutsideEvent) => {

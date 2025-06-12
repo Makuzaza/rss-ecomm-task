@@ -4,7 +4,7 @@ import { InteractionEvent } from "@/@types/interfaces";
 export const useClickAndEscape = (
   ref: RefObject<HTMLElement>,
   isActive: boolean,
-  callback: () => void
+  callback: () => void,
 ) => {
   useEffect(() => {
     const handleInteraction = (event: InteractionEvent) => {

@@ -18,7 +18,6 @@ const CategoryProductsPage = () => {
         const categories = await apiClient.getAllCategories({
           where: `slug(en-US="${categorySlug}")`,
         });
-        console.log("category slug:", categories);
 
         if (categories.results.length > 0) {
           const category = categories.results[0];

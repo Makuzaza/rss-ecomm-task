@@ -126,7 +126,7 @@
   display: none;
 }
 
-.mobile-menu-button, 
+.mobile-menu-button,
 .mobile-search-button {
   display: flex;
   align-items: center;
@@ -162,7 +162,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.mobile-nav-link, 
+.mobile-nav-link,
 .mobile-auth-button {
   font-size: 1rem;
   display: block;
@@ -207,7 +207,6 @@
     margin: 5px 0;
   }
 }
-
 
 /* Responsive Styles */
 @media (max-width: 850px) {

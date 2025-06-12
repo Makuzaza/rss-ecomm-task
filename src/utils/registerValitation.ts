@@ -23,7 +23,7 @@ export const validateField = (
   value: string,
   formData: RegisterFormFields,
   countries: typeof europeanCountriesData,
-  showBillingAddress: boolean
+  showBillingAddress: boolean,
 ): string => {
   switch (name) {
     case "email":
@@ -74,7 +74,7 @@ export const validateField = (
       if (!formData.shippingCountry) return "Please select a country first";
       if (!value) return "Postal code is required";
       const selectedCountry = countries.find(
-        (c) => c.code === formData.shippingCountry
+        (c) => c.code === formData.shippingCountry,
       );
       if (selectedCountry) {
         const regex = new RegExp(selectedCountry.codeRegex);
@@ -108,7 +108,7 @@ export const validateField = (
         if (!formData.billingCountry) return "Please select a country first";
         if (!value) return "Postal code is required";
         const selectedCountry = countries.find(
-          (c) => c.code === formData.billingCountry
+          (c) => c.code === formData.billingCountry,
         );
         if (selectedCountry) {
           const regex = new RegExp(selectedCountry.codeRegex);
@@ -127,7 +127,7 @@ export const validateField = (
 export const validateRegisterForm = (
   formData: RegisterFormFields,
   countries: typeof europeanCountriesData,
-  showBillingAddress: boolean
+  showBillingAddress: boolean,
 ): { isValid: boolean; errors: Record<keyof RegisterFormFields, string> } => {
   const errors: Record<keyof RegisterFormFields, string> = {
     email: "",
@@ -155,7 +155,7 @@ export const validateRegisterForm = (
       formData[key],
       formData,
       countries,
-      showBillingAddress
+      showBillingAddress,
     );
     if (error) {
       errors[key] = error;
