@@ -37,7 +37,7 @@ const CategoryDropdown = () => {
   }, []);
 
   const buildCategoryTree = (
-    allCategories: Category[]
+    allCategories: Category[],
   ): CategoryWithChildren[] => {
     const categoryMap = new Map<string, CategoryWithChildren>();
     allCategories.forEach((category) => {
@@ -58,7 +58,7 @@ const CategoryDropdown = () => {
     });
 
     const sortCategories = (
-      categories: CategoryWithChildren[]
+      categories: CategoryWithChildren[],
     ): CategoryWithChildren[] => {
       return [...categories]
         .sort((a, b) => {
@@ -105,6 +105,7 @@ const CategoryDropdown = () => {
       <button
         className="dropdown-toggle"
         onClick={() => {
+          navigate("/category");
           setIsOpen(!isOpen);
           setActiveCategory(null);
         }}
@@ -157,9 +158,7 @@ const CategoryDropdown = () => {
                           <Link
                             to={`/category/${child.slug?.["en-US"] || child.id}`}
                             className="subcategory-link"
-                            onClick={() =>
-                              closeMenu()
-                            }
+                            onClick={() => closeMenu()}
                           >
                             {getCategoryName(child)}
                           </Link>

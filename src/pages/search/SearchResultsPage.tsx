@@ -19,24 +19,9 @@ const SearchResultsPage = () => {
       setLoading(true);
 
       apiClient
-        .searchProductsByName(query)
+        .searchData("name", query)
         .then((response) => {
-          console.log("Search response:", response);
-
-          const transformedResults = response.results.map((product) => ({
-            id: product.id,
-            key: product.key || product.id,
-            sku: product.masterVariant.sku,
-            name: product.name?.["en-US"] || "Unnamed product",
-            description: product.description?.["en-US"] || "",
-            images: product.masterVariant.images || [],
-            price:
-              product.masterVariant.prices?.[0]?.value?.centAmount / 100 || 0,
-            priceDiscounted:
-              product.masterVariant.prices?.[0]?.discounted?.value?.centAmount /
-                100 || 0,
-          }));
-          setResults(transformedResults);
+          setResults(response);
           setLoading(false);
         })
         .catch((error) => {

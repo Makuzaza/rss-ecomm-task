@@ -123,13 +123,12 @@
   }
 }
 
-
 /* Mobile-specific styles */
 @media (max-width: 600px) {
   .category-dropdown {
     width: 100%;
   }
-  
+
   .mega-menu.mobile-view {
     position: fixed;
     top: var(--header-height, 60px);

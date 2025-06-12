@@ -1,7 +1,10 @@
 import { CustomerAddress } from "@/@types/interfaces";
 import europeanCountries from "@/data/europeanCountries.json";
 
-export function validatePostalCode(countryCode: string, postalCode: string): string | null {
+export function validatePostalCode(
+  countryCode: string,
+  postalCode: string,
+): string | null {
   if (!countryCode) return "Please select a country first";
   if (!postalCode.trim()) return "Postal code is required";
 
@@ -31,3 +34,4 @@ export function validateAddress(address: CustomerAddress): Partial<Record<keyof 
 
   return errors;
 }
+

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApiClient } from "@/context/ApiClientContext";
-import { sortProducts } from "@/utils/dataProcessing";
+import { filterProducts, sortProducts } from "@/utils/dataProcessing";
 import DOMPurify from "dompurify";
 import {
+  type MyProductFilter,
   type MyProductsData,
   type ProductCatalogProps,
 } from "@/@types/interfaces";
@@ -13,9 +14,12 @@ import "@/pages/home/HomePage.css";
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
   propsProducts,
-  propsLimit = 10,
-  propsApiSort = undefined,
+  propsLimit = 20,
+  propsApiSort,
   propsSort = "name-asc",
+  filterMinPrice,
+  filterMaxPrice,
+  filterDiscountOnly = false,
 }) => {
   const apiClient = useApiClient();
   const [products, setProducts] = useState<MyProductsData[]>([]);
@@ -25,11 +29,12 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   useEffect(() => {
     const fetchProducts = async () => {
       if (categoryId) {
-        console.log("Category: products", products);
         try {
           setLoading(true);
-          const data: MyProductsData[] =
-            await apiClient.searchProductsByCategory(categoryId);
+          const data: MyProductsData[] = await apiClient.searchData(
+            "category",
+            categoryId,
+          );
           setProducts(data);
           setError(null);
         } catch (err) {
@@ -43,27 +48,26 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
       } else {
         try {
           setLoading(true);
+
+          // GET PRODUCTS FROM API
           const arg = {
             limit: propsLimit,
             sort: propsApiSort,
           };
-
           const data: MyProductsData[] = await apiClient.getAllProducts(arg);
-          let productsData = [];
-          switch (propsSort) {
-            case "name-desc":
-              productsData = sortProducts(data, "name", "desc");
-              break;
-            case "price-asc":
-              productsData = sortProducts(data, "price", "asc");
-              break;
-            case "price-desc":
-              productsData = sortProducts(data, "price", "desc");
-              break;
-            default:
-              productsData = sortProducts(data, "name", "asc");
-          }
-          setProducts(productsData);
+
+          // SORT PRODUCTS DATA
+          const sortedData = sortProducts(data, propsSort);
+
+          // FILTER PRODUCTS DATA
+          const filterArg: MyProductFilter = {
+            minPrice: filterMinPrice,
+            maxPrice: filterMaxPrice,
+            discountOnly: filterDiscountOnly,
+          };
+          const filteredData = filterProducts(sortedData, filterArg);
+
+          setProducts(filteredData);
           setError(null);
         } catch (err) {
           setError(err.message);
@@ -74,10 +78,30 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
     };
 
     fetchProducts();
-  }, [categoryId, apiClient, propsProducts, propsSort, propsLimit]);
+  }, [
+    categoryId,
+    apiClient,
+    propsProducts,
+    propsSort,
+    propsLimit,
+    propsApiSort,
+    filterMinPrice,
+    filterMaxPrice,
+    filterDiscountOnly,
+  ]);
 
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-container">Error: {error}</div>;
+
+  if (products.length === 0) {
+    return (
+      <div className="main-container">
+        <p className="no-found">
+          No products were found matching your filters.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="cards-container">

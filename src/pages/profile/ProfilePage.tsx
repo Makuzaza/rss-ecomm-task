@@ -591,7 +591,11 @@ const ProfilePage = () => {
 
   const handlePasswordChange = async () => {
     try {
-      await apiClient.changePassword(currentPassword, newPassword, customer.version);
+      await apiClient.changePassword(
+        currentPassword,
+        newPassword,
+        customer.version,
+      );
 
       localStorage.removeItem("accessToken");
       await relogin({ email, password: newPassword });
@@ -614,10 +618,11 @@ const ProfilePage = () => {
         (err as { body: { errors?: unknown } }).body?.errors &&
         Array.isArray((err as { body: { errors: unknown } }).body.errors)
       ) {
-        const errorList = (err as { body: { errors: { code: string }[] } }).body.errors;
+        const errorList = (err as { body: { errors: { code: string }[] } }).body
+          .errors;
 
         const isInvalidPassword = errorList.some(
-          (e) => e.code === "InvalidCurrentPassword"
+          (e) => e.code === "InvalidCurrentPassword",
         );
 
         if (isInvalidPassword) {
@@ -634,7 +639,7 @@ const ProfilePage = () => {
   <>
     <div className="profile-page">
       <h2>User Profile</h2>
-      
+
       <section className="personal-info">
         <h3>Personal Information</h3>
         {errorMessage && <p className="error-message">{errorMessage}</p>}
@@ -801,7 +806,7 @@ const ProfilePage = () => {
                 newPassword !== confirmNewPassword && (
                   <p className="error-message">New passwords do not match</p>
                 )}
-
+              
               <div className="edit-buttons-container">
                 <button
                   type="button"    
