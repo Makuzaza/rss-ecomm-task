@@ -1,11 +1,12 @@
 import React, { Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Header } from "./header/Header";
 import { Footer } from "./footer/Footer";
 import "./App.css";
 import { AuthProvider } from "./../context/AuthContext";
 
 export const App = () => {
-  // console.log(process.env.VITE_CT_PROJECT_KEY); //  example of usage of env variable
   return (
     <AuthProvider>
       <div className="app-container">
@@ -15,6 +16,7 @@ export const App = () => {
         </main>
         <Footer />
       </div>
+      <ToastContainer />
     </AuthProvider>
   );
 };

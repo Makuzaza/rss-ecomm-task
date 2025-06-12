@@ -1,14 +1,26 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./components/App";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Login from "@/pages/login/Login";
-import Register from "@/pages/register/Register";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import React, { Suspense } from "react";
-import { ApiClientProvider } from "@/api/ApiClientContext";
-import Shop from "@/pages/shop/Shop";
-import About from "@/pages/about/About";
-import NotFound from "./pages/notfound/NotFound";
-import Profile from "./pages/profile/Profile";
+import { ApiClientProvider } from "@/context/ApiClientContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+
+// PAGES
+import HomePage from "@/pages/home/HomePage";
+import LoginPage from "@/pages/login/LoginPage";
+import RegisterPage from "@/pages/register/RegisterPage";
+import AboutPage from "@/pages/about/AboutPage";
+import NotFoundPage from "@/pages/notfound/NotFoundPage";
+import ProfilePage from "@/pages/profile/ProfilePage";
+import ProductDetailsPage from "@/pages/productDetails/ProductDetailsPage";
+import CategoryPage from "@/pages/category/CategoryPage";
+import ProductsPage from "@/pages/products/ProductsPage";
+import SearchResultsPage from "@/pages/search/SearchResultsPage";
+import CategoryProductsPage from "./pages/category/CategoryProductsPage";
 
 const root = document.getElementById("root");
 
@@ -24,10 +36,18 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
+        index: true,
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <HomePage />
+          </Suspense>
+        ),
+      },
+      {
         path: "/login",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Login />
+            <LoginPage />
           </Suspense>
         ),
       },
@@ -35,7 +55,7 @@ const router = createBrowserRouter([
         path: "/register",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Register />
+            <RegisterPage />
           </Suspense>
         ),
       },
@@ -43,15 +63,7 @@ const router = createBrowserRouter([
         path: "/about",
         element: (
           <Suspense fallback={"Loading..."}>
-            <About />
-          </Suspense>
-        ),
-      },
-      {
-        path: "/shop",
-        element: (
-          <Suspense fallback={"Loading..."}>
-            <Shop />
+            <AboutPage />
           </Suspense>
         ),
       },
@@ -59,15 +71,45 @@ const router = createBrowserRouter([
         path: "/profile",
         element: (
           <Suspense fallback={"Loading..."}>
-            <Profile />
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
           </Suspense>
         ),
+      },
+      {
+        path: "/product",
+        element: <Navigate to="/products" replace />,
+      },
+      {
+        path: "/products",
+        element: <ProductsPage />,
+      },
+      {
+        path: "/product/:id",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <ProductDetailsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/category",
+        element: <CategoryPage />,
+      },
+      {
+        path: "/category/:categorySlug",
+        element: <CategoryProductsPage />,
+      },
+      {
+        path: "/search",
+        element: <SearchResultsPage />,
       },
       {
         path: "*",
         element: (
           <Suspense fallback={"Loading..."}>
-            <NotFound />
+            <NotFoundPage />
           </Suspense>
         ),
       },
@@ -78,5 +120,5 @@ const router = createBrowserRouter([
 container.render(
   <ApiClientProvider>
     <RouterProvider router={router} />
-  </ApiClientProvider>
+  </ApiClientProvider>,
 );

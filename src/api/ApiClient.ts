@@ -1,102 +1,124 @@
-import { ClientBuilder, type Client } from "@commercetools/ts-client";
+import CreateApiClient from "./CreateApiClient";
 import {
-  createApiBuilderFromCtpClient,
-  ApiRoot,
-  CustomerSignInResult,
-  MyCustomerDraft,
+  allProductsNormalization,
+  productDataNormalization,
+  productSearchNormalization,
+} from "@/utils/dataNormalization";
+
+// types
+import {
+  type CategoryPagedQueryResponse,
+  type CustomerSignInResult,
+  type MyCustomerDraft,
+  type MyCustomerUpdate,
+  type Customer,
 } from "@commercetools/platform-sdk";
-import { CommerceToolsError } from "../@types/interfaces";
+import {
+  SearchTypes,
+  type CommerceToolsError,
+  type MyProductsData,
+} from "../@types/interfaces";
 
-export class ApiClient {
-  protected BASE_URI = process.env.REACT_APP_BASE_URL;
-  protected OAUTH_URI = process.env.REACT_APP_OAUTH_URL;
-  protected PROJECT_KEY = process.env.REACT_APP_PROJECT_KEY;
-
-  private readonly ADMIN_CREDENTIALS = {
-    // Admin client (scope)
-    clientId: process.env.REACT_APP_ADMIN_CLIENT_ID,
-    clientSecret: process.env.REACT_APP_ADMIN_CLIENT_SECRET,
-  };
-
-  private readonly SPA_CREDENTIALS = {
-    // SPA client (scope)
-    clientId: process.env.REACT_APP_SPA_CLIENT_ID,
-    clientSecret: process.env.REACT_APP_SPA_CLIENT_SECRET,
-  };
-
-  private client: Client;
-
-  constructor() {
-    this.client = this.getClient();
-  }
-
-  private getClient(): Client {
-    return new ClientBuilder()
-      .defaultClient(
-        this.BASE_URI,
-        this.ADMIN_CREDENTIALS,
-        this.OAUTH_URI,
-        this.PROJECT_KEY
-      )
-      .build();
-  }
-
-  private getApiRoot(isAdmin: boolean = false): ApiRoot {
-    return createApiBuilderFromCtpClient(this.buildClient(isAdmin));
-  }
-
-  private buildClient(isAdmin: boolean): Client {
-    const credentials = isAdmin ? this.ADMIN_CREDENTIALS : this.SPA_CREDENTIALS;
-
-    return new ClientBuilder()
-      .defaultClient(
-        this.BASE_URI,
-        credentials,
-        this.OAUTH_URI,
-        this.PROJECT_KEY
-      )
-      .build();
-  }
-
-  async getCustomersByLastName(lastName: string) {
-    const apiRoot = this.getApiRoot(true); // Admin client
-
+export class ApiClient extends CreateApiClient {
+  /**
+   * BUILD CUSTOMER WITH PASSWORD
+   */
+  public async getCustomerWithPassword(
+    email: string,
+    password: string,
+  ): Promise<Customer> {
     try {
-      const { body } = await apiRoot
+      this.client = this.buildClientWithPassword(email, password);
+      const apiRoot = this.getApiRoot(this.client);
+
+      const { body: customer } = await apiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
-        .customers()
-        .get({
-          queryArgs: {
-            where: `lastName="${lastName}"`,
-          },
-        })
+        .me()
+        .get()
         .execute();
-      return body;
+      return customer;
     } catch (error) {
-      console.error("API Error:", error);
-      throw error;
+      if (
+        error.toString() ===
+        "BadRequest: Customer account with the given credentials not found."
+      ) {
+        throw new Error("Invalid email or password");
+      }
+
+      // Fallback to generic message
+      throw new Error(error.toString());
     }
   }
 
-  public async registerCustomer(
-    customerData: MyCustomerDraft
-  ): Promise<CustomerSignInResult> {
-    const apiRoot = this.getApiRoot(false);
+  /**
+   * BUILD CUSTOMER WITH TOKEN
+   */
+  public async getCustomerWithToken(token: string) {
+    this.client = this.buildClientWithToken(token);
+    const apiRoot = this.getApiRoot(this.client);
 
     try {
-      const { body } = await apiRoot
-        .withProjectKey({ projectKey: this.PROJECT_KEY })
+      const { body: customer } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .me()
+        .get()
+        .execute();
+
+      return customer;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+   * SIGN IN CUSTOMER
+   */
+  public async loginCustomer(customerData: MyCustomerDraft) {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+
+    try {
+      const { body: customer } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .me()
+        .login()
+        .post({ body: customerData })
+        .execute();
+
+      return customer;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+   * REGISTER CUSTOMER
+   */
+  public async registerCustomer(
+    customerData: MyCustomerDraft,
+  ): Promise<CustomerSignInResult> {
+    const client = this.buildDefaultClient(false);
+    this.apiRoot = this.getApiRoot(client);
+
+    try {
+      const { body: customer } = await this.apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
         .me()
         .signup()
         .post({ body: customerData })
         .execute();
 
-      return body;
+      return customer;
     } catch (error) {
       const err = error as CommerceToolsError;
 
       const duplicateEmail = err.body.errors?.find(
-        (e) => e.code === "DuplicateField" && e.field === "email"
+        (e) => e.code === "DuplicateField" && e.field === "email",
       );
 
       if (duplicateEmail) {
@@ -107,87 +129,173 @@ export class ApiClient {
     }
   }
 
-  public async loginCustomer(
-    email: string,
-    password: string
-  ): Promise<{
-    firstName: string;
-    lastName: string;
-    email: string;
-  }> {
-    const formData = new URLSearchParams();
-    formData.append("grant_type", "password");
-    formData.append("username", email);
-    formData.append("password", password);
-    formData.append(
-      "scope",
-      ["manage_my_profile", "view_published_products", "manage_my_orders"]
-        .map((scope) => `${scope}:${this.PROJECT_KEY}`)
-        .join(" ")
-    );
+  /**
+   * GET CUSTOMER PROFILE
+   */
+  public async getCustomerProfile() {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
 
-    const authUrl = `${this.OAUTH_URI}/oauth/${this.PROJECT_KEY}/customers/token`;
-
-    const res = await fetch(authUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${btoa(`${this.SPA_CREDENTIALS.clientId}:${this.SPA_CREDENTIALS.clientSecret}`)}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: formData.toString(),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      const errorMessage =
-        data?.error_description || data?.message || "Login failed";
-      throw new Error(errorMessage);
-    }
-
-    localStorage.setItem("accessToken", data.access_token);
-
-    return this.getCurrentCustomer(data.access_token);
-  }
-
-  public async getCurrentCustomer(accessToken: string): Promise<{
-    firstName: string;
-    lastName: string;
-    email: string;
-  }> {
-    const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch customer data");
-    }
-
-    const data = await response.json();
-    return {
-      firstName: data.firstName || "",
-      lastName: data.lastName || "",
-      email: data.email,
-    };
-  }
-
-  public async validateToken(token: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.BASE_URI}/${this.PROJECT_KEY}/me`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.ok;
-    } catch {
-      return false;
+      const { body: customer } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .me()
+        .get()
+        .execute();
+      return customer;
+    } catch (error) {
+      console.log(error);
     }
   }
+
+  /**
+   * GET CATEGORIES
+   */
+  public async getAllCategories(args: {
+    limit?: number;
+    sort?: string;
+    where?: string;
+  }): Promise<CategoryPagedQueryResponse> {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .categories()
+        .get({ queryArgs: args })
+        .execute();
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /**
+   * GET ALL PRODUCTS
+   */
+  public async getAllProducts(args?: {
+    limit?: number;
+    sort?: string | string[];
+  }): Promise<MyProductsData[]> {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .products()
+        .get({ queryArgs: args })
+        .execute();
+
+      return allProductsNormalization(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /**
+   * GET PRODUCT WITH KEY
+   */
+  public async getProduct(key: string): Promise<MyProductsData> {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+    try {
+      const { body: data } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .products()
+        .withKey({ key: key })
+        .get()
+        .execute();
+
+      return productDataNormalization(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /**
+   * SEARCH DATA
+   */
+
+  public async searchData(
+    searchType: SearchTypes,
+    searchValue: string,
+  ): Promise<MyProductsData[]> {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+
+    let searchArgs = {};
+    switch (searchType) {
+      case "name":
+        searchArgs = { "text.en-US": searchValue, limit: 10 };
+        break;
+      case "category":
+        searchArgs = { "filter.query": `categories.id:"${searchValue}"` };
+        break;
+    }
+
+    try {
+      const { body: data } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
+        .productProjections()
+        .search()
+        .get({
+          queryArgs: searchArgs,
+        })
+        .execute();
+      return productSearchNormalization(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+   * UPDATE CUSTOMER
+   */
+  public async updateCustomer(
+    updatePayload: MyCustomerUpdate,
+  ): Promise<Customer> {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
+    try {
+      const { body: data } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .post({ body: updatePayload })
+        .execute();
+
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  public async changePassword(
+    currentPassword: string,
+    newPassword: string,
+    version: number,
+  ) {
+    const apiRoot = this.getApiRoot(this.client);
+
+    await apiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .me()
+      .password()
+      .post({
+        body: {
+          version,
+          currentPassword,
+          newPassword,
+        },
+      })
+      .execute();
+  }
+
+  // end
 }
+
 // Singleton instance
 export const apiClient = new ApiClient();

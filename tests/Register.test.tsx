@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import Register from "@/pages/register/Register";
-import { useApiClient } from "@/api/ApiClientContext";
+import Register from "@/pages/register/RegisterPage";
+import { useApiClient } from "@/context/ApiClientContext";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "@testing-library/jest-dom";

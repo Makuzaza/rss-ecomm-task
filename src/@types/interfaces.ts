@@ -1,3 +1,12 @@
+import {
+  type Customer,
+  // CustomerSignInResult,
+  type MyCustomerDraft,
+  type Image,
+  type ProductVariant,
+} from "@commercetools/platform-sdk";
+import { Category } from "@commercetools/platform-sdk";
+
 export interface CommerceToolsError {
   body: {
     statusCode: number;
@@ -38,8 +47,99 @@ export interface User {
   email: string;
 }
 
+export interface TokenStore {
+  token: string;
+  expirationTime: number;
+  refreshToken?: string;
+}
+
 export interface AuthContextType {
-  user: User | null;
-  login: (userData: User) => void;
+  isAuth: boolean;
+  customer: Customer | null;
+  token: string | null;
+  login: (email: string, password: string) => Promise<Customer>;
+  loginWithToken: (token: string) => Promise<void>;
   logout: () => void;
+  register: (customerData: MyCustomerDraft) => Promise<Customer>;
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+  refreshToken: () => Promise<void>;
+  setCustomer: (customer: Customer | null) => void;
+  relogin: (params: { email: string; password: string }) => Promise<void>;
+}
+
+export interface ProductCatalogProps {
+  categoryId?: string;
+  propsLimit?: number;
+  propsApiSort?: string;
+  propsSort?: string;
+  propsProducts?: MyProductsData[];
+  filterMinPrice?: string;
+  filterMaxPrice?: string;
+  filterDiscountOnly?: boolean;
+}
+
+export interface MyProductsData {
+  id: string;
+  key?: string;
+  date?: string;
+  name: string;
+  description?: string;
+  sku: string;
+  price: number;
+  priceDiscounted: number;
+  images?: Image[];
+  variants?: ProductVariant[];
+}
+
+export interface MyProductFilter {
+  minPrice: string;
+  maxPrice: string;
+  discountOnly: boolean;
+}
+
+export type SortDirection = "asc" | "desc";
+export type SearchTypes = "name" | "category";
+
+export interface CustomerAddress {
+  id?: string;
+  streetName: string;
+  postalCode: string;
+  city: string;
+  country: string;
+  state?: string;
+}
+
+export interface CustomerProfile {
+  id: string;
+  version: number;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  addresses: CustomerAddress[];
+  defaultBillingAddressId?: string;
+  defaultShippingAddressId?: string;
+}
+
+export interface ClickOutsideEvent extends MouseEvent {
+  target: Node;
+}
+
+export interface CategoryWithChildren extends Category {
+  children?: CategoryWithChildren[];
+}
+
+export type InteractionEvent = MouseEvent | KeyboardEvent | TouchEvent;
+
+export interface ValidatedInputProps {
+  label: string;
+  type: string;
+  value: string;
+  placeholder?: string;
+  error?: string;
+  onChange: (v: string) => void;
+  showToggle?: boolean;
+  isShown?: boolean;
+  onToggleShow?: () => void;
 }
