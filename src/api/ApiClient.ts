@@ -312,32 +312,42 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  public async createMyCart(): Promise<Cart> {
+  public async createMyCart(customer?: Customer): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
 
-    try {
-      const { body: cart } = await apiRoot
-        .withProjectKey({ projectKey: this.PROJECT_KEY })
-        .me()
-        .carts()
-        .post({
-          body: {
-            currency: "EUR",
-          },
-        })
-        .execute();
+    const shippingAddress = customer?.addresses?.find(
+      (addr) => addr.id === customer.defaultShippingAddressId
+    );
 
-      return cart;
-    } catch (error) {
-      console.error("Failed to create cart:", error);
-      throw new Error("Cart creation failed");
+    const countryFromCustomer = shippingAddress?.country;
+
+    const body: {
+      currency: string;
+      
+      country?: string;
+    } = {
+      currency: "EUR",
+    };
+
+    if (countryFromCustomer) {
+      body.country = countryFromCustomer;
     }
+
+    const { body: cart } = await apiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .me()
+      .carts()
+      .post({ body })
+      .execute();
+
+    return cart;
   }
 
   public async addProductToCart(
     productId: string,
     variantId: number = 1,
+    customer?: Customer,
   ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -347,7 +357,7 @@ export class ApiClient extends CreateApiClient {
       try {
         cart = await this.getMyActiveCart();
       } catch {
-        cart = await this.createMyCart();
+        cart = await this.createMyCart(customer);
       }
 
       const updatedCart = await apiRoot

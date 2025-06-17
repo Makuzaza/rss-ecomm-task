@@ -10,6 +10,8 @@ import {
 } from "@/@types/interfaces";
 import "./ProductCatalog.css";
 import "@/pages/home/HomePage.css";
+import { useCart } from "@/context/CartContext";
+import { getEURVariant } from "@/utils/productHelpers";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
@@ -25,6 +27,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const [products, setProducts] = useState<MyProductsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { addToCart, isInCart, isLoadingAddToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -138,7 +141,33 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
             </div>
           </Link>
           <div className="cards-item-card cards-item-text">
-            <button className="button__addToCart">ADD TO CART</button>
+            <button
+              className="button__addToCart"
+             onClick={() => {
+  console.log("PRODUCT:", product); // 👈
+  const variant = getEURVariant(product);
+
+  if (!variant) {
+    console.warn("No EUR-priced variant");
+    return;
+  }
+
+  console.log("ADDING TO CART:", {
+    productId: product.id,
+    variantId: variant.id,
+    variantSKU: variant.sku,
+  });
+
+  addToCart(product.id, variant.id);
+}}
+              disabled={isInCart(product.id) || isLoadingAddToCart(product.id)}
+            >
+              {isLoadingAddToCart(product.id)
+                ? "Adding..."
+                : isInCart(product.id)
+                ? "In Cart"
+                : "Add to Cart"}
+            </button>
           </div>
         </div>
       ))}
