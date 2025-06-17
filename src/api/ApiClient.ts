@@ -12,6 +12,7 @@ import {
   type MyCustomerDraft,
   type MyCustomerUpdate,
   type Customer,
+  Cart,
 } from "@commercetools/platform-sdk";
 import {
   SearchTypes,
@@ -293,6 +294,89 @@ export class ApiClient extends CreateApiClient {
       })
       .execute();
   }
+
+  public async getMyActiveCart() {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+    try {
+      const { body: cart } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .activeCart()
+        .get()
+        .execute();
+      return cart;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to fetch active cart");
+    }
+  }
+
+  public async createMyCart(): Promise<Cart> {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
+    try {
+      const { body: cart } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .carts()
+        .post({
+          body: {
+            currency: "EUR",
+          },
+        })
+        .execute();
+
+      return cart;
+    } catch (error) {
+      console.error("Failed to create cart:", error);
+      throw new Error("Cart creation failed");
+    }
+  }
+
+  public async addProductToCart(
+    productId: string,
+    variantId: number = 1,
+  ): Promise<Cart> {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
+    try {
+      let cart;
+      try {
+        cart = await this.getMyActiveCart();
+      } catch {
+        cart = await this.createMyCart();
+      }
+
+      const updatedCart = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .carts()
+        .withId({ ID: cart.id })
+        .post({
+          body: {
+            version: cart.version,
+            actions: [
+              {
+                action: "addLineItem",
+                productId,
+                variantId,
+                quantity: 1,
+              },
+            ],
+          },
+        })
+        .execute();
+
+      return updatedCart.body;
+    } catch (error) {
+      console.error("Failed to add product to cart:", error);
+      throw new Error("Add to cart failed");
+    }
+  }
+
 
   // end
 }
