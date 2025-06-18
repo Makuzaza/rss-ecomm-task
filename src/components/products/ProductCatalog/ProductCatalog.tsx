@@ -11,7 +11,7 @@ import {
 import "./ProductCatalog.css";
 import "@/pages/home/HomePage.css";
 import { useCart } from "@/context/CartContext";
-import { getEURVariant } from "@/utils/productHelpers";
+// import { getEURVariant } from "@/utils/productHelpers";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
@@ -27,7 +27,8 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const [products, setProducts] = useState<MyProductsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { addToCart, isInCart, isLoadingAddToCart } = useCart();
+  // const { addToCart, isInCart, isLoadingAddToCart } = useCart();
+  const { isInCart, isLoadingAddToCart } = useCart();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProductsCount, setTotalProductsCount] = useState(0);
   const [productsPerPage, setProductsPerPage] = useState(12);
@@ -107,10 +108,6 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
           setProducts(filteredData);
           setError(null);
-
-          // tmp
-          const myCart = await apiClient.getMyCarts();
-          console.log("MyCart:", myCart);
         } catch (err) {
           setError(err.message);
         } finally {
@@ -201,22 +198,31 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
             <div className="cards-item-card cards-item-text">
               <button
                 className="button__addToCart"
-                onClick={() => {
-                  console.log("PRODUCT:", product); // 👈
-                  const variant = getEURVariant(product);
+                onClick={async () => {
+                  // tmp
+                  const myCart = await apiClient.getMyCarts();
+                  const myProfile = await apiClient.getCustomerProfile();
+                  const activeCart = await apiClient.getMyActiveCart();
+                  console.log("myProfile:", myProfile);
+                  console.log("MyCart:", myCart);
+                  console.log("activeCart:", activeCart);
+                  // const deleteCarts = await apiClient.deleteAllCarts(myCart);
+                  // console.log("CartDeleted:", deleteCarts);
 
-                  if (!variant) {
-                    console.warn("No EUR-priced variant");
-                    return;
-                  }
+                  // const variant = getEURVariant(product);
 
-                  console.log("ADDING TO CART:", {
-                    productId: product.id,
-                    variantId: variant.id,
-                    variantSKU: variant.sku,
-                  });
+                  // if (!variant) {
+                  //   console.warn("No EUR-priced variant");
+                  //   return;
+                  // }
 
-                  addToCart(product.id, variant.id);
+                  // console.log("ADDING TO CART:", {
+                  //   productId: product.id,
+                  //   variantId: variant.id,
+                  //   variantSKU: variant.sku,
+                  // });
+
+                  // addToCart(product.id, variant.id);
                 }}
                 aria-label={`Add ${product.name} to cart`}
                 disabled={

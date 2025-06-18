@@ -367,6 +367,36 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
+  public async deleteAllCarts(carts: Cart[]) {
+    // console.log("delete:", carts);
+    // carts.forEach((cart) => {
+    //   const deletePromise = new Promise();
+    // });
+    await this.deleteCart(carts[1]);
+  }
+
+  public async deleteCart(cart: Cart) {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+    try {
+      const { body: result } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .carts()
+        .withId({ ID: cart.id })
+        .delete({
+          queryArgs: {
+            version: cart.version,
+          },
+        })
+        .execute();
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to fetch active cart");
+    }
+  }
+
   public async createMyCart(customer?: Customer): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -401,19 +431,20 @@ export class ApiClient extends CreateApiClient {
 
   public async addProductToCart(
     productId: string,
-    variantId: number = 1,
-    customer?: Customer
+    variantId: number = 1
+    // customer?: Customer
   ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
 
     try {
-      let cart;
-      try {
-        cart = await this.getMyActiveCart();
-      } catch {
-        cart = await this.createMyCart(customer);
-      }
+      // let cart;
+      // try {
+      //   cart = await this.getMyActiveCart();
+      // } catch {
+      //   cart = await this.createMyCart(customer);
+      // }
+      const cart = await this.getMyActiveCart();
 
       const updatedCart = await apiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })

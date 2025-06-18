@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { Cart, CartPagedQueryResponse } from "@commercetools/platform-sdk";
 import { useApiClient } from "./ApiClientContext";
 
@@ -19,21 +19,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loadingItems, setLoadingItems] = useState<string[]>([]);
 
   // On mount → fetch or create cart
-  useEffect(() => {
-    const initCart = async () => {
-      try {
-        const existingCart = await apiClient.getMyCarts();
-        console.log("existingCart:", existingCart);
-        setCart(existingCart[0]);
-      } catch (error) {
-        console.log(error);
-        const newCart = await apiClient.createMyCart();
-        setCart(newCart);
-      }
-    };
+  // useEffect(() => {
+  //   const initCart = async () => {
+  //     try {
+  //       const existingCart = await apiClient.getMyCarts();
+  //       console.log("existingCart:", existingCart);
+  //       setCart(existingCart[0]);
+  //     } catch (error) {
+  //       console.log(error);
+  //       const newCart = await apiClient.createMyCart();
+  //       setCart(newCart);
+  //     }
+  //   };
 
-    initCart();
-  }, [apiClient]);
+  //   initCart();
+  // }, [apiClient]);
 
   const addToCart = async (productId: string, variantId: number = 1) => {
     try {
