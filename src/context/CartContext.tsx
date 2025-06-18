@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Cart } from "@commercetools/platform-sdk";
+import { Cart, Customer } from "@commercetools/platform-sdk";
 import { useApiClient } from "./ApiClientContext";
 
 interface CartContextType {
@@ -35,16 +35,40 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoadingItems((prev) => [...prev, productId]);
 
+      let customer: Customer | undefined;
       let activeCart = cart;
-      let customer;
 
+      // Если нет корзины — пытаемся получить текущего customer
       if (!activeCart) {
-        customer = await apiClient.getCustomerProfile();
-        activeCart = await apiClient.createMyCart(customer);
+        try {
+          customer = await apiClient.getCustomerProfile(); // если неавторизован, вернёт undefined или выбросит
+        } catch {
+          customer = undefined;
+        }
+
+        try {
+          activeCart = await apiClient.getMyActiveCart();
+        } catch (err: unknown) {
+          if (
+            err instanceof Error &&
+            err.message.includes("404")
+          ) {
+            // если корзины нет — создаём
+            activeCart = await apiClient.createMyCart(customer);
+          } else {
+            throw err;
+          }
+        }
+
         setCart(activeCart);
       }
 
-      const updatedCart = await apiClient.addProductToCart(productId, variantId, customer);
+      const updatedCart = await apiClient.addProductToCart(
+        productId,
+        variantId,
+        customer
+      );
+
       setCart(updatedCart);
     } catch (error) {
       console.error("Add to cart failed:", error);
