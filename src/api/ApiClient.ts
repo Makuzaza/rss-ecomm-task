@@ -364,11 +364,15 @@ export class ApiClient extends CreateApiClient {
 
     const body: {
       currency: string;
-      
       country?: string;
+      anonymousId?: string;
     } = {
       currency: "EUR",
     };
+
+    if (!customer?.id) {
+      body.anonymousId = this.getOrCreateAnonymousId();
+    }
 
     if (countryFromCustomer) {
       body.country = countryFromCustomer;

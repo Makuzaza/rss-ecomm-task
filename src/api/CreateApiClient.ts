@@ -11,6 +11,8 @@ import {
   ApiRoot,
 } from "@commercetools/platform-sdk";
 
+import { v4 as uuidv4 } from 'uuid';
+
 class CreateApiClient {
   protected BASE_URI = process.env.REACT_APP_BASE_URL;
   protected OAUTH_URI = process.env.REACT_APP_OAUTH_URL;
@@ -105,6 +107,16 @@ class CreateApiClient {
         host: this.BASE_URI,
       })
       .build();
+  }
+
+  protected getOrCreateAnonymousId(): string {
+    const key = "anonymous_id";
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = uuidv4();
+      localStorage.setItem(key, id);
+    }
+    return id;
   }
 
   // end
