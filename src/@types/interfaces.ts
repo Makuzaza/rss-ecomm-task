@@ -143,3 +143,7 @@ export interface ValidatedInputProps {
   isShown?: boolean;
   onToggleShow?: () => void;
 }
+
+export interface CategoryDropdownProps {
+  onItemSelected?: () => void;
+}
