@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Cart } from "@commercetools/platform-sdk";
+import { Cart, CartPagedQueryResponse } from "@commercetools/platform-sdk";
 import { useApiClient } from "./ApiClientContext";
 
 interface CartContextType {
-  cart: Cart | null;
+  cart: CartPagedQueryResponse | Cart | null;
   addToCart: (productId: string, variantId?: number) => Promise<void>;
   isInCart: (productId: string) => boolean;
   isLoadingAddToCart: (productId: string) => boolean;
@@ -11,18 +11,22 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const apiClient = useApiClient();
-  const [cart, setCart] = useState<Cart | null>(null);
+  const [cart, setCart] = useState<CartPagedQueryResponse | Cart | null>(null);
   const [loadingItems, setLoadingItems] = useState<string[]>([]);
 
   // On mount → fetch or create cart
   useEffect(() => {
     const initCart = async () => {
       try {
-        const existingCart = await apiClient.getMyActiveCart();
-        setCart(existingCart);
-      } catch {
+        const existingCart = await apiClient.getMyCarts();
+        console.log("existingCart:", existingCart);
+        setCart(existingCart[0]);
+      } catch (error) {
+        console.log(error);
         const newCart = await apiClient.createMyCart();
         setCart(newCart);
       }
@@ -44,7 +48,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCart(activeCart);
       }
 
-      const updatedCart = await apiClient.addProductToCart(productId, variantId, customer);
+      const updatedCart = await apiClient.addProductToCart(
+        productId,
+        variantId,
+        customer
+      );
       setCart(updatedCart);
     } catch (error) {
       console.error("Add to cart failed:", error);
@@ -53,14 +61,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const isInCart = (productId: string): boolean => {
+    return (
+      cart?.lineItems?.some((item) => item.productId === productId) ?? false
+    );
+  };
 
-    const isInCart = (productId: string): boolean => {
-      return cart?.lineItems?.some((item) => item.productId === productId) ?? false;
-    };
-
-    const isLoadingAddToCart = (productId: string): boolean => {
-      return loadingItems.includes(productId);
-    };
+  const isLoadingAddToCart = (productId: string): boolean => {
+    return loadingItems.includes(productId);
+  };
 
   return (
     <CartContext.Provider

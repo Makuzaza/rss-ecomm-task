@@ -1,7 +1,7 @@
 import CreateApiClient from "./CreateApiClient";
 import {
   allProductsNormalization,
-  productDataNormalization
+  productDataNormalization,
 } from "@/utils/dataNormalization";
 
 // types
@@ -26,7 +26,7 @@ export class ApiClient extends CreateApiClient {
    */
   public async getCustomerWithPassword(
     email: string,
-    password: string,
+    password: string
   ): Promise<Customer> {
     try {
       this.client = this.buildClientWithPassword(email, password);
@@ -99,7 +99,7 @@ export class ApiClient extends CreateApiClient {
    * REGISTER CUSTOMER
    */
   public async registerCustomer(
-    customerData: MyCustomerDraft,
+    customerData: MyCustomerDraft
   ): Promise<CustomerSignInResult> {
     const client = this.buildDefaultClient(false);
     this.apiRoot = this.getApiRoot(client);
@@ -119,7 +119,7 @@ export class ApiClient extends CreateApiClient {
       const err = error as CommerceToolsError;
 
       const duplicateEmail = err.body.errors?.find(
-        (e) => e.code === "DuplicateField" && e.field === "email",
+        (e) => e.code === "DuplicateField" && e.field === "email"
       );
 
       if (duplicateEmail) {
@@ -290,13 +290,11 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-
-
   /**
    * UPDATE CUSTOMER
    */
   public async updateCustomer(
-    updatePayload: MyCustomerUpdate,
+    updatePayload: MyCustomerUpdate
   ): Promise<Customer> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -317,7 +315,7 @@ export class ApiClient extends CreateApiClient {
   public async changePassword(
     currentPassword: string,
     newPassword: string,
-    version: number,
+    version: number
   ) {
     const apiRoot = this.getApiRoot(this.client);
 
@@ -352,6 +350,23 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
+  public async getMyCarts() {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+    try {
+      const { body: cart } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .carts()
+        .get()
+        .execute();
+      return cart.results;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to fetch active cart");
+    }
+  }
+
   public async createMyCart(customer?: Customer): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -364,7 +379,7 @@ export class ApiClient extends CreateApiClient {
 
     const body: {
       currency: string;
-      
+
       country?: string;
     } = {
       currency: "EUR",
@@ -387,7 +402,7 @@ export class ApiClient extends CreateApiClient {
   public async addProductToCart(
     productId: string,
     variantId: number = 1,
-    customer?: Customer,
+    customer?: Customer
   ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -426,7 +441,6 @@ export class ApiClient extends CreateApiClient {
       throw new Error("Add to cart failed");
     }
   }
-
 
   // end
 }

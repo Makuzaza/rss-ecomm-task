@@ -54,24 +54,24 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
     return () => window.removeEventListener("resize", updatePerPage);
   }, []);
-  
 
   useEffect(() => {
     const fetchProducts = async () => {
       if (categoryId) {
         try {
           setLoading(true);
-          const { products: fetchedProducts, total } = await apiClient.searchData("category", categoryId, {
-            limit: productsPerPage,
-            offset: (currentPage - 1) * productsPerPage,
-            sort: propsApiSort,
-            minPrice: filterMinPrice ? Number(filterMinPrice) : undefined,
-            maxPrice: filterMaxPrice ? Number(filterMaxPrice) : undefined,
-            discountOnly: filterDiscountOnly,
-          });
+          const { products: fetchedProducts, total } =
+            await apiClient.searchData("category", categoryId, {
+              limit: productsPerPage,
+              offset: (currentPage - 1) * productsPerPage,
+              sort: propsApiSort,
+              minPrice: filterMinPrice ? Number(filterMinPrice) : undefined,
+              maxPrice: filterMaxPrice ? Number(filterMaxPrice) : undefined,
+              discountOnly: filterDiscountOnly,
+            });
 
-          setProducts(fetchedProducts);    
-          setTotalProductsCount(total);       
+          setProducts(fetchedProducts);
+          setTotalProductsCount(total);
         } catch (err) {
           setError(err.message);
         } finally {
@@ -91,9 +91,9 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
             offset,
             sort: propsApiSort,
           };
-          const { products: fetchedProducts, total } = await apiClient.getAllProducts(arg);
+          const { products: fetchedProducts, total } =
+            await apiClient.getAllProducts(arg);
           setTotalProductsCount(total);
-      
 
           // SORT PRODUCTS DATA
           const sortedData = sortProducts(fetchedProducts, propsSort);
@@ -107,6 +107,10 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
           setProducts(filteredData);
           setError(null);
+
+          // tmp
+          const myCart = await apiClient.getMyCarts();
+          console.log("MyCart:", myCart);
         } catch (err) {
           setError(err.message);
         } finally {
@@ -148,12 +152,12 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   }
 
   return (
-     <>
-     {totalProductsCount > 0 && (
+    <>
+      {totalProductsCount > 0 && (
         <p className="product-count-info">
-          Showing {(currentPage - 1) * productsPerPage + 1}
-          –
-          {(currentPage - 1) * productsPerPage + products.length} of {totalProductsCount} products
+          Showing {(currentPage - 1) * productsPerPage + 1}–
+          {(currentPage - 1) * productsPerPage + products.length} of{" "}
+          {totalProductsCount} products
         </p>
       )}
       <div className="cards-container">
@@ -162,7 +166,10 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           <div key={product.id} className="cards-item">
             <Link to={"/product/" + product.key}>
               <div className="cards-item-img">
-                <img src={product.images[0].url} alt={`Image of ${product.name}`} />
+                <img
+                  src={product.images[0].url}
+                  alt={`Image of ${product.name}`}
+                />
               </div>
               <div className="cards-item-name cards-item-text">
                 {product.name}
@@ -182,7 +189,9 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     <span className="price-discounted">
                       {product.priceDiscounted} &euro;
                     </span>
-                    <span className="price-original">{product.price} &euro;</span>
+                    <span className="price-original">
+                      {product.price} &euro;
+                    </span>
                   </div>
                 ) : (
                   <span className="price-regular">{product.price} &euro;</span>
@@ -193,30 +202,32 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
               <button
                 className="button__addToCart"
                 onClick={() => {
-                    console.log("PRODUCT:", product); // 👈
-                    const variant = getEURVariant(product);
+                  console.log("PRODUCT:", product); // 👈
+                  const variant = getEURVariant(product);
 
-                    if (!variant) {
-                      console.warn("No EUR-priced variant");
-                      return;
-                    }
+                  if (!variant) {
+                    console.warn("No EUR-priced variant");
+                    return;
+                  }
 
-                    console.log("ADDING TO CART:", {
-                      productId: product.id,
-                      variantId: variant.id,
-                      variantSKU: variant.sku,
-                    });
+                  console.log("ADDING TO CART:", {
+                    productId: product.id,
+                    variantId: variant.id,
+                    variantSKU: variant.sku,
+                  });
 
-                    addToCart(product.id, variant.id);
-                  }}
-                  aria-label={`Add ${product.name} to cart`}
-                  disabled={isInCart(product.id) || isLoadingAddToCart(product.id)}
-                >
+                  addToCart(product.id, variant.id);
+                }}
+                aria-label={`Add ${product.name} to cart`}
+                disabled={
+                  isInCart(product.id) || isLoadingAddToCart(product.id)
+                }
+              >
                 {isLoadingAddToCart(product.id)
                   ? "Adding..."
                   : isInCart(product.id)
-                  ? "In Cart"
-                  : "Add to Cart"}
+                    ? "In Cart"
+                    : "Add to Cart"}
               </button>
             </div>
           </div>
