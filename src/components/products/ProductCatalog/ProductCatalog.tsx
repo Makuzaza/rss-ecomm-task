@@ -11,7 +11,7 @@ import {
 import "./ProductCatalog.css";
 import "@/pages/home/HomePage.css";
 import { useCart } from "@/context/CartContext";
-// import { getEURVariant } from "@/utils/productHelpers";
+import { getEURVariant } from "@/utils/productHelpers";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
@@ -27,8 +27,8 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const [products, setProducts] = useState<MyProductsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // const { addToCart, isInCart, isLoadingAddToCart } = useCart();
-  const { isInCart, isLoadingAddToCart } = useCart();
+  const { addToCart, isInCart, isLoadingAddToCart } = useCart();
+  // const { isInCart, isLoadingAddToCart } = useCart();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProductsCount, setTotalProductsCount] = useState(0);
   const [productsPerPage, setProductsPerPage] = useState(12);
@@ -200,6 +200,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 className="button__addToCart"
                 onClick={async () => {
                   // tmp
+
                   const myCart = await apiClient.getMyCarts();
                   const myProfile = await apiClient.getCustomerProfile();
                   const activeCart = await apiClient.getMyActiveCart();
@@ -209,12 +210,12 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   // const deleteCarts = await apiClient.deleteAllCarts(myCart);
                   // console.log("CartDeleted:", deleteCarts);
 
-                  // const variant = getEURVariant(product);
+                  const variant = getEURVariant(product);
 
-                  // if (!variant) {
-                  //   console.warn("No EUR-priced variant");
-                  //   return;
-                  // }
+                  if (!variant) {
+                    console.warn("No EUR-priced variant");
+                    return;
+                  }
 
                   // console.log("ADDING TO CART:", {
                   //   productId: product.id,
@@ -222,7 +223,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   //   variantSKU: variant.sku,
                   // });
 
-                  // addToCart(product.id, variant.id);
+                  addToCart(product.id, variant.id);
                 }}
                 aria-label={`Add ${product.name} to cart`}
                 disabled={

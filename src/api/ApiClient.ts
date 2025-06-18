@@ -444,16 +444,17 @@ export class ApiClient extends CreateApiClient {
       // } catch {
       //   cart = await this.createMyCart(customer);
       // }
-      const cart = await this.getMyActiveCart();
+      // const cart = await this.getMyActiveCart();
+      const cart = await this.getMyCarts();
 
       const updatedCart = await apiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
         .me()
         .carts()
-        .withId({ ID: cart.id })
+        .withId({ ID: cart[0].id })
         .post({
           body: {
-            version: cart.version,
+            version: cart[0].version,
             actions: [
               {
                 action: "addLineItem",

@@ -39,19 +39,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setLoadingItems((prev) => [...prev, productId]);
 
-      let activeCart = cart;
-      let customer;
+      // let activeCart = cart;
+      // let customer;
 
-      if (!activeCart) {
-        customer = await apiClient.getCustomerProfile();
-        activeCart = await apiClient.createMyCart(customer);
-        setCart(activeCart);
-      }
+      // if (!activeCart) {
+      //   customer = await apiClient.getCustomerProfile();
+      //   activeCart = await apiClient.createMyCart(customer);
+      //   setCart(activeCart);
+      // }
 
       const updatedCart = await apiClient.addProductToCart(
         productId,
-        variantId,
-        customer
+        variantId
+        // customer
       );
       setCart(updatedCart);
     } catch (error) {
