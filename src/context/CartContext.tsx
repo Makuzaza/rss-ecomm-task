@@ -5,7 +5,7 @@ import { useApiClient } from "./ApiClientContext";
 interface CartContextType {
   cart: Cart | null;
   addToCart: (productId: string, variantId?: number) => Promise<void>;
-  isInCart: (productId: string) => boolean;
+  isInCart: (productId: string, variantId?: number) => boolean;
   isLoadingAddToCart: (productId: string) => boolean;
 }
 
@@ -54,9 +54,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
 
-    const isInCart = (productId: string): boolean => {
-      return cart?.lineItems?.some((item) => item.productId === productId) ?? false;
-    };
+    function isInCart(productId: string, variantId?: number): boolean {
+      return cart?.lineItems?.some(
+        (item) =>
+          item.productId === productId &&
+          (variantId ? item.variant.id === variantId : true)
+      ) ?? false;
+    }
 
     const isLoadingAddToCart = (productId: string): boolean => {
       return loadingItems.includes(productId);

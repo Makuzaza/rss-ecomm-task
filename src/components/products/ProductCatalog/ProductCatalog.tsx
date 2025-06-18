@@ -61,9 +61,10 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
       if (categoryId) {
         try {
           setLoading(true);
+          const offset = (currentPage - 1) * productsPerPage;
           const { products: fetchedProducts, total } = await apiClient.searchData("category", categoryId, {
             limit: productsPerPage,
-            offset: (currentPage - 1) * productsPerPage,
+            offset,
             sort: propsApiSort,
             minPrice: filterMinPrice ? Number(filterMinPrice) : undefined,
             maxPrice: filterMaxPrice ? Number(filterMaxPrice) : undefined,

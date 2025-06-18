@@ -10,9 +10,11 @@ import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 
 import "./ProductDetailsPage.css";
 import { type MyProductsData } from "@/@types/interfaces";
+import { useCart } from "@/context/CartContext";
 
 const ProductDetailsPage = () => {
   const apiClient = useApiClient();
+  const { addToCart, isInCart, isLoadingAddToCart } = useCart();
   const navigate = useNavigate();
   const [product, setProduct] = useState<MyProductsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,8 +56,25 @@ const ProductDetailsPage = () => {
   };
 
   const handleAddToCart = () => {
-    console.log("Added to cart:", product.name);
+    if (!product) return;
+    console.log("PRODUCT:", product); // 👈
+
+    const variant = selectedVariant === 0
+      ? { id: 1 }
+      : product.variants[selectedVariant - 1];
+
+    if (!variant) {
+      console.warn("Selected variant not found");
+      return;
+    }
+    console.log("ADDING TO CART:", {
+                    productId: product.id,
+                    variantId: variant.id,
+                    variantSKU: variant.sku,
+                  });
+    addToCart(product.id, variant.id);
   };
+
   const closeImageModal = () => {
     setIsModalOpen(false);
     document.body.style.overflow = "auto";
@@ -118,6 +137,10 @@ const ProductDetailsPage = () => {
 
   // HTML SANITIZATION
   const sanitizedDesc = DOMPurify.sanitize(product.description);
+
+  const variantId =
+  selectedVariant === 0 ? 1 : product.variants[selectedVariant - 1]?.id;
+
 
   return (
     <div className="main-content">
@@ -257,8 +280,16 @@ const ProductDetailsPage = () => {
           </div>
           {/* ADD TO CART BUTTON */}
           <div className="buy-section">
-            <button className="button__addToCart" onClick={handleAddToCart}>
-              Add to Cart
+            <button
+              onClick={handleAddToCart}
+              disabled={isInCart(product.id, variantId) || isLoadingAddToCart(product.id)}
+              className="button__addToCart"
+            >
+              {isLoadingAddToCart(product.id)
+                ? "Adding..."
+                : isInCart(product.id, variantId)
+                ? "In Cart"
+                : "Add to Cart"}
             </button>
           </div>
         </div>
