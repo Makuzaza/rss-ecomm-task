@@ -1,8 +1,7 @@
 import CreateApiClient from "./CreateApiClient";
 import {
   allProductsNormalization,
-  productDataNormalization,
-  productSearchNormalization,
+  productDataNormalization
 } from "@/utils/dataNormalization";
 
 // types
@@ -13,6 +12,9 @@ import {
   type MyCustomerUpdate,
   type Customer,
   Cart,
+  ProductProjectionPagedQueryResponse,
+  ProductProjectionPagedSearchResponse,
+  QueryParam,
 } from "@commercetools/platform-sdk";
 import {
   SearchTypes,
@@ -176,23 +178,26 @@ export class ApiClient extends CreateApiClient {
   /**
    * GET ALL PRODUCTS
    */
+
   public async getAllProducts(args?: {
     limit?: number;
     sort?: string | string[];
-  }): Promise<MyProductsData[]> {
+    offset?: number;
+  }): Promise<{ products: MyProductsData[]; total: number }> {
     const apiRoot = this.getApiRoot(this.defaultClient);
     try {
-      const { body: data } = await apiRoot
-        .withProjectKey({
-          projectKey: this.PROJECT_KEY,
-        })
-        .products()
-        .get({ queryArgs: args })
-        .execute();
+      const { body: data }: { body: ProductProjectionPagedQueryResponse } =
+        await apiRoot
+          .withProjectKey({ projectKey: this.PROJECT_KEY })
+          .productProjections()
+          .get({ queryArgs: args })
+          .execute();
 
-      return allProductsNormalization(data);
+      const normalized = allProductsNormalization(data);
+      return { products: normalized, total: data.total };
     } catch (error) {
       console.log(error);
+      return { products: [], total: 0 };
     }
   }
   /**
@@ -222,35 +227,55 @@ export class ApiClient extends CreateApiClient {
   public async searchData(
     searchType: SearchTypes,
     searchValue: string,
-  ): Promise<MyProductsData[]> {
+    options: {
+      limit?: number;
+      offset?: number;
+      sort?: string | string[];
+      minPrice?: number;
+      maxPrice?: number;
+      discountOnly?: boolean;
+    } = {}
+  ): Promise<ProductProjectionPagedSearchResponse> {
     const apiRoot = this.getApiRoot(this.defaultClient);
 
-    let searchArgs = {};
-    switch (searchType) {
-      case "name":
-        searchArgs = { "text.en-US": searchValue, limit: 10 };
-        break;
-      case "category":
-        searchArgs = { "filter.query": `categories.id:"${searchValue}"` };
-        break;
+    const filterArgs: string[] = [];
+
+    if (typeof options.minPrice === "number") {
+      filterArgs.push(`variants.price.centAmount:range(${options.minPrice * 100} to *)`);
+    }
+    if (typeof options.maxPrice === "number") {
+      filterArgs.push(`variants.price.centAmount:range(* to ${options.maxPrice * 100})`);
+    }
+    if (options.discountOnly) {
+      filterArgs.push("variants.prices.discounted.exists:true");
     }
 
-    try {
-      const { body: data } = await apiRoot
-        .withProjectKey({
-          projectKey: this.PROJECT_KEY,
-        })
-        .productProjections()
-        .search()
-        .get({
-          queryArgs: searchArgs,
-        })
-        .execute();
-      return productSearchNormalization(data);
-    } catch (error) {
-      console.log(error);
+    const queryArgs: { [key: string]: QueryParam } = {
+      ...(searchType === "name" ? { "text.en-US": searchValue } : {}),
+      limit: options.limit,
+      offset: options.offset,
+      sort: options.sort,
+    };
+
+    if (searchType === "category") {
+      filterArgs.push(`categories.id:"${searchValue}"`);
     }
+
+    if (filterArgs.length > 0) {
+      queryArgs["filter.query"] = filterArgs;
+    }
+
+    const { body: data } = await apiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .productProjections()
+      .search()
+      .get({ queryArgs })
+      .execute();
+
+    return data;
   }
+
+
 
   /**
    * UPDATE CUSTOMER
