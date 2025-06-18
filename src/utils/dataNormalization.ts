@@ -56,24 +56,13 @@ export function productDataNormalization(product: ProductProjection | Product): 
 
 export function productSearchNormalization(
   data: ProductProjectionPagedSearchResponse,
-) {
-  return data.results.map((record) => {
-    const price = record.masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
-    const discountedPrice =
-      record.masterVariant.prices?.[0]?.discounted?.value.centAmount / 100 ||
-      undefined;
-
-    return {
-      id: record.id,
-      key: record.key,
-      data: record.createdAt,
-      name: record.name["en-US"],
-      description: record.description["en-US"] || "",
-      sku: record.masterVariant.sku || "",
-      price: price,
-      priceDiscounted: discountedPrice,
-      images: record.masterVariant.images,
-      variants: record.variants,
-    };
+): { products: MyProductsData[]; total: number } {
+  const products: MyProductsData[] = data.results.map((record) => {
+    return productDataNormalization(record);
   });
+
+  return {
+    products,
+    total: data.total,
+  };
 }

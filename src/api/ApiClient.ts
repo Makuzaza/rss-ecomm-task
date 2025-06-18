@@ -13,8 +13,6 @@ import {
   type Customer,
   Cart,
   ProductProjectionPagedQueryResponse,
-  ProductProjectionPagedSearchResponse,
-  QueryParam,
 } from "@commercetools/platform-sdk";
 import {
   SearchTypes,
@@ -235,29 +233,38 @@ export class ApiClient extends CreateApiClient {
       maxPrice?: number;
       discountOnly?: boolean;
     } = {}
-  ): Promise<ProductProjectionPagedSearchResponse> {
+  ): Promise<{ products: MyProductsData[]; total: number }> {
     const apiRoot = this.getApiRoot(this.defaultClient);
 
     const filterArgs: string[] = [];
 
     if (typeof options.minPrice === "number") {
-      filterArgs.push(`variants.price.centAmount:range(${options.minPrice * 100} to *)`);
+      filterArgs.push(
+        `variants.price.centAmount:range(${options.minPrice * 100} to *)`
+      );
     }
+
     if (typeof options.maxPrice === "number") {
-      filterArgs.push(`variants.price.centAmount:range(* to ${options.maxPrice * 100})`);
+      filterArgs.push(
+        `variants.price.centAmount:range(* to ${options.maxPrice * 100})`
+      );
     }
+
     if (options.discountOnly) {
       filterArgs.push("variants.prices.discounted.exists:true");
     }
 
-    const queryArgs: { [key: string]: QueryParam } = {
-      ...(searchType === "name" ? { "text.en-US": searchValue } : {}),
+    const queryArgs: {
+      [key: string]: string | string[] | number | boolean | undefined;
+    } = {
       limit: options.limit,
       offset: options.offset,
       sort: options.sort,
     };
 
-    if (searchType === "category") {
+    if (searchType === "name") {
+      queryArgs["text.en-US"] = searchValue;
+    } else if (searchType === "category") {
       filterArgs.push(`categories.id:"${searchValue}"`);
     }
 
@@ -265,14 +272,22 @@ export class ApiClient extends CreateApiClient {
       queryArgs["filter.query"] = filterArgs;
     }
 
-    const { body: data } = await apiRoot
-      .withProjectKey({ projectKey: this.PROJECT_KEY })
-      .productProjections()
-      .search()
-      .get({ queryArgs })
-      .execute();
+    try {
+      const { body } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .productProjections()
+        .search()
+        .get({ queryArgs })
+        .execute();
 
-    return data;
+      const products = body.results.map((p) => productDataNormalization(p));
+      const total = body.total ?? products.length;
+
+      return { products, total };
+    } catch (error) {
+      console.error("Failed to search products:", error);
+      throw new Error("Failed to fetch filtered products");
+    }
   }
 
 

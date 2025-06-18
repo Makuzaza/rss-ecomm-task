@@ -12,7 +12,6 @@ import "./ProductCatalog.css";
 import "@/pages/home/HomePage.css";
 import { useCart } from "@/context/CartContext";
 import { getEURVariant } from "@/utils/productHelpers";
-import { productDataNormalization } from "@/utils/dataNormalization";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
@@ -31,8 +30,30 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const { addToCart, isInCart, isLoadingAddToCart } = useCart();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProductsCount, setTotalProductsCount] = useState(0);
-  const PRODUCTS_PER_PAGE = 12;
-  const totalPages = Math.ceil(totalProductsCount / PRODUCTS_PER_PAGE);
+  const [productsPerPage, setProductsPerPage] = useState(12);
+  const totalPages = Math.ceil(totalProductsCount / productsPerPage);
+
+  useEffect(() => {
+    const calculateProductsPerPage = () => {
+      const width = window.innerWidth;
+
+      if (width >= 2560) return 20; // 2K+
+      if (width >= 1920) return 16; // FullHD+
+      if (width >= 1440) return 12;
+      if (width >= 1024) return 9;
+      if (width >= 768) return 6;
+      return 4; // movile
+    };
+
+    const updatePerPage = () => {
+      setProductsPerPage(calculateProductsPerPage());
+    };
+
+    updatePerPage(); // initial
+    window.addEventListener("resize", updatePerPage);
+
+    return () => window.removeEventListener("resize", updatePerPage);
+  }, []);
   
 
   useEffect(() => {
@@ -40,18 +61,17 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
       if (categoryId) {
         try {
           setLoading(true);
-          const { results: fetchedProducts, total } = await apiClient.searchData("category", categoryId, {
-            limit: PRODUCTS_PER_PAGE,
-            offset: (currentPage - 1) * PRODUCTS_PER_PAGE,
+          const { products: fetchedProducts, total } = await apiClient.searchData("category", categoryId, {
+            limit: productsPerPage,
+            offset: (currentPage - 1) * productsPerPage,
             sort: propsApiSort,
             minPrice: filterMinPrice ? Number(filterMinPrice) : undefined,
             maxPrice: filterMaxPrice ? Number(filterMaxPrice) : undefined,
             discountOnly: filterDiscountOnly,
           });
 
-          setTotalProductsCount(total);
-          setProducts(fetchedProducts.map(productDataNormalization));
-          setError(null);
+          setProducts(fetchedProducts);    
+          setTotalProductsCount(total);       
         } catch (err) {
           setError(err.message);
         } finally {
@@ -64,11 +84,10 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
         try {
           setLoading(true);
 
-          const PRODUCTS_PER_PAGE = 12;
-          const offset = (currentPage - 1) * PRODUCTS_PER_PAGE;
+          const offset = (currentPage - 1) * productsPerPage;
 
           const arg = {
-            limit: PRODUCTS_PER_PAGE,
+            limit: productsPerPage,
             offset,
             sort: propsApiSort,
           };
@@ -108,12 +127,17 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
     filterMaxPrice,
     filterDiscountOnly,
     currentPage,
+    productsPerPage,
   ]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterMinPrice, filterMaxPrice, filterDiscountOnly, propsSort]); // Reset the current page when changing filters.
 
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-container">Error: {error}</div>;
 
-  if (products.length === 0) {
+  if (!loading && products.length === 0) {
     return (
       <div className="main-container">
         <p className="no-found">
@@ -125,13 +149,20 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
   return (
      <>
+     {totalProductsCount > 0 && (
+        <p className="product-count-info">
+          Showing {(currentPage - 1) * productsPerPage + 1}
+          –
+          {(currentPage - 1) * productsPerPage + products.length} of {totalProductsCount} products
+        </p>
+      )}
       <div className="cards-container">
         {/* Array of Products */}
         {products.map((product) => (
           <div key={product.id} className="cards-item">
             <Link to={"/product/" + product.key}>
               <div className="cards-item-img">
-                <img src={product.images[0].url} alt={product.name} />
+                <img src={product.images[0].url} alt={`Image of ${product.name}`} />
               </div>
               <div className="cards-item-name cards-item-text">
                 {product.name}
@@ -178,6 +209,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
                     addToCart(product.id, variant.id);
                   }}
+                  aria-label={`Add ${product.name} to cart`}
                   disabled={isInCart(product.id) || isLoadingAddToCart(product.id)}
                 >
                 {isLoadingAddToCart(product.id)
