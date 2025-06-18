@@ -4,8 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import { SearchInput } from "../search/SearchInput";
 import CategoryDropdown from "../products/ProductCategory/CategoryDropdown";
 import { FaBars, FaTimes, FaSearch, FaShoppingBasket } from "react-icons/fa";
-// import { useClickOutside } from "@/hooks/useClickOutside";
 import { ClickOutsideEvent } from "@/@types/interfaces";
+import { useCart } from "@/context/CartContext";
 
 import "./Header.css";
 
@@ -14,6 +14,8 @@ export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { cartCount } = useCart();
+  console.log('[Header] Cart count:', cartCount); // Debug
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -42,8 +44,6 @@ export const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isMobileMenuOpen]);
-
-  // useClickOutside(menuRef, () => setIsMobileMenuOpen(false), isMobileMenuOpen);
 
   return (
     <header className="header">
@@ -76,6 +76,7 @@ export const Header = () => {
             <div className="cart-icon">
               <Link to="/cart" className="cart-link">
                 <FaShoppingBasket />
+                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
               </Link>
             </div>
           </div>
@@ -113,9 +114,10 @@ export const Header = () => {
           <div className="search-wrapper desktop-search">
             <SearchInput />
           </div>
-          <div className="cart-icon_mobile">
+          <div className="cart-icon_desktop">
             <Link to="/cart" className="cart-link">
               <FaShoppingBasket />
+              {cartCount > 0 && <div className="cart-count">{cartCount}</div>}
             </Link>
           </div>
         </div>
