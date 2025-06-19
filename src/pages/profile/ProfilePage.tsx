@@ -15,18 +15,15 @@ import { validateAddress } from "../../utils/editValidation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 
-const fieldNameMap: Record<
-      keyof CustomerAddress,
-      keyof RegisterFormFields
-    > = {
-      streetName: "shippingStreet",
-      city: "shippingCity",
-      postalCode: "shippingPostalCode",
-      country: "shippingCountry",
-      state: "shippingCity",
-      id: "email",
-    };
-    
+const fieldNameMap: Record<keyof CustomerAddress, keyof RegisterFormFields> = {
+  streetName: "shippingStreet",
+  city: "shippingCity",
+  postalCode: "shippingPostalCode",
+  country: "shippingCountry",
+  state: "shippingCity",
+  id: "email",
+};
+
 function isAddressEqual(a: CustomerAddress, b: CustomerAddress) {
   return (
     a.streetName === b.streetName &&
@@ -35,7 +32,7 @@ function isAddressEqual(a: CustomerAddress, b: CustomerAddress) {
     a.country === b.country &&
     a.state === b.state
   );
-}   
+}
 
 const ProfilePage = () => {
   const { customer, setCustomer, relogin } = useAuth();
@@ -198,8 +195,8 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const shippingSet = !!defaultShippingAddressId;
-    const billingSet  = !!defaultBillingAddressId;
-    const isSame      = defaultShippingAddressId === defaultBillingAddressId;
+    const billingSet = !!defaultBillingAddressId;
+    const isSame = defaultShippingAddressId === defaultBillingAddressId;
 
     setCanAddNewAddress(!isSame && shippingSet !== billingSet);
 
@@ -213,8 +210,6 @@ const ProfilePage = () => {
     editedLastName !== lastName ||
     editedDOB !== dateOfBirth ||
     editedEmail !== email;
-
-  
 
   const passwordMismatch =
     (newPassword || confirmNewPassword || currentPassword) &&
@@ -608,7 +603,6 @@ const ProfilePage = () => {
 
       //show success message
       toast.success("Password was successfully changed!");
-      
     } catch (err: unknown) {
       if (
         typeof err === "object" &&
@@ -634,471 +628,490 @@ const ProfilePage = () => {
     }
   };
 
-
   return (
-  <>
-    <div className="profile-page">
-      <h2>User Profile</h2>
+    <>
+      <div className="profile-page">
+        <h2>User Profile</h2>
 
-      <section className="personal-info">
-        <h3>Personal Information</h3>
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-        {/* 👉 Edit personal info */}
-        {isEditing ? (
-          <div className="edit-form-container">
-            <ValidatedInput
-              label="First Name"
-              type="text"
-              value={editedFirstName}
-              placeholder="First Name"
-              error={fieldErrors.firstName || (!editedFirstName.trim() ? "First name is required" : undefined)}
-              onChange={setEditedFirstName}
-            />
-
-            <ValidatedInput
-              label="Last Name"
-              type="text"
-              value={editedLastName}
-              placeholder="Last Name"
-              error={fieldErrors.lastName || (!editedLastName.trim() ? "Last name is required" : undefined)}
-              onChange={setEditedLastName}
-            />
-
-            <ValidatedInput
-              label="Date of Birth"
-              type="date"
-              value={editedDOB}
-              placeholder="Date of Birth"
-              error={fieldErrors.dateOfBirth || (!editedDOB ? "Date of birth is required" : undefined)}
-              onChange={setEditedDOB}
-            />
-
-            <ValidatedInput
-              label="Email Address"
-              type="text"
-              value={editedEmail}
-              placeholder="Email Address"
-              error={emailError || (!editedEmail.trim() ? "Email is required" : undefined)}
-              onChange={setEditedEmail}
-            />
-
-            <div className="edit-buttons-container">
-              <button
-                onClick={saveChanges}
-                className={`save-button ${isPersonalSaveDisabled ? "disabled" : ""}`}
-                disabled={isPersonalSaveDisabled}
-              >
-                Save
-              </button>
-              <button onClick={cancelEdit} className="close-button">
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <p className="p-text">
-              <strong>First Name:</strong> {firstName}
-            </p>
-            <p className="p-text">
-              <strong>Last Name:</strong> {lastName}
-            </p>
-            <p className="p-text">
-              <strong>Date of Birth:</strong> {dateOfBirth}
-            </p>
-            <p className="p-text">
-              <strong>Your email address:</strong> {email}
-            </p>
-
-            <div className="edit-buttons-row">
-              <button onClick={startEdit} className="edit-button">
-                Edit
-              </button>
-              <button
-                onClick={() => setShowPasswordForm((prev) => !prev)}
-                className="edit-button"
-              >
-                {showPasswordForm
-                  ? "Cancel Password Change"
-                  : "Change Password"}
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* ✅ form to change password */}
-        {showPasswordForm && (
-          <>
-            <h4 className="password-change-title">Change Password</h4>
+        <section className="personal-info">
+          <h3>Personal Information</h3>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          {/* 👉 Edit personal info */}
+          {isEditing ? (
             <div className="edit-form-container">
-              {/* Current Password */}
-              <div className="password-input-wrapper">
-                <p className="p-text-password">Your current password:</p>
-                <input
-                  type={showCurrentPassword ? "text" : "password"}
-                  value={currentPassword}
-                  onChange={(e) => {
-                    setCurrentPassword(e.target.value);
-                    setCurrentPasswordError("");
-                  }}
-                  placeholder="Current Password"
-                  className="edit-input"
-                />
-                <span
-                  onClick={() => setShowCurrentPassword((prev) => !prev)}
-                  className="eye-icon"
-                >
-                  {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
-                </span>
-              </div>
-              {!currentPassword && (
-                <p className="error-message">Current password is required</p>
-              )}
-              {currentPasswordError && (
-                <p className="error-message">{currentPasswordError}</p>
-              )}
+              <ValidatedInput
+                label="First Name"
+                type="text"
+                value={editedFirstName}
+                placeholder="First Name"
+                error={
+                  fieldErrors.firstName ||
+                  (!editedFirstName.trim()
+                    ? "First name is required"
+                    : undefined)
+                }
+                onChange={setEditedFirstName}
+              />
 
-              {/* New Password */}
-              <div className="password-input-wrapper">
-                <p className="p-text-password">Your new password:</p>
-                <input
-                  type={showNewPassword ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="New Password"
-                  className="edit-input"
-                />
-                <span
-                  onClick={() => setShowNewPassword((prev) => !prev)}
-                  className="eye-icon"
-                >
-                  {showNewPassword ? <FaEyeSlash /> : <FaEye />}
-                </span>
-              </div>
-              {passwordError && (
-                <p className="error-message">{passwordError}</p>
-              )}
+              <ValidatedInput
+                label="Last Name"
+                type="text"
+                value={editedLastName}
+                placeholder="Last Name"
+                error={
+                  fieldErrors.lastName ||
+                  (!editedLastName.trim() ? "Last name is required" : undefined)
+                }
+                onChange={setEditedLastName}
+              />
 
-              {/* Confirm New Password */}
-              <div className="password-input-wrapper">
-                <p className="p-text-password">Confirm your new password:</p>
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  placeholder="Confirm New Password"
-                  className="edit-input"
-                />
-                <span
-                  onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="eye-icon"
-                >
-                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                </span>
-              </div>
-              {!confirmNewPassword && (
-                <p className="error-message">
-                  Confirm new password is required
-                </p>
-              )}
-              {newPassword &&
-                confirmNewPassword &&
-                newPassword !== confirmNewPassword && (
-                  <p className="error-message">New passwords do not match</p>
-                )}
-              
+              <ValidatedInput
+                label="Date of Birth"
+                type="date"
+                value={editedDOB}
+                placeholder="Date of Birth"
+                error={
+                  fieldErrors.dateOfBirth ||
+                  (!editedDOB ? "Date of birth is required" : undefined)
+                }
+                onChange={setEditedDOB}
+              />
+
+              <ValidatedInput
+                label="Email Address"
+                type="text"
+                value={editedEmail}
+                placeholder="Email Address"
+                error={
+                  emailError ||
+                  (!editedEmail.trim() ? "Email is required" : undefined)
+                }
+                onChange={setEditedEmail}
+              />
+
               <div className="edit-buttons-container">
                 <button
-                  type="button"    
-                  className="save-button"
-                  disabled={
-                    !currentPassword ||
-                    !newPassword ||
-                    !confirmNewPassword ||
-                    newPassword !== confirmNewPassword ||
-                    !!passwordError
-                  }
-                  onClick={handlePasswordChange}
+                  onClick={saveChanges}
+                  className={`save-button ${isPersonalSaveDisabled ? "disabled" : ""}`}
+                  disabled={isPersonalSaveDisabled}
                 >
-                  Save Password
+                  Save
                 </button>
-                <button
-                  className="close-button"
-                  onClick={() => {
-                    setShowPasswordForm(false);
-                    resetPasswordState();
-                  }}
-                >
+                <button onClick={cancelEdit} className="close-button">
                   Cancel
                 </button>
               </div>
             </div>
-          </>
-        )}
-      </section>
+          ) : (
+            <>
+              <p className="p-text">
+                <strong>First Name:</strong> {firstName}
+              </p>
+              <p className="p-text">
+                <strong>Last Name:</strong> {lastName}
+              </p>
+              <p className="p-text">
+                <strong>Date of Birth:</strong> {dateOfBirth}
+              </p>
+              <p className="p-text">
+                <strong>Your email address:</strong> {email}
+              </p>
 
-      <section className="addresses">
-        <h3 className="h3-addresses">Delivery addresses:</h3>
-        {addresses && addresses.length > 0 ? (
-          addresses.map((addr, index) => (
-            <div key={addr.id || index} className="address-card">
-              {editingAddressIndex === index ? (
-                <div className="address-edit-form">
-                  <h4 className="address-title">Editing Address {index + 1}</h4>
-                  <p className="p-text-address">Your full adress:</p>
+              <div className="edit-buttons-row">
+                <button onClick={startEdit} className="edit-button">
+                  Edit
+                </button>
+                <button
+                  onClick={() => setShowPasswordForm((prev) => !prev)}
+                  className="edit-button"
+                >
+                  {showPasswordForm
+                    ? "Cancel Password Change"
+                    : "Change Password"}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* ✅ form to change password */}
+          {showPasswordForm && (
+            <>
+              <h4 className="password-change-title">Change Password</h4>
+              <div className="edit-form-container">
+                {/* Current Password */}
+                <div className="password-input-wrapper">
+                  <p className="p-text-password">Your current password:</p>
                   <input
-                    type="text"
-                    value={editedAddresses[index].streetName}
-                    onChange={(e) =>
-                      handleAddressChange(index, "streetName", e.target.value)
-                    }
-                    placeholder="Street Name"
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => {
+                      setCurrentPassword(e.target.value);
+                      setCurrentPasswordError("");
+                    }}
+                    placeholder="Current Password"
                     className="edit-input"
                   />
-                  {touchedAddressFields[index]?.has("streetName") &&
-                    addressErrors[index]?.streetName && (
-                      <p className="error-message">
-                        {addressErrors[index]!.streetName}
-                      </p>
-                    )}
-                  <p className="p-text-address">Postal code:</p>  
-                  <input
-                    type="text"
-                    value={editedAddresses[index].postalCode}
-                    onChange={(e) =>
-                      handleAddressChange(index, "postalCode", e.target.value)
-                    }
-                    placeholder="Postal Code"
-                    className="edit-input"
-                  />
-                  {touchedAddressFields[index]?.has("postalCode") &&
-                    addressErrors[index]?.postalCode && (
-                      <p className="error-message">
-                        {addressErrors[index]!.postalCode}
-                      </p>
-                    )}
-                  <p className="p-text-address">Your city:</p>  
-                  <input
-                    type="text"
-                    value={editedAddresses[index].city}
-                    onChange={(e) =>
-                      handleAddressChange(index, "city", e.target.value)
-                    }
-                    placeholder="City"
-                    className="edit-input"
-                  />
-                  {touchedAddressFields[index]?.has("city") &&
-                    addressErrors[index]?.city && (
-                      <p className="error-message">
-                        {addressErrors[index]!.city}
-                      </p>
-                    )}
-                  <p className="p-text-address">Select your country:</p>
-                  <select
-                    value={editedAddresses[index].country}
-                    onChange={(e) =>
-                      handleAddressChange(index, "country", e.target.value)
-                    }
-                    className="edit-input"
+                  <span
+                    onClick={() => setShowCurrentPassword((prev) => !prev)}
+                    className="eye-icon"
                   >
-                    <option value="">Select a country</option>
-                    {europeanCountries.map(({ code, name }) => (
-                      <option key={code} value={code}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                  {touchedAddressFields[index]?.has("country") &&
-                    addressErrors[index]?.country && (
-                      <p className="error-message">
-                        {addressErrors[index]!.country}
-                      </p>
-                    )}
-                  <div className="edit-button-row">
-                    <button
-                      onClick={() => saveAddressChanges(index)}
-                      className="save-button"
-                      disabled={isAddressSaveDisabled(index)}
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={cancelAddressEdit}
-                      className="close-button"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                    {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
                 </div>
-              ) : (
-                <>
-                  <h4 className="address-title">Address {index + 1}</h4>
-                  <p className="p-text">
-                    {addr.streetName}, {addr.postalCode}, {addr.city},{" "}
-                    {addr.country}
-                  </p>
-                  <div className="label-container">
-                    <label
-                      className={`checkbox-toggle ${
-                        addr.id === defaultShippingAddressId ? "active" : ""
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={addr.id === defaultShippingAddressId}
-                        onChange={() => setDefaultAddress(addr.id!, "shipping")}
-                      />
-                      Default Shipping address
-                    </label>
+                {!currentPassword && (
+                  <p className="error-message">Current password is required</p>
+                )}
+                {currentPasswordError && (
+                  <p className="error-message">{currentPasswordError}</p>
+                )}
 
-                    <label
-                      className={`checkbox-toggle ${
-                        addr.id === defaultBillingAddressId ? "active" : ""
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={addr.id === defaultBillingAddressId}
-                        onChange={() => setDefaultAddress(addr.id!, "billing")}
-                      />
-                      Default Billing address
-                    </label>
-                  </div>
-                  <p
-                    className={`address-label ${
-                      addr.id !== defaultBillingAddressId
-                        ? "not-default"
-                        : "default"
-                    }`}
+                {/* New Password */}
+                <div className="password-input-wrapper">
+                  <p className="p-text-password">Your new password:</p>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="New Password"
+                    className="edit-input"
+                  />
+                  <span
+                    onClick={() => setShowNewPassword((prev) => !prev)}
+                    className="eye-icon"
                   >
-                    {addr.id === defaultBillingAddressId
-                      ? "🏷️ Default Billing Address"
-                      : "❗ This address is not Default Billing Address"}
-                  </p>
-                  <p
-                    className={`address-label ${
-                      addr.id !== defaultShippingAddressId
-                        ? "not-default"
-                        : "default"
-                    }`}
+                    {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
+                {passwordError && (
+                  <p className="error-message">{passwordError}</p>
+                )}
+
+                {/* Confirm New Password */}
+                <div className="password-input-wrapper">
+                  <p className="p-text-password">Confirm your new password:</p>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Confirm New Password"
+                    className="edit-input"
+                  />
+                  <span
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="eye-icon"
                   >
-                    {addr.id === defaultShippingAddressId
-                      ? "📦 Default Shipping Address"
-                      : "❗ This address is not Default Shipping Address"}
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
+                {!confirmNewPassword && (
+                  <p className="error-message">
+                    Confirm new password is required
                   </p>
-                  <div className="button-container">
-                    <button
-                      onClick={() => startAddressEdit(index)}
-                      className="edit-button-address"
-                    >
-                      Edit Address
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ))
-        ) : (
-          <p>No addresses found.</p>
-        )}
+                )}
+                {newPassword &&
+                  confirmNewPassword &&
+                  newPassword !== confirmNewPassword && (
+                    <p className="error-message">New passwords do not match</p>
+                  )}
 
-        {addresses.length < 2 && canAddNewAddress && !showNewAddressForm && (
-          <button
-            onClick={() => setShowNewAddressForm(true)}
-            className="add-address-button"
-          >
-            {missingAddressType === "billing"
-              ? "Add Billing Address"
-              : "Add Shipping Address"}
-          </button>
-        )}
-
-        {showNewAddressForm && (
-          <>
-            <h4 className="address-subtitle">
-              {missingAddressType === "billing"
-                ? "Adding Billing Address"
-                : "Adding Shipping Address"}
-            </h4>
-            <div className="address-edit-form">
-              <input
-                type="text"
-                value={newAddress.streetName}
-                onChange={(e) =>
-                  setNewAddress({ ...newAddress, streetName: e.target.value })
-                }
-                placeholder="Street Name"
-                className="edit-input"
-              />
-              {newAddressErrors.streetName && (
-                <p className="error-message">{newAddressErrors.streetName}</p>
-              )}
-
-              <input
-                type="text"
-                value={newAddress.postalCode}
-                onChange={(e) =>
-                  setNewAddress({ ...newAddress, postalCode: e.target.value })
-                }
-                placeholder="Postal Code"
-                className="edit-input"
-              />
-              {newAddressErrors.postalCode && (
-                <p className="error-message">{newAddressErrors.postalCode}</p>
-              )}
-
-              <input
-                type="text"
-                value={newAddress.city}
-                onChange={(e) =>
-                  setNewAddress({ ...newAddress, city: e.target.value })
-                }
-                placeholder="City"
-                className="edit-input"
-              />
-              {newAddressErrors.city && (
-                <p className="error-message">{newAddressErrors.city}</p>
-              )}
-
-              <select
-                value={newAddress.country}
-                onChange={(e) =>
-                  setNewAddress({ ...newAddress, country: e.target.value })
-                }
-                className="edit-input"
-              >
-                <option value="">Select a country</option>
-                {europeanCountries.map(({ code, name }) => (
-                  <option key={code} value={code}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-              {newAddressErrors.country && (
-                <p className="error-message">{newAddressErrors.country}</p>
-              )}
-
-              <div className="edit-button-row">
-                <button
-                  onClick={handleAddNewAddress}
-                  className={`save-button ${isNewAddressSaveDisabled ? "disabled" : ""}`}
-                  disabled={isNewAddressSaveDisabled}
-                >
-                  Save New Address
-                </button>
-                <button
-                  onClick={() => setShowNewAddressForm(false)}
-                  className="close-button"
-                >
-                  Cancel
-                </button>
+                <div className="edit-buttons-container">
+                  <button
+                    type="button"
+                    className="save-button"
+                    disabled={
+                      !currentPassword ||
+                      !newPassword ||
+                      !confirmNewPassword ||
+                      newPassword !== confirmNewPassword ||
+                      !!passwordError
+                    }
+                    onClick={handlePasswordChange}
+                  >
+                    Save Password
+                  </button>
+                  <button
+                    className="close-button"
+                    onClick={() => {
+                      setShowPasswordForm(false);
+                      resetPasswordState();
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </section>
-    </div>
-     </>
+            </>
+          )}
+        </section>
+
+        <section className="addresses">
+          <h3 className="h3-addresses">Delivery addresses:</h3>
+          {addresses && addresses.length > 0 ? (
+            addresses.map((addr, index) => (
+              <div key={addr.id || index} className="address-card">
+                {editingAddressIndex === index ? (
+                  <div className="address-edit-form">
+                    <h4 className="address-title">
+                      Editing Address {index + 1}
+                    </h4>
+                    <p className="p-text-address">Your full adress:</p>
+                    <input
+                      type="text"
+                      value={editedAddresses[index].streetName}
+                      onChange={(e) =>
+                        handleAddressChange(index, "streetName", e.target.value)
+                      }
+                      placeholder="Street Name"
+                      className="edit-input"
+                    />
+                    {touchedAddressFields[index]?.has("streetName") &&
+                      addressErrors[index]?.streetName && (
+                        <p className="error-message">
+                          {addressErrors[index]!.streetName}
+                        </p>
+                      )}
+                    <p className="p-text-address">Postal code:</p>
+                    <input
+                      type="text"
+                      value={editedAddresses[index].postalCode}
+                      onChange={(e) =>
+                        handleAddressChange(index, "postalCode", e.target.value)
+                      }
+                      placeholder="Postal Code"
+                      className="edit-input"
+                    />
+                    {touchedAddressFields[index]?.has("postalCode") &&
+                      addressErrors[index]?.postalCode && (
+                        <p className="error-message">
+                          {addressErrors[index]!.postalCode}
+                        </p>
+                      )}
+                    <p className="p-text-address">Your city:</p>
+                    <input
+                      type="text"
+                      value={editedAddresses[index].city}
+                      onChange={(e) =>
+                        handleAddressChange(index, "city", e.target.value)
+                      }
+                      placeholder="City"
+                      className="edit-input"
+                    />
+                    {touchedAddressFields[index]?.has("city") &&
+                      addressErrors[index]?.city && (
+                        <p className="error-message">
+                          {addressErrors[index]!.city}
+                        </p>
+                      )}
+                    <p className="p-text-address">Select your country:</p>
+                    <select
+                      value={editedAddresses[index].country}
+                      onChange={(e) =>
+                        handleAddressChange(index, "country", e.target.value)
+                      }
+                      className="edit-input"
+                    >
+                      <option value="">Select a country</option>
+                      {europeanCountries.map(({ code, name }) => (
+                        <option key={code} value={code}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                    {touchedAddressFields[index]?.has("country") &&
+                      addressErrors[index]?.country && (
+                        <p className="error-message">
+                          {addressErrors[index]!.country}
+                        </p>
+                      )}
+                    <div className="edit-button-row">
+                      <button
+                        onClick={() => saveAddressChanges(index)}
+                        className="save-button"
+                        disabled={isAddressSaveDisabled(index)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelAddressEdit}
+                        className="close-button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h4 className="address-title">Address {index + 1}</h4>
+                    <p className="p-text">
+                      {addr.streetName}, {addr.postalCode}, {addr.city},{" "}
+                      {addr.country}
+                    </p>
+                    <div className="label-container">
+                      <label
+                        className={`checkbox-toggle ${
+                          addr.id === defaultShippingAddressId ? "active" : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={addr.id === defaultShippingAddressId}
+                          onChange={() =>
+                            setDefaultAddress(addr.id!, "shipping")
+                          }
+                        />
+                        Default Shipping address
+                      </label>
+
+                      <label
+                        className={`checkbox-toggle ${
+                          addr.id === defaultBillingAddressId ? "active" : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={addr.id === defaultBillingAddressId}
+                          onChange={() =>
+                            setDefaultAddress(addr.id!, "billing")
+                          }
+                        />
+                        Default Billing address
+                      </label>
+                    </div>
+                    <p
+                      className={`address-label ${
+                        addr.id !== defaultBillingAddressId
+                          ? "not-default"
+                          : "default"
+                      }`}
+                    >
+                      {addr.id === defaultBillingAddressId
+                        ? "🏷️ Default Billing Address"
+                        : "❗ This address is not Default Billing Address"}
+                    </p>
+                    <p
+                      className={`address-label ${
+                        addr.id !== defaultShippingAddressId
+                          ? "not-default"
+                          : "default"
+                      }`}
+                    >
+                      {addr.id === defaultShippingAddressId
+                        ? "📦 Default Shipping Address"
+                        : "❗ This address is not Default Shipping Address"}
+                    </p>
+                    <div className="button-container">
+                      <button
+                        onClick={() => startAddressEdit(index)}
+                        className="edit-button-address"
+                      >
+                        Edit Address
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          ) : (
+            <p>No addresses found.</p>
+          )}
+
+          {addresses.length < 2 && canAddNewAddress && !showNewAddressForm && (
+            <button
+              onClick={() => setShowNewAddressForm(true)}
+              className="add-address-button"
+            >
+              {missingAddressType === "billing"
+                ? "Add Billing Address"
+                : "Add Shipping Address"}
+            </button>
+          )}
+
+          {showNewAddressForm && (
+            <>
+              <h4 className="address-subtitle">
+                {missingAddressType === "billing"
+                  ? "Adding Billing Address"
+                  : "Adding Shipping Address"}
+              </h4>
+              <div className="address-edit-form">
+                <input
+                  type="text"
+                  value={newAddress.streetName}
+                  onChange={(e) =>
+                    setNewAddress({ ...newAddress, streetName: e.target.value })
+                  }
+                  placeholder="Street Name"
+                  className="edit-input"
+                />
+                {newAddressErrors.streetName && (
+                  <p className="error-message">{newAddressErrors.streetName}</p>
+                )}
+
+                <input
+                  type="text"
+                  value={newAddress.postalCode}
+                  onChange={(e) =>
+                    setNewAddress({ ...newAddress, postalCode: e.target.value })
+                  }
+                  placeholder="Postal Code"
+                  className="edit-input"
+                />
+                {newAddressErrors.postalCode && (
+                  <p className="error-message">{newAddressErrors.postalCode}</p>
+                )}
+
+                <input
+                  type="text"
+                  value={newAddress.city}
+                  onChange={(e) =>
+                    setNewAddress({ ...newAddress, city: e.target.value })
+                  }
+                  placeholder="City"
+                  className="edit-input"
+                />
+                {newAddressErrors.city && (
+                  <p className="error-message">{newAddressErrors.city}</p>
+                )}
+
+                <select
+                  value={newAddress.country}
+                  onChange={(e) =>
+                    setNewAddress({ ...newAddress, country: e.target.value })
+                  }
+                  className="edit-input"
+                >
+                  <option value="">Select a country</option>
+                  {europeanCountries.map(({ code, name }) => (
+                    <option key={code} value={code}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                {newAddressErrors.country && (
+                  <p className="error-message">{newAddressErrors.country}</p>
+                )}
+
+                <div className="edit-button-row">
+                  <button
+                    onClick={handleAddNewAddress}
+                    className={`save-button ${isNewAddressSaveDisabled ? "disabled" : ""}`}
+                    disabled={isNewAddressSaveDisabled}
+                  >
+                    Save New Address
+                  </button>
+                  <button
+                    onClick={() => setShowNewAddressForm(false)}
+                    className="close-button"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+      </div>
+    </>
   );
 };
 

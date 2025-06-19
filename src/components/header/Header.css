@@ -179,7 +179,8 @@
   cursor: pointer;
 }
 
-.cart-icon, .cart-icon_desktop {
+.cart-icon,
+.cart-icon_desktop {
   display: flex;
   align-items: center;
   padding: 0 1rem 0 0.3rem;
@@ -190,7 +191,9 @@
   align-items: center;
   color: #ffffff;
   font-size: 2rem;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
 }
 
 .cart-link:hover {
