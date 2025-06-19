@@ -19,8 +19,15 @@ import {
   type CommerceToolsError,
   type MyProductsData,
 } from "../@types/interfaces";
+import { AuthMiddlewareOptions, ClientBuilder, TokenStore  } from "@commercetools/ts-client";
 
+
+interface AnonymousAuthOptions extends AuthMiddlewareOptions {
+  anonymousId: string;
+  fetch: typeof fetch;
+}
 export class ApiClient extends CreateApiClient {
+  
   /**
    * BUILD CUSTOMER WITH PASSWORD
    */
@@ -431,6 +438,75 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
+  public async getCartById(cartId: string) {
+    const apiRoot = this.getApiRoot(this.client); 
+    const { body: cart } = await apiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .me()
+      .carts()
+      .withId({ ID: cartId })
+      .get()
+      .execute();
+
+    return cart;
+  }
+
+
+  public initAnonymousClient() {
+    const anonymousId = this.getOrCreateAnonymousId();
+
+    const options: AnonymousAuthOptions = {
+      host: this.OAUTH_URI,
+      projectKey: this.PROJECT_KEY,
+      credentials: this.SPA_CREDENTIALS,
+      scopes: [
+        `manage_my_profile`,
+        `manage_my_orders`,
+        `view_published_products`,
+      ],
+      anonymousId,
+      tokenCache: {
+        get: (): TokenStore | null => {
+          const cached = localStorage.getItem("accessToken");
+          return cached ? JSON.parse(cached) : null;
+        },
+        set: (cache: TokenStore): void => {
+          localStorage.setItem("accessToken", JSON.stringify(cache));
+        },
+      },
+      fetch,
+    };
+
+    this.client = new ClientBuilder()
+      .withAnonymousSessionFlow(options)
+      .withHttpMiddleware({ host: this.BASE_URI })
+      .build();
+  }
+
+  public initClientFromStorage() {
+    const raw = localStorage.getItem("accessToken");
+
+    if (raw) {
+      try {
+        const token = JSON.parse(raw) as TokenStore;
+        const now = Date.now();
+
+        if (token.expirationTime && token.expirationTime > now) {
+          this.client = this.buildClientWithToken(token.token);
+          return;
+        }
+
+        console.warn("Access token expired, removing.");
+        localStorage.removeItem("accessToken");
+      } catch (e) {
+        console.error("Failed to parse accessToken", e);
+        localStorage.removeItem("accessToken");
+      }
+    }
+
+    // Fallback to anonymous
+    this.initAnonymousClient();
+  }
 
   // end
 }

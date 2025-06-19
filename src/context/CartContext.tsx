@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Cart, Customer } from "@commercetools/platform-sdk";
+import { Cart } from "@commercetools/platform-sdk";
 import { useApiClient } from "./ApiClientContext";
 
 interface CartContextType {
@@ -18,64 +18,92 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // On mount → fetch or create cart
   useEffect(() => {
+    apiClient.initClientFromStorage();
+
     const initCart = async () => {
       try {
-        const existingCart = await apiClient.getMyActiveCart();
-        setCart(existingCart);
-      } catch {
-        const newCart = await apiClient.createMyCart();
+        const storedCartId = localStorage.getItem("cartId");
+
+        if (storedCartId) {
+          try {
+            const cart = await apiClient.getCartById(storedCartId);
+            setCart(cart);
+            console.log("Your cart", cart.lineItems)
+            return;
+          } catch {
+            console.warn("Stored cart is invalid or expired.");
+            localStorage.removeItem("cartId");
+          }
+        }
+
+        let customer;
+        try {
+          customer = await apiClient.getCustomerProfile();
+        } catch {
+          customer = undefined ;
+        }
+
+        const newCart = await apiClient.createMyCart(customer);
         setCart(newCart);
+        localStorage.setItem("cartId", newCart.id);
+      } catch (error) {
+        console.error("Cart init failed:", error);
       }
     };
 
     initCart();
   }, [apiClient]);
 
-  const addToCart = async (productId: string, variantId: number = 1) => {
-    try {
-      setLoadingItems((prev) => [...prev, productId]);
 
-      let customer: Customer | undefined;
-      let activeCart = cart;
+ const addToCart = async (productId: string, variantId: number = 1) => {
+  setLoadingItems((prev) => [...prev, productId]);
 
-      // Если нет корзины — пытаемся получить текущего customer
+  try {
+    let activeCart = cart;
+    console.log("im here", activeCart.lineItems)
+    let customer;
+
+    if (!activeCart) {
+      const storedCartId = localStorage.getItem("cartId");
+
+      if (storedCartId) {
+        try {
+          console.log("Trying to restore cart with ID:", storedCartId);
+          activeCart = await apiClient.getCartById(storedCartId);
+        } catch (error) {
+          console.warn("Cart restore failed. Creating new one.", error);
+          localStorage.removeItem("cartId");
+        }
+      }
+
       if (!activeCart) {
         try {
-          customer = await apiClient.getCustomerProfile(); // если неавторизован, вернёт undefined или выбросит
+          customer = await apiClient.getCustomerProfile();
         } catch {
           customer = undefined;
         }
 
-        try {
-          activeCart = await apiClient.getMyActiveCart();
-        } catch (err: unknown) {
-          if (
-            err instanceof Error &&
-            err.message.includes("404")
-          ) {
-            // если корзины нет — создаём
-            activeCart = await apiClient.createMyCart(customer);
-          } else {
-            throw err;
-          }
-        }
-
-        setCart(activeCart);
+        activeCart = await apiClient.createMyCart(customer);
+        localStorage.setItem("cartId", activeCart.id);
       }
 
-      const updatedCart = await apiClient.addProductToCart(
-        productId,
-        variantId,
-        customer
-      );
-
-      setCart(updatedCart);
-    } catch (error) {
-      console.error("Add to cart failed:", error);
-    } finally {
-      setLoadingItems((prev) => prev.filter((id) => id !== productId));
+      setCart(activeCart);
     }
-  };
+
+    const updatedCart = await apiClient.addProductToCart(
+      productId,
+      variantId,
+      customer
+    );
+
+    setCart(updatedCart);
+  } catch (error) {
+    console.error("Add to cart failed:", error);
+  } finally {
+    setLoadingItems((prev) => prev.filter((id) => id !== productId));
+  }
+};
+
 
 
     function isInCart(productId: string, variantId?: number): boolean {
