@@ -143,3 +143,23 @@ export interface ValidatedInputProps {
   isShown?: boolean;
   onToggleShow?: () => void;
 }
+
+export interface CategoryDropdownProps {
+  onItemSelected?: () => void;
+}
+
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  priceDiscounted?: number;
+  quantity: number;
+  image: string;
+  key: string;
+}
+
+export interface CartContextType {
+  cartItems: CartItem[];
+  addToCart: (product: CartItem) => void;
+  cartCount: number;
+}

@@ -21,6 +21,7 @@ import CategoryPage from "@/pages/category/CategoryPage";
 import ProductsPage from "@/pages/products/ProductsPage";
 import SearchResultsPage from "@/pages/search/SearchResultsPage";
 import CategoryProductsPage from "./pages/category/CategoryProductsPage";
+import CartPage from "./pages/cart/CartPage";
 
 const root = document.getElementById("root");
 
@@ -74,6 +75,14 @@ const router = createBrowserRouter([
             <ProtectedRoute>
               <ProfilePage />
             </ProtectedRoute>
+          </Suspense>
+        ),
+      },
+      {
+        path: "/cart",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <CartPage />
           </Suspense>
         ),
       },

@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { SearchInput } from "../search/SearchInput";
 import CategoryDropdown from "../products/ProductCategory/CategoryDropdown";
-import { FaBars, FaTimes, FaSearch } from "react-icons/fa";
-// import { useClickOutside } from "@/hooks/useClickOutside";
+import { FaBars, FaTimes, FaSearch, FaShoppingBasket } from "react-icons/fa";
 import { ClickOutsideEvent } from "@/@types/interfaces";
+import { useCart } from "@/context/CartContext";
 
 import "./Header.css";
 
@@ -14,6 +14,8 @@ export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { cartCount } = useCart();
+  console.log('[Header] Cart count:', cartCount); // Debug
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -43,32 +45,40 @@ export const Header = () => {
     };
   }, [isMobileMenuOpen]);
 
-  // useClickOutside(menuRef, () => setIsMobileMenuOpen(false), isMobileMenuOpen);
-
   return (
     <header className="header">
       <nav className="nav-container">
         <div className="mobile-controls">
-          <button
-            className="mobile-menu-button"
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
-          </button>
-          <div className="mobile-search-container">
-            {showMobileSearch && (
-              <div className="mobile-search-input">
-                <SearchInput />
-              </div>
-            )}
+          <div>
             <button
-              className="mobile-search-button"
-              onClick={toggleMobileSearch}
-              aria-label="Toggle search"
+              className="mobile-menu-button"
+              onClick={toggleMobileMenu}
+              aria-label="Toggle menu"
             >
-              <FaSearch />
+              {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
             </button>
+          </div>
+          <div className="search-container">
+            <div className="mobile-search-container">
+              {showMobileSearch && (
+                <div className="mobile-search-input">
+                  <SearchInput />
+                </div>
+              )}
+              <button
+                className="mobile-search-button"
+                onClick={toggleMobileSearch}
+                aria-label="Toggle search"
+              >
+                <FaSearch />
+              </button>
+            </div>
+            <div className="cart-icon">
+              <Link to="/cart" className="cart-link">
+                <FaShoppingBasket />
+                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+              </Link>
+            </div>
           </div>
         </div>
         <ul className="nav-list">
@@ -100,8 +110,16 @@ export const Header = () => {
             </li>
           )}
         </ul>
-        <div className="search-wrapper desktop-search">
-          <SearchInput />
+        <div className="nav-icons">
+          <div className="search-wrapper desktop-search">
+            <SearchInput />
+          </div>
+          <div className="cart-icon_desktop">
+            <Link to="/cart" className="cart-link">
+              <FaShoppingBasket />
+              {cartCount > 0 && <div className="cart-count">{cartCount}</div>}
+            </Link>
+          </div>
         </div>
         <div className="auth-buttons">
           {isAuth ? (
@@ -151,7 +169,7 @@ export const Header = () => {
                   className="mobile-nav-link"
                   style={{ paddingLeft: "14px" }}
                 >
-                  <CategoryDropdown />
+                  <CategoryDropdown onItemSelected={toggleMobileMenu}/>
                 </div>
               </li>
               <li className="mobile-nav-item">

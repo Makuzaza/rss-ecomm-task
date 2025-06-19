@@ -10,6 +10,7 @@ import {
 } from "@/@types/interfaces";
 import "./ProductCatalog.css";
 import "@/pages/home/HomePage.css";
+import { useCart } from "@/context/CartContext";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
@@ -25,6 +26,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const [products, setProducts] = useState<MyProductsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -33,7 +35,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           setLoading(true);
           const data: MyProductsData[] = await apiClient.searchData(
             "category",
-            categoryId,
+            categoryId
           );
           setProducts(data);
           setError(null);
@@ -138,7 +140,24 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
             </div>
           </Link>
           <div className="cards-item-card cards-item-text">
-            <button className="button__addToCart">ADD TO CART</button>
+            <button
+              className="button__addToCart"
+              onClick={(e) => {
+                e.preventDefault();
+                console.log("Adding to cart:", product.name);
+                addToCart({
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  priceDiscounted: product.priceDiscounted,
+                  image: product.images[0].url,
+                  key: product.key,
+                  quantity: 1,
+                });
+              }}
+            >
+              ADD TO CART
+            </button>
           </div>
         </div>
       ))}
