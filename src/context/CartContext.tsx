@@ -16,23 +16,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<Cart | null>(null);
   const [loadingItems, setLoadingItems] = useState<string[]>([]);
 
-  // On mount → fetch or create cart
   useEffect(() => {
-    apiClient.initClientFromStorage();
-
     const initCart = async () => {
       try {
         const storedCartId = localStorage.getItem("cartId");
 
         if (storedCartId) {
           try {
-            const cart = await apiClient.getCartById(storedCartId);
-            setCart(cart);
-            console.log("Your cart", cart.lineItems)
+            const existingCart = await apiClient.getCartById(storedCartId);
+            setCart(existingCart);
             return;
           } catch {
-            console.warn("Stored cart is invalid or expired.");
             localStorage.removeItem("cartId");
+            console.warn("Stored cart is invalid or expired");
           }
         }
 
@@ -40,83 +36,77 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           customer = await apiClient.getCustomerProfile();
         } catch {
-          customer = undefined ;
+          customer = undefined;
         }
 
         const newCart = await apiClient.createMyCart(customer);
         setCart(newCart);
         localStorage.setItem("cartId", newCart.id);
-      } catch (error) {
-        console.error("Cart init failed:", error);
+      } catch (err) {
+        console.error("Cart init failed", err);
       }
     };
 
     initCart();
   }, [apiClient]);
 
+  const addToCart = async (productId: string, variantId: number = 1) => {
+    setLoadingItems((prev) => [...prev, productId]);
 
- const addToCart = async (productId: string, variantId: number = 1) => {
-  setLoadingItems((prev) => [...prev, productId]);
-
-  try {
-    let activeCart = cart;
-    console.log("im here", activeCart.lineItems)
-    let customer;
-
-    if (!activeCart) {
-      const storedCartId = localStorage.getItem("cartId");
-
-      if (storedCartId) {
-        try {
-          console.log("Trying to restore cart with ID:", storedCartId);
-          activeCart = await apiClient.getCartById(storedCartId);
-        } catch (error) {
-          console.warn("Cart restore failed. Creating new one.", error);
-          localStorage.removeItem("cartId");
-        }
-      }
+    try {
+      let activeCart = cart;
+      let customer;
 
       if (!activeCart) {
-        try {
-          customer = await apiClient.getCustomerProfile();
-        } catch {
-          customer = undefined;
+        const storedCartId = localStorage.getItem("cartId");
+        if (storedCartId) {
+          try {
+            activeCart = await apiClient.getCartById(storedCartId);
+          } catch {
+            localStorage.removeItem("cartId");
+          }
         }
 
-        activeCart = await apiClient.createMyCart(customer);
-        localStorage.setItem("cartId", activeCart.id);
+        if (!activeCart) {
+          try {
+            customer = await apiClient.getCustomerProfile();
+          } catch {
+            customer = undefined;
+          }
+
+          activeCart = await apiClient.createMyCart(customer);
+          localStorage.setItem("cartId", activeCart.id);
+        }
+
+        setCart(activeCart);
       }
 
-      setCart(activeCart);
+      const updatedCart = await apiClient.addProductToCart(
+        productId,
+        variantId,
+        customer
+      );
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Failed to add to cart", err);
+    } finally {
+      setLoadingItems((prev) => prev.filter((id) => id !== productId));
     }
+  };
 
-    const updatedCart = await apiClient.addProductToCart(
-      productId,
-      variantId,
-      customer
-    );
-
-    setCart(updatedCart);
-  } catch (error) {
-    console.error("Add to cart failed:", error);
-  } finally {
-    setLoadingItems((prev) => prev.filter((id) => id !== productId));
-  }
-};
-
-
-
-    function isInCart(productId: string, variantId?: number): boolean {
-      return cart?.lineItems?.some(
+  const isInCart = (productId: string, variantId?: number): boolean => {
+    return (
+      cart?.lineItems?.some(
         (item) =>
           item.productId === productId &&
           (variantId ? item.variant.id === variantId : true)
-      ) ?? false;
-    }
+      ) ?? false
+    );
+  };
 
-    const isLoadingAddToCart = (productId: string): boolean => {
-      return loadingItems.includes(productId);
-    };
+  const isLoadingAddToCart = (productId: string): boolean => {
+    return loadingItems.includes(productId);
+  };
 
   return (
     <CartContext.Provider

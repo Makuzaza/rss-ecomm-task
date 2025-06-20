@@ -5,7 +5,7 @@ import { Header } from "./header/Header";
 import { Footer } from "./footer/Footer";
 import "./App.css";
 import { AuthProvider } from "./../context/AuthContext";
-import { CartProvider } from "@/context/CartContext";
+import { CartProvider } from "./../context/CartContext";
 
 export const App = () => {
   return (

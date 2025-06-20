@@ -6,8 +6,9 @@ import "./CategoryDropdown.css";
 import { CategoryWithChildren } from "@/@types/interfaces";
 import { useWindowResize } from "@/hooks/useWindowResize";
 import { useClickAndEscape } from "@/hooks/useClickAndEscape";
+import { CategoryDropdownProps } from "@/@types/interfaces";
 
-const CategoryDropdown = () => {
+const CategoryDropdown = ({ onItemSelected }: CategoryDropdownProps) => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<CategoryWithChildren[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -89,10 +90,12 @@ const CategoryDropdown = () => {
       } else {
         navigate(`/category/${category.slug?.["en-US"] || category.id}`);
         closeMenu();
+        onItemSelected?.();
       }
     } else {
       setActiveCategory(category.id);
       closeMenu();
+      onItemSelected?.();
     }
   };
 
@@ -158,7 +161,10 @@ const CategoryDropdown = () => {
                           <Link
                             to={`/category/${child.slug?.["en-US"] || child.id}`}
                             className="subcategory-link"
-                            onClick={() => closeMenu()}
+                            onClick={() => {
+                              closeMenu();
+                              onItemSelected?.();
+                            }}
                           >
                             {getCategoryName(child)}
                           </Link>
@@ -168,7 +174,10 @@ const CategoryDropdown = () => {
                             key={subChild.id}
                             to={`/category/${subChild.slug?.["en-US"] || subChild.id}`}
                             className="subcategory-item"
-                            onClick={closeMenu}
+                            onClick={() => {
+                              closeMenu();
+                              onItemSelected?.();
+                            }}
                           >
                             {getCategoryName(subChild)}
                           </Link>
