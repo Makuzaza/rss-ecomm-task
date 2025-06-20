@@ -1,12 +1,13 @@
-import { type MyProductsData } from "@/@types/interfaces";
+import { CartItem, type MyProductsData } from "@/@types/interfaces";
 import {
+  type Cart,
   type Product,
   type ProductPagedQueryResponse,
   type ProductProjectionPagedSearchResponse,
 } from "@commercetools/platform-sdk";
 
 export function allProductsNormalization(
-  data: ProductPagedQueryResponse,
+  data: ProductPagedQueryResponse
 ): MyProductsData[] {
   return data.results.map((data) => {
     return productDataNormalization(data);
@@ -35,7 +36,7 @@ export function productDataNormalization(data: Product): MyProductsData {
 }
 
 export function productSearchNormalization(
-  data: ProductProjectionPagedSearchResponse,
+  data: ProductProjectionPagedSearchResponse
 ) {
   return data.results.map((record) => {
     const price = record.masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
@@ -56,4 +57,20 @@ export function productSearchNormalization(
       variants: record.variants,
     };
   });
+}
+
+export function cartItemsNormalization(cart: Cart): CartItem[] {
+  const items: CartItem[] = cart.lineItems.map((item) => ({
+    id: item.productId,
+    name: item.name?.["en-US"] || "",
+    price: item.price?.value.centAmount ? item.price.value.centAmount / 100 : 0,
+    priceDiscounted: item.price?.discounted?.value.centAmount
+      ? item.price.discounted.value.centAmount / 100
+      : undefined,
+    image: item.variant.images?.[0]?.url || "",
+    key: item.productKey || "",
+    quantity: item.quantity,
+  }));
+
+  return items;
 }

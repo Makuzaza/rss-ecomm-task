@@ -12,59 +12,47 @@ import {
   type MyCustomerDraft,
   type MyCustomerUpdate,
   type Customer,
-  Cart,
-  // CartPagedQueryResponse,
+  type Cart,
+  type MyCustomerSignin,
 } from "@commercetools/platform-sdk";
 import {
-  CartItem,
-  SearchTypes,
+  type CartItem,
+  type SearchTypes,
   type CommerceToolsError,
   type MyProductsData,
 } from "../@types/interfaces";
 
 export class ApiClient extends CreateApiClient {
-  /**
-   * DEFAULT CUSTOMER
-   */
-  /**
-   * GET DEFAULT PROFILE
-   */
-  public async getDefaultProfile() {
-    const apiRoot = this.getApiRoot(this.defaultClient);
-    if (!apiRoot) throw new Error("Unauthorized action");
+  /********************************************************
+   ***************** CUSTOMER AUTHENTICATION ****************
+   ********************************************************/
 
-    try {
-      const { body: customer } = await apiRoot
-        .withProjectKey({
-          projectKey: this.PROJECT_KEY,
-        })
-        .carts()
-        .get()
-        .execute();
-      return customer;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  /**
-   * BUILD CUSTOMER WITH PASSWORD
-   */
+  // ***** SIGNIN CUSTOMER WITH PASSWORD *****
   public async getCustomerWithPassword(
     email: string,
     password: string
-  ): Promise<Customer> {
+  ): Promise<CustomerSignInResult> {
     try {
       this.client = this.buildClientWithPassword(email, password);
       const apiRoot = this.getApiRoot(this.client);
 
+      const customerData: MyCustomerSignin = {
+        email: email,
+        password: password,
+        activeCartSignInMode: "MergeWithExistingCustomerCart",
+      };
+
       const { body: customer } = await apiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
         .me()
-        .get()
+        .login()
+        .post({
+          body: customerData,
+        })
         .execute();
 
-      this.isAuth = true;
+      this.setAuth(true);
+
       return customer;
     } catch (error) {
       if (
@@ -73,15 +61,12 @@ export class ApiClient extends CreateApiClient {
       ) {
         throw new Error("Invalid email or password");
       }
-
       // Fallback to generic message
       throw new Error(error.toString());
     }
   }
 
-  /**
-   * BUILD CUSTOMER WITH TOKEN
-   */
+  // ***** SIGNIN CUSTOMER WITH TOKEN *****
   public async getCustomerWithToken(token: string) {
     this.client = this.buildClientWithToken(token);
     const apiRoot = this.getApiRoot(this.client);
@@ -95,39 +80,24 @@ export class ApiClient extends CreateApiClient {
         .get()
         .execute();
 
-      this.isAuth = true;
+      this.setAuth(true);
       return customer;
     } catch (error) {
       console.log(error);
     }
   }
 
-  /**
-   * SIGN IN CUSTOMER
-   */
-  public async loginCustomer(customerData: MyCustomerDraft) {
-    const apiRoot = this.getApiRoot(this.defaultClient);
-
-    try {
-      const { body: customer } = await apiRoot
-        .withProjectKey({
-          projectKey: this.PROJECT_KEY,
-        })
-        .me()
-        .login()
-        .post({ body: customerData })
-        .execute();
-
-      this.isAuth = true;
-      return customer;
-    } catch (error) {
-      console.log(error);
-    }
+  // ***** SET AUTHENTICATION *****
+  public async setAuth(authState: boolean) {
+    this.isAuth = authState;
+    console.log("Auth:", this.isAuth);
   }
-
-  /**
-   * REGISTER CUSTOMER
-   */
+  // ***** LOGOUT CUSTOMER *****
+  public async logout() {
+    localStorage.removeItem("accessToken");
+    this.setAuth(false);
+  }
+  // ***** REGISTER CUSTOMER *****
   public async registerCustomer(
     customerData: MyCustomerDraft
   ): Promise<CustomerSignInResult> {
@@ -160,9 +130,11 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  /**
-   * GET CUSTOMER PROFILE
-   */
+  /********************************************************
+   ***************** CUSTOMER & PRODUCT DATA **************
+   ********************************************************/
+
+  // ***** GET CUSTOMER PROFILE *****
   public async getCustomerProfile() {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -181,9 +153,7 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  /**
-   * GET CATEGORIES
-   */
+  // ***** GET CATEGORIES *****
   public async getAllCategories(args: {
     limit?: number;
     sort?: string;
@@ -203,9 +173,8 @@ export class ApiClient extends CreateApiClient {
       console.log(error);
     }
   }
-  /**
-   * GET ALL PRODUCTS
-   */
+
+  // ***** GET ALL PRODUCTS *****
   public async getAllProducts(args?: {
     limit?: number;
     sort?: string | string[];
@@ -225,9 +194,8 @@ export class ApiClient extends CreateApiClient {
       console.log(error);
     }
   }
-  /**
-   * GET PRODUCT WITH KEY
-   */
+
+  // ***** GET PRODUCT WITH KEY *****
   public async getProduct(key: string): Promise<MyProductsData> {
     const apiRoot = this.getApiRoot(this.defaultClient);
     try {
@@ -245,10 +213,8 @@ export class ApiClient extends CreateApiClient {
       console.log(error);
     }
   }
-  /**
-   * SEARCH DATA
-   */
 
+  // ***** SEARCH DATA *****
   public async searchData(
     searchType: SearchTypes,
     searchValue: string
@@ -282,9 +248,7 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  /**
-   * UPDATE CUSTOMER
-   */
+  // ***** UPDATE CUSTOMER *****
   public async updateCustomer(
     updatePayload: MyCustomerUpdate
   ): Promise<Customer> {
@@ -325,36 +289,52 @@ export class ApiClient extends CreateApiClient {
       .execute();
   }
 
+  /********************************************************
+   *********************** CART ***************************
+   ********************************************************/
   /**
    * GET CART
    */
+
+  // ***** GET CUSTOMER CART *****
   public async getCart(): Promise<Cart> {
-    const cartId = localStorage.getItem("cartId");
+    const defaultCart = localStorage.getItem("defaultCart");
+    const customerCart = localStorage.getItem("customerCart");
 
-    if (cartId) {
-      console.log("You have cart:");
+    if (defaultCart && customerCart) {
+      console.log("You have default & customer cart:");
 
-      this.myCart = await apiClient.getCartById(cartId);
+      this.myCart = await apiClient.getCartById(customerCart);
+      return this.myCart;
+    } else if (defaultCart) {
+      console.log("You have default cart:");
+
+      this.myCart = await apiClient.getCartById(defaultCart);
+      return this.myCart;
+    } else if (customerCart) {
+      console.log("You have customer cart:");
+
+      this.myCart = await apiClient.getCartById(customerCart);
       return this.myCart;
     } else {
       console.log("You don't have a cart:");
 
       this.myCart = await apiClient.createCart();
-      localStorage.setItem("cartId", this.myCart.id);
       return this.myCart;
     }
   }
 
-  // GET CART BASED ON AUTHENTICATION
+  // ***** GET CART BASED ON AUTHENTICATION *****
   public async getCartById(cartId: string) {
     if (this.isAuth) {
+      // return await this.getCustomerActiveCart();
       return await this.getCustomerCartById(cartId);
     } else {
       return await this.getDefaultCartById(cartId);
     }
   }
 
-  // GET DEFAULT CUSTOMER CART
+  // ***** GET DEFAULT CUSTOMER CART *****
   public async getDefaultCartById(cartId: string) {
     const apiRoot = this.getApiRoot(this.defaultClient);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -371,7 +351,7 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  // GET AUTHORIZED CUSTOMER CART
+  // ***** GET AUTHORIZED CUSTOMER CART *****
   public async getCustomerCartById(cartId: string) {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -390,20 +370,63 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
+  // ***** GET CUSTOMER ACTIVE CART *****
+  public async getCustomerActiveCart() {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+    try {
+      const { body: cart } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .activeCart()
+        .get()
+        .execute();
+      return cart;
+    } catch {
+      console.log("Failed to fetch customer cart");
+      // throw new Error("Failed to fetch active cart");
+    }
+  }
+
+  // ***** GET ALL CARTS *****
+  public async getAllCarts() {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+    if (!apiRoot) throw new Error("Unauthorized action");
+    try {
+      const { body: carts } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .carts()
+        .get({
+          queryArgs: {
+            limit: 300,
+          },
+        })
+        .execute();
+      return carts.results;
+    } catch {
+      console.log("Failed to fetch customer cart");
+      // throw new Error("Failed to fetch active cart");
+    }
+  }
+
   /**
    * CREATE CART
    */
 
-  // CREATE BASED ON AUTHENTICATION
+  // ***** CREATE BASED ON AUTHENTICATION *****
   public async createCart() {
     if (this.isAuth) {
-      return await this.createCustomerCart();
+      const cart = await this.createCustomerCart();
+      localStorage.setItem("customerCart", cart.id);
+      return cart;
     } else {
-      return await this.createDefaultCart();
+      const cart = await this.createDefaultCart();
+      localStorage.setItem("defaultCart", cart.id);
+      return cart;
     }
   }
 
-  // CREATE DEFAULT CART
+  // ***** CREATE DEFAULT CART *****
   public async createDefaultCart(): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.defaultClient);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -423,7 +446,8 @@ export class ApiClient extends CreateApiClient {
       throw new Error("Failed to create default cart");
     }
   }
-  // CREATE CUSTOMER CART
+
+  // ***** CREATE CUSTOMER CART *****
   public async createCustomerCart(): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -446,10 +470,10 @@ export class ApiClient extends CreateApiClient {
   }
 
   /**
-   * UPDATE CART
+   * UPDATE CUSTOMER CART
    */
 
-  // UPDATE CART BASED ON AUTHENTICATION
+  // ***** UPDATE CART BASED ON AUTHENTICATION *****
   public async updateCart(cart: Cart, product: CartItem) {
     if (this.isAuth) {
       return this.updateCustomerCart(cart, product);
@@ -458,7 +482,7 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  // UPDATE DEFAULT CART
+  // ***** UPDATE DEFAULT CART *****
   public async updateDefaultCart(cart: Cart, product: CartItem): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.defaultClient);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -492,7 +516,7 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  // UPDATE DEFAULT CART
+  // ***** UPDATE CUSTOMER CART *****
   public async updateCustomerCart(cart: Cart, product: CartItem) {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -530,7 +554,7 @@ export class ApiClient extends CreateApiClient {
    * DELETE CART
    */
 
-  // DELETE CART BASED ON AUTHENTICATION
+  // ***** DELETE CART BASED ON AUTHENTICATION *****
   public async deleteCart(cart: Cart) {
     if (this.isAuth) {
       return this.deleteCustomerCart(cart);
@@ -538,7 +562,8 @@ export class ApiClient extends CreateApiClient {
       return this.deleteDefaultCart(cart);
     }
   }
-  // DELETE DEFAULT CART
+
+  // ***** DELETE DEFAULT CART *****
   public async deleteDefaultCart(cart: Cart) {
     const apiRoot = this.getApiRoot(this.defaultClient);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -561,7 +586,7 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-  // DELETE CUSTOMER CART
+  // ***** DELETE CUSTOMER CART *****
   public async deleteCustomerCart(cart: Cart) {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");

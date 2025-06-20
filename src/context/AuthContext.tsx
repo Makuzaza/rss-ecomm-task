@@ -123,10 +123,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 
   const logout = useCallback(() => {
-    localStorage.removeItem("accessToken");
     setCustomer(null);
     setToken(null);
-    apiClient.isAuth = false;
+    apiClient.logout();
   }, []);
 
   const register = useCallback(

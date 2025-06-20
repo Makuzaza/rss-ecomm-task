@@ -33,7 +33,7 @@ class CreateApiClient {
   protected client: Client;
   protected apiRoot: ApiRoot;
   protected myCart: Cart;
-  public isAuth: boolean;
+  protected isAuth: boolean;
 
   constructor() {
     this.defaultClient = this.buildDefaultClient(true);
