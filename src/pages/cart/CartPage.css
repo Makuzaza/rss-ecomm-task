@@ -10,3 +10,10 @@
   transition: background-color 0.3s ease;
   margin-top: 10px;
 }
+
+.img-cart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

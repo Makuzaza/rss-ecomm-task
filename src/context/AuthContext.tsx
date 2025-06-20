@@ -14,6 +14,8 @@ import {
 } from "@commercetools/platform-sdk";
 import { TokenStore, AuthContextType } from "@/@types/interfaces";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "@/context/CartContext";
+// Assuming you have a utility function to reload the cart
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -27,6 +29,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { clearCart } = useCart();
+  const { reloadCart } = useCart();
 
   // Initialize auth state from localStorage
   useEffect(() => {
@@ -64,14 +68,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       let customerProfile: Customer;
 
       try {
-        const customerSignIn = await apiClient.getCustomerWithPassword(
-          email,
-          password,
-        );
+        const customerSignIn = await apiClient.getCustomerWithPassword(email, password);
 
         if (customerSignIn) {
           customerProfile = await apiClient.getCustomerProfile();
           setCustomer(customerProfile);
+
+          // 👉 reload cart after login
+          await reloadCart();
         }
 
         const storedToken = localStorage.getItem("accessToken");
@@ -93,7 +97,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
       }
     },
-    [clearError, navigate],
+    [clearError, navigate, reloadCart], 
   );
 
   const loginWithToken = useCallback(
@@ -122,11 +126,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     [clearError],
   );
 
-  const logout = useCallback(() => {
+    const logout = useCallback(() => {
     localStorage.removeItem("accessToken");
     setCustomer(null);
     setToken(null);
-  }, []);
+    clearCart(); 
+  }, [clearCart]);
 
   const register = useCallback(
     async (customerData: MyCustomerDraft): Promise<Customer> => {

@@ -4,19 +4,20 @@ import { Link } from "react-router-dom";
 import "./CartPage.css";
 
 const CartPage = () => {
-  const { cartItems } = useCart();
+  const { cart } = useCart();
+  const lineItems = cart?.lineItems ?? [];
+  const totalItems = lineItems.reduce((sum: number, item) => sum + item.quantity, 0);
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
+  
   return (
     <div style={{ padding: "20px", backgroundColor: "#f0f0f0" }}>
       <h1>
         Your Cart ({totalItems} {totalItems === 1 ? "item" : "items"})
       </h1>
-      {cartItems.length > 0 ? (
+      {lineItems.length > 0 ? (
         <>
           <ul style={{ listStyle: "none", padding: 0 }}>
-            {cartItems.map((item) => (
+            {lineItems.map((item) => (
               <li
                 key={item.id}
                 style={{
@@ -26,20 +27,21 @@ const CartPage = () => {
                 }}
               >
                 <p>
-                  <strong>{item.name}</strong>
+                  <strong>{item.name?.["en-US"]}</strong>
                 </p>
                 <p>
-                  Price: {(item.priceDiscounted || item.price).toFixed(2)} €
+                  Price: {(item.price.discounted?.value.centAmount ?? item.price.value.centAmount) / 100} €
                 </p>
                 <p>Quantity: {item.quantity}</p>
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  style={{ maxWidth: "100px", height: "auto" }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
+                {item.variant.images?.[0]?.url && (
+                  <div className="img-cart-container">
+                    <img
+                      src={item.variant.images[0].url}
+                      alt={item.name?.["en-US"]}
+                      style={{ maxWidth: "100px", height: "50px" }}
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>

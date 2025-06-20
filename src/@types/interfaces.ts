@@ -4,6 +4,7 @@ import {
   type MyCustomerDraft,
   type Image,
   type ProductVariant,
+  Cart,
 } from "@commercetools/platform-sdk";
 import { Category } from "@commercetools/platform-sdk";
 
@@ -159,7 +160,12 @@ export interface CartItem {
 }
 
 export interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (product: CartItem) => void;
+  cart: Cart | null;
+  addToCart: (productId: string, variantId?: number) => Promise<void>;
+  isInCart: (productId: string, variantId?: number) => boolean;
+  isLoadingAddToCart: (productId: string) => boolean;
   cartCount: number;
+  clearCart: () => void; 
+  reloadCart: () => Promise<void>;
 }
+
