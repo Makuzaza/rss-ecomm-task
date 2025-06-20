@@ -6,16 +6,18 @@ import CategoryDropdown from "../products/ProductCategory/CategoryDropdown";
 import { FaBars, FaTimes, FaSearch, FaShoppingBasket } from "react-icons/fa";
 import { ClickOutsideEvent } from "@/@types/interfaces";
 import { useCart } from "@/context/CartContext";
+import { useApiClient } from "@/context/ApiClientContext";
 
 import "./Header.css";
 
 export const Header = () => {
+  const apiClient = useApiClient();
   const { isAuth, logout, customer } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
-  console.log('[Header] Cart count:', cartCount); // Debug
+  // console.log('[Header] Cart count:', cartCount); // Debug
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -76,7 +78,9 @@ export const Header = () => {
             <div className="cart-icon">
               <Link to="/cart" className="cart-link">
                 <FaShoppingBasket />
-                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+                {cartCount > 0 && (
+                  <span className="cart-count">{cartCount}</span>
+                )}
               </Link>
             </div>
           </div>
@@ -110,6 +114,51 @@ export const Header = () => {
             </li>
           )}
         </ul>
+        <div>
+          <button
+            onClick={async (e) => {
+              e.preventDefault();
+
+              const myCart = await apiClient.getCart();
+              console.log("My cart:", myCart);
+              // const deletedCart = await apiClient.deleteCart(myCart);
+              // console.log("Deleted cart:", deletedCart);
+
+              // const cartId = localStorage.getItem("cartId");
+              // if (cartId) {
+              //   console.log("You have cart:");
+              //   const cart = await apiClient.getAnonymousCartById(cartId);
+              //   console.log("Cart:", cart);
+              // } else {
+              //   console.log("No cart:");
+              //   const cart = await apiClient.createAnonymousCart();
+              //   localStorage.setItem("cartId", cart.id);
+              //   console.log("New cart:", cart);
+              // }
+
+              // if (carts.count > 0) {
+              //   console.log("You have cart");
+              //   console.log("Carts:", carts);
+              // } else {
+              //   console.log("You don't have cart");
+              //   const cart = await apiClient.createAnonymousCart();
+              //   localStorage.setItem("cartId", cart.id);
+              //   console.log("Cart creaded:", cart);
+              // }
+
+              // const promiseArr = [];
+              // carts.results.forEach((cart) => {
+              //   const promise = new Promise(() => {
+              //     apiClient.deleteAnonymousCart(cart);
+              //   });
+              //   promiseArr.push(promise);
+              // });
+              // console.log(carts);
+            }}
+          >
+            Test
+          </button>
+        </div>
         <div className="nav-icons">
           <div className="search-wrapper desktop-search">
             <SearchInput />
@@ -169,7 +218,7 @@ export const Header = () => {
                   className="mobile-nav-link"
                   style={{ paddingLeft: "14px" }}
                 >
-                  <CategoryDropdown onItemSelected={toggleMobileMenu}/>
+                  <CategoryDropdown onItemSelected={toggleMobileMenu} />
                 </div>
               </li>
               <li className="mobile-nav-item">

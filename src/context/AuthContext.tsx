@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     async (
       email: string,
       password: string,
-      options?: { preventRedirect?: boolean },
+      options?: { preventRedirect?: boolean }
     ): Promise<Customer> => {
       setLoading(true);
       clearError();
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const customerSignIn = await apiClient.getCustomerWithPassword(
           email,
-          password,
+          password
         );
 
         if (customerSignIn) {
@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
       }
     },
-    [clearError, navigate],
+    [clearError, navigate]
   );
 
   const loginWithToken = useCallback(
@@ -119,13 +119,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
       }
     },
-    [clearError],
+    [clearError]
   );
 
   const logout = useCallback(() => {
     localStorage.removeItem("accessToken");
     setCustomer(null);
     setToken(null);
+    apiClient.isAuth = false;
   }, []);
 
   const register = useCallback(
@@ -163,7 +164,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
       }
     },
-    [clearError],
+    [clearError]
   );
 
   const refreshToken = useCallback(async (): Promise<void> => {
@@ -188,7 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.error("Relogin failed", err);
       }
     },
-    [login],
+    [login]
   );
 
   const value: AuthContextType = {

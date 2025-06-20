@@ -162,4 +162,5 @@ export interface CartContextType {
   cartItems: CartItem[];
   addToCart: (product: CartItem) => void;
   cartCount: number;
+  isLoading: boolean;
 }
