@@ -3,10 +3,13 @@ import { useCart } from "@/context/CartContext";
 import { Link } from "react-router-dom";
 import "./CartPage.css";
 
+
+
 const CartPage = () => {
-  const { cart } = useCart();
+  const { cart, removeLineItem, clearEntireCart } = useCart();
   const lineItems = cart?.lineItems ?? [];
   const totalItems = lineItems.reduce((sum: number, item) => sum + item.quantity, 0);
+  
 
   
   return (
@@ -14,6 +17,13 @@ const CartPage = () => {
       <h1>
         Your Cart ({totalItems} {totalItems === 1 ? "item" : "items"})
       </h1>
+      <button
+        onClick={clearEntireCart}
+        className="button__clear-cart"
+        style={{ marginBottom: "10px" }}
+      >
+        Remove All Items
+      </button>
       {lineItems.length > 0 ? (
         <>
           <ul style={{ listStyle: "none", padding: 0 }}>
@@ -42,6 +52,14 @@ const CartPage = () => {
                     />
                   </div>
                 )}
+                <div className="button__remove-item-container">
+                  <button
+                    onClick={() => removeLineItem(item.id)}
+                    className="button__remove-item"
+                  >
+                    Remove
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

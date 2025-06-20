@@ -167,5 +167,7 @@ export interface CartContextType {
   cartCount: number;
   clearCart: () => void; 
   reloadCart: () => Promise<void>;
+  removeLineItem: (lineItemId: string) => Promise<void>;
+  clearEntireCart: () => Promise<void>;
 }
 

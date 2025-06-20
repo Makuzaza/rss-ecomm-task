@@ -13,6 +13,8 @@ import {
   type Customer,
   Cart,
   ProductProjectionPagedQueryResponse,
+  MyCartUpdateAction,
+  MyCartUpdate,
 } from "@commercetools/platform-sdk";
 import {
   SearchTypes,
@@ -483,6 +485,11 @@ export class ApiClient extends CreateApiClient {
       .build();
   }
 
+  /**
+   * Initialize the client from localStorage
+   * If no valid token is found, fallback to anonymous client
+   */
+
   public initClientFromStorage() {
     const raw = localStorage.getItem("accessToken");
 
@@ -506,6 +513,34 @@ export class ApiClient extends CreateApiClient {
 
     // Fallback to anonymous
     this.initAnonymousClient();
+  }
+
+  /**
+   * Remove a line item from the cart
+   */
+  async removeLineItemFromCart(cartId: string, version: number, lineItemId: string) {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
+    const body: MyCartUpdate = {
+      version,
+      actions: [
+        {
+          action: "removeLineItem",
+          lineItemId,
+        } as MyCartUpdateAction,
+      ],
+    };
+
+    const res = await apiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .me()
+      .carts()
+      .withId({ ID: cartId })
+      .post({ body })
+      .execute();
+
+    return res.body;
   }
 
   // end

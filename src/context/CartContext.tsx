@@ -34,6 +34,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Remove a specific line item from the cart
+  const removeLineItem = async (lineItemId: string) => {
+    if (!cart) return;
+    try {
+      const updatedCart = await apiClient.removeLineItemFromCart(cart.id, cart.version, lineItemId);
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Failed to remove line item:", err);
+    }
+  };
+
+  // Сlear the entire cart by removing all line items
+  const clearEntireCart = async () => {
+    if (!cart || cart.lineItems.length === 0) return;
+    try {
+      let updatedCart = cart;
+      for (const item of cart.lineItems) {
+        updatedCart = await apiClient.removeLineItemFromCart(updatedCart.id, updatedCart.version, item.id);
+      }
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Failed to clear cart:", err);
+    }
+  };
+
   // Initial cart setup
   useEffect(() => {
     const initCart = async () => {
@@ -137,6 +162,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoadingAddToCart,
         clearCart,
         reloadCart,
+        removeLineItem,
+        clearEntireCart,
       }}
     >
       {children}
