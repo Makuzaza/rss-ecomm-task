@@ -16,7 +16,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
+        setIsLoading(true);
+
         const myCart = await apiClient.getCart();
+        if (!myCart) {
+          throw new Error("Failed to fetch cart");
+        }
+
         const items = cartItemsNormalization(myCart);
         setCartItems(items);
       } catch (error) {
@@ -30,9 +36,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [apiClient]);
 
   const addToCart = async (product: CartItem) => {
-    const carts = await apiClient.getAllCarts();
-    console.log("My cart:", carts);
-
     try {
       // Update API state
       const myCart = await apiClient.getCart();

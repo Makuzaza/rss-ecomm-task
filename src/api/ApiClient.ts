@@ -27,6 +27,23 @@ export class ApiClient extends CreateApiClient {
    ***************** CUSTOMER AUTHENTICATION ****************
    ********************************************************/
 
+  // ***** GET USER AUTH *****
+  public async getUserAuth(): Promise<boolean> {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      try {
+        const parsedToken = JSON.parse(token);
+        await this.getCustomerWithToken(parsedToken.token);
+        return true;
+      } catch {
+        localStorage.removeItem("accessToken");
+        return false;
+      }
+    }
+
+    return false;
+  }
+
   // ***** SIGNIN CUSTOMER WITH PASSWORD *****
   public async getCustomerWithPassword(
     email: string,
@@ -51,8 +68,7 @@ export class ApiClient extends CreateApiClient {
         })
         .execute();
 
-      this.setAuth(true);
-
+      this.login();
       return customer;
     } catch (error) {
       if (
@@ -80,7 +96,7 @@ export class ApiClient extends CreateApiClient {
         .get()
         .execute();
 
-      this.setAuth(true);
+      this.login();
       return customer;
     } catch (error) {
       console.log(error);
@@ -88,15 +104,21 @@ export class ApiClient extends CreateApiClient {
   }
 
   // ***** SET AUTHENTICATION *****
-  public async setAuth(authState: boolean) {
-    this.isAuth = authState;
-    console.log("Auth:", this.isAuth);
+
+  // ***** LOGIN CUSTOMER *****
+  public async login() {
+    this.isAuth = true;
+    localStorage.removeItem("defaultCart");
+    await this.getCart();
   }
+
   // ***** LOGOUT CUSTOMER *****
   public async logout() {
+    this.isAuth = false;
     localStorage.removeItem("accessToken");
-    this.setAuth(false);
+    location.reload();
   }
+
   // ***** REGISTER CUSTOMER *****
   public async registerCustomer(
     customerData: MyCustomerDraft
@@ -292,45 +314,48 @@ export class ApiClient extends CreateApiClient {
   /********************************************************
    *********************** CART ***************************
    ********************************************************/
-  /**
-   * GET CART
-   */
-
-  // ***** GET CUSTOMER CART *****
-  public async getCart(): Promise<Cart> {
-    const defaultCart = localStorage.getItem("defaultCart");
-    const customerCart = localStorage.getItem("customerCart");
-
-    if (defaultCart && customerCart) {
-      console.log("You have default & customer cart:");
-
-      this.myCart = await apiClient.getCartById(customerCart);
-      return this.myCart;
-    } else if (defaultCart) {
-      console.log("You have default cart:");
-
-      this.myCart = await apiClient.getCartById(defaultCart);
-      return this.myCart;
-    } else if (customerCart) {
-      console.log("You have customer cart:");
-
-      this.myCart = await apiClient.getCartById(customerCart);
-      return this.myCart;
-    } else {
-      console.log("You don't have a cart:");
-
-      this.myCart = await apiClient.createCart();
-      return this.myCart;
-    }
-  }
 
   // ***** GET CART BASED ON AUTHENTICATION *****
-  public async getCartById(cartId: string) {
-    if (this.isAuth) {
-      // return await this.getCustomerActiveCart();
-      return await this.getCustomerCartById(cartId);
-    } else {
-      return await this.getDefaultCartById(cartId);
+  public async getCart(): Promise<Cart | null> {
+    try {
+      const isAuth = await apiClient.getUserAuth();
+      console.log("isAuth cartContext", isAuth);
+
+      if (this.isAuth) {
+        const customerCartId = localStorage.getItem("customerCart");
+        if (customerCartId) {
+          const cart = await this.getCustomerCartById(customerCartId);
+          if (!cart) {
+            return await this.createCustomerCart();
+          }
+          this.currentCart = cart;
+          return cart;
+        } else {
+          console.log("createCustomerCart");
+          const cart = await this.createCustomerCart();
+          localStorage.setItem("customerCart", cart.id);
+          this.currentCart = cart;
+          return cart;
+        }
+      } else {
+        const defaultCartId = localStorage.getItem("defaultCart");
+        if (defaultCartId) {
+          const cart = await this.getDefaultCartById(defaultCartId);
+          if (!cart) {
+            return await this.createDefaultCart();
+          }
+          this.currentCart = cart;
+          return cart;
+        } else {
+          const cart = await this.createDefaultCart();
+          localStorage.setItem("defaultCart", cart.id);
+          this.currentCart = cart;
+          return cart;
+        }
+      }
+    } catch (error) {
+      console.error("Failed to get cart:", error);
+      return null;
     }
   }
 
@@ -366,7 +391,6 @@ export class ApiClient extends CreateApiClient {
       return cart;
     } catch {
       console.log("Failed to fetch customer cart");
-      // throw new Error("Failed to fetch active cart");
     }
   }
 

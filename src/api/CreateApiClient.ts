@@ -9,7 +9,7 @@ import {
 import {
   createApiBuilderFromCtpClient,
   ApiRoot,
-  Cart,
+  type Cart,
 } from "@commercetools/platform-sdk";
 
 class CreateApiClient {
@@ -32,12 +32,11 @@ class CreateApiClient {
   protected defaultClient: Client;
   protected client: Client;
   protected apiRoot: ApiRoot;
-  protected myCart: Cart;
+  protected currentCart: Cart;
   protected isAuth: boolean;
 
   constructor() {
     this.defaultClient = this.buildDefaultClient(true);
-    this.isAuth = false;
   }
   // API ROOT
   protected getApiRoot(client: Client) {
