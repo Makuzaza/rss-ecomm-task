@@ -36,11 +36,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
           // console.log("myActiveCart", myActiveCart);
         } else {
           const defaultCartId = localStorage.getItem("defaultCart");
+
           if (defaultCartId) {
             cart = await apiClient.getDefaultCartById(defaultCartId);
           } else {
             cart = await apiClient.createDefaultCart();
-            localStorage.setItem("defaultCart", myCart.id);
+            localStorage.setItem("defaultCart", cart.id);
           }
         }
 
