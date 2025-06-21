@@ -180,14 +180,8 @@ export interface HandleQuantityChange {
   (e: QuantityChangeEvent, id: string | number): void;
 }
 
-export interface UpdateQuantityFn {
-  (id: string, newQuantity: number): void;
-}
+export type UpdateQuantityFn = (id: string, newQuantity: number) => void;
 
-export interface IncrementQuantityFn {
-  (id: string): void;
-}
-
-export interface DecrementQuantityFn {
+export interface ChangeQuantityFn {
   (id: string): void;
 }

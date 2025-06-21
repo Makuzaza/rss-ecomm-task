@@ -1,11 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { CartItem } from "@/@types/interfaces";
 import { CartContextType } from "@/@types/interfaces";
-import {
-  UpdateQuantityFn,
-  IncrementQuantityFn,
-  DecrementQuantityFn,
-} from "@/@types/interfaces";
+import { UpdateQuantityFn, ChangeQuantityFn } from "@/@types/interfaces";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -57,7 +53,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  const incrementQuantity: IncrementQuantityFn = (id) => {
+  const incrementQuantity: ChangeQuantityFn = (id) => {
     setCartItems((prevItems) =>
       prevItems.map((item) =>
         item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
@@ -65,7 +61,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  const decrementQuantity: DecrementQuantityFn = (id) => {
+  const decrementQuantity: ChangeQuantityFn = (id) => {
     setCartItems((prevItems) =>
       prevItems.map((item) =>
         item.id === id
