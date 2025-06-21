@@ -3,13 +3,17 @@ import { CartItem } from "@/@types/interfaces";
 import { CartContextType } from "@/@types/interfaces";
 import { useApiClient } from "@/context/ApiClientContext";
 import { cartItemsNormalization } from "@/utils/dataNormalization";
+import { useAuth } from "@/context/AuthContext";
+import { type Cart } from "@commercetools/platform-sdk";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { isAuth } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [myCart, setCart] = useState<Cart>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const apiClient = useApiClient();
 
@@ -18,12 +22,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         setIsLoading(true);
 
-        const myCart = await apiClient.getCart();
-        if (!myCart) {
+        let cart;
+
+        if (isAuth) {
+          const customerCartId = localStorage.getItem("customerCart");
+          if (customerCartId) {
+            cart = await apiClient.getCustomerCartById(customerCartId);
+          } else {
+            cart = await apiClient.createCustomerCart();
+            localStorage.setItem("customerCart", myCart.id);
+          }
+          // const myActiveCart = await apiClient.getCustomerActiveCart();
+          // console.log("myActiveCart", myActiveCart);
+        } else {
+          const defaultCartId = localStorage.getItem("defaultCart");
+          if (defaultCartId) {
+            cart = await apiClient.getDefaultCartById(defaultCartId);
+          } else {
+            cart = await apiClient.createDefaultCart();
+            localStorage.setItem("defaultCart", myCart.id);
+          }
+        }
+
+        if (!cart) {
           throw new Error("Failed to fetch cart");
         }
 
-        const items = cartItemsNormalization(myCart);
+        const items = cartItemsNormalization(cart);
+        setCart(cart);
         setCartItems(items);
       } catch (error) {
         console.error("Failed to fetch cart items:", error);
@@ -33,13 +59,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     fetchCartItems();
-  }, [apiClient]);
+  }, [apiClient, isAuth]);
 
   const addToCart = async (product: CartItem) => {
     try {
       // Update API state
-      const myCart = await apiClient.getCart();
+
       const updatedCart = await apiClient.updateCart(myCart, product);
+      console.log("myCart: (add)", myCart);
       console.log("updatedCart:", updatedCart);
 
       // Update local state
@@ -65,7 +92,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, cartCount, isLoading }}
+      value={{ myCart, cartItems, addToCart, cartCount, isLoading }}
     >
       {children}
     </CartContext.Provider>

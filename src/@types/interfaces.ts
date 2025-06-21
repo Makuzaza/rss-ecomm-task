@@ -1,9 +1,9 @@
 import {
   type Customer,
-  // CustomerSignInResult,
   type MyCustomerDraft,
   type Image,
   type ProductVariant,
+  type Cart,
 } from "@commercetools/platform-sdk";
 import { Category } from "@commercetools/platform-sdk";
 
@@ -159,6 +159,7 @@ export interface CartItem {
 }
 
 export interface CartContextType {
+  myCart: Cart;
   cartItems: CartItem[];
   addToCart: (product: CartItem) => void;
   cartCount: number;

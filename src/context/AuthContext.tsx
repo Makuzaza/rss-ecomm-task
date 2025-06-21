@@ -8,11 +8,10 @@ import React, {
 } from "react";
 import { apiClient } from "@/api/ApiClient";
 import {
-  Customer,
-  // CustomerSignInResult,
-  MyCustomerDraft,
+  type Customer,
+  type MyCustomerDraft,
 } from "@commercetools/platform-sdk";
-import { TokenStore, AuthContextType } from "@/@types/interfaces";
+import { type TokenStore, type AuthContextType } from "@/@types/interfaces";
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,6 +73,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setCustomer(customerProfile);
         }
 
+        // DELETE DEFAULT CART AFTER SIGN IN
+        const defaultCartId = localStorage.getItem("defaultCart");
+        if (defaultCartId) {
+          const defaultCart = await apiClient.getDefaultCartById(defaultCartId);
+          await apiClient.deleteDefaultCart(defaultCart);
+          localStorage.removeItem("defaultCart");
+        }
+
         const storedToken = localStorage.getItem("accessToken");
         if (storedToken) {
           const parsedToken: TokenStore = JSON.parse(storedToken);
@@ -125,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = useCallback(() => {
     setCustomer(null);
     setToken(null);
-    apiClient.logout();
+    localStorage.removeItem("accessToken");
   }, []);
 
   const register = useCallback(

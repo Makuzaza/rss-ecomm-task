@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import "./CartPage.css";
 
 const CartPage = () => {
-  const { cartItems } = useCart();
-
+  const { cartItems, myCart } = useCart();
+  console.log("myCart (cart page:)", myCart);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
