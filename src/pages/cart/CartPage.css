@@ -159,8 +159,8 @@
 
 .promo-code-input {
   display: flex;
+  align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .promo-code-input input {
@@ -232,7 +232,7 @@
     margin-top: 15px;
   }
   .promo-code-section {
-    padding: 0;
+    padding: 10px 0;
   }
 
   .promo-code-input input {
