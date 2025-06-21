@@ -56,7 +56,7 @@
 
 .button__continue-shopping {
   text-align: center;
-  background-color: #736e6e;
+  background-color: #4caf50;
   color: white;
   border: none;
   padding: 10px;
@@ -68,7 +68,7 @@
 }
 
 .button__continue-shopping:hover {
-  background-color: #8c8b8b;
+  background-color: #45a049;
 }
 
 .button__clear-all {
@@ -90,7 +90,7 @@
 
 .button__checkout {
   padding: 10px 15px;
-  background-color: #4caf50;
+  background-color: #736e6e;
   color: white;
   border: none;
   border-radius: 4px;
@@ -103,7 +103,7 @@
 }
 
 .button__checkout:hover {
-  background-color: #45a049;
+  background-color: #8c8b8b;
 }
 
 .cart-page > div:last-child {
@@ -147,6 +147,63 @@
   margin: 0 5px;
   padding: 5px;
   border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.promo-code-section {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.promo-code-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.promo-code-input input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.promo-code-input button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.promo-code-input button:hover {
+  background-color: #0056b3;
+}
+
+.promo-message {
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.promo-message.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.promo-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.total-price {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  background-color: #c1e8c1;
+  padding: 5px;
   border-radius: 4px;
 }
 
