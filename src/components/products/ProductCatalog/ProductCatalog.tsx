@@ -11,6 +11,12 @@ import {
 import "./ProductCatalog.css";
 import "@/pages/home/HomePage.css";
 import { useCart } from "@/context/CartContext";
+import {
+  FaShoppingCart,
+  FaTimes,
+  FaAngleLeft,
+  FaAngleRight,
+} from "react-icons/fa";
 
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
@@ -21,12 +27,25 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   filterMinPrice,
   filterMaxPrice,
   filterDiscountOnly = false,
+  itemsPerPage = 12,
+  onResetFilters,
 }) => {
   const apiClient = useApiClient();
-  const [products, setProducts] = useState<MyProductsData[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<MyProductsData[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { addToCart } = useCart();
+  const { cartItems, addToCart, removeFromCart } = useCart();
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    if (onResetFilters) {
+      onResetFilters();
+    }
+  }, [propsSort, filterMinPrice, filterMaxPrice, filterDiscountOnly]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -37,7 +56,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
             "category",
             categoryId,
           );
-          setProducts(data);
+          setFilteredProducts(data);
           setError(null);
         } catch (err) {
           setError(err.message);
@@ -45,7 +64,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           setLoading(false);
         }
       } else if (propsProducts) {
-        setProducts(propsProducts);
+        setFilteredProducts(propsProducts);
         setLoading(false);
       } else {
         try {
@@ -69,7 +88,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           };
           const filteredData = filterProducts(sortedData, filterArg);
 
-          setProducts(filteredData);
+          setFilteredProducts(filteredData);
           setError(null);
         } catch (err) {
           setError(err.message);
@@ -92,10 +111,34 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
     filterDiscountOnly,
   ]);
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredProducts.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const isProductInCart = (productId: string) => {
+    return cartItems.some((item) => item.id === productId);
+  };
+
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-container">Error: {error}</div>;
 
-  if (products.length === 0) {
+  if (filteredProducts.length === 0) {
     return (
       <div className="main-container">
         <p className="no-found">
@@ -106,61 +149,114 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   }
 
   return (
-    <div className="cards-container">
-      {/* Array of Products */}
-      {products.map((product) => (
-        <div key={product.id} className="cards-item">
-          <Link to={"/product/" + product.key}>
-            <div className="cards-item-img">
-              <img src={product.images[0].url} alt={product.name} />
-            </div>
-            <div className="cards-item-name cards-item-text">
-              {product.name}
-            </div>
-            <div className="cards-item-desc cards-item-text">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html:
-                    DOMPurify.sanitize(product.description).slice(0, 55) +
-                    "...  ",
-                }}
-              />
-            </div>
-            <div className="product-price-container">
-              {product.priceDiscounted ? (
-                <div className="price-with-discount">
-                  <span className="price-discounted">
-                    {product.priceDiscounted} &euro;
-                  </span>
-                  <span className="price-original">{product.price} &euro;</span>
+    <div className="product-catalog-container">
+      <div className="cards-container">
+        {/* Array of Products */}
+        {currentItems.map((product) => {
+          const inCart = isProductInCart(product.id);
+
+          return (
+            <div key={product.id} className="cards-item">
+              <Link to={"/product/" + product.key}>
+                <div className="cards-item-img">
+                  {product.images && product.images.length > 0 ? (
+                    <img src={product.images[0].url} alt={product.name} />
+                  ) : (
+                    <div className="no-image-placeholder">No Image</div>
+                  )}
                 </div>
-              ) : (
-                <span className="price-regular">{product.price} &euro;</span>
-              )}
+                <div className="cards-item-name cards-item-text">
+                  {product.name}
+                </div>
+                <div className="cards-item-desc cards-item-text">
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        DOMPurify.sanitize(product.description).slice(0, 55) +
+                        "...  ",
+                    }}
+                  />
+                </div>
+                <div className="product-price-container">
+                  {product.priceDiscounted ? (
+                    <div className="price-with-discount">
+                      <span className="price-discounted">
+                        {product.priceDiscounted} &euro;
+                      </span>
+                      <span className="price-original">
+                        {product.price} &euro;
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="price-regular">
+                      {product.price} &euro;
+                    </span>
+                  )}
+                </div>
+              </Link>
+              <div className="cards-item-card cards-item-text">
+                {inCart ? (
+                  <button
+                    className="button__removeFromCart"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      removeFromCart(product.id);
+                    }}
+                  >
+                    <FaTimes /> REMOVE FROM CART
+                  </button>
+                ) : (
+                  <button
+                    className="button__addToCart"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log("Adding to cart:", product.name);
+                      addToCart({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        priceDiscounted: product.priceDiscounted,
+                        image: product.images[0].url,
+                        key: product.key,
+                        quantity: 1,
+                      });
+                    }}
+                  >
+                    <FaShoppingCart />
+                    ADD TO CART
+                  </button>
+                )}
+              </div>
             </div>
-          </Link>
-          <div className="cards-item-card cards-item-text">
-            <button
-              className="button__addToCart"
-              onClick={(e) => {
-                e.preventDefault();
-                console.log("Adding to cart:", product.name);
-                addToCart({
-                  id: product.id,
-                  name: product.name,
-                  price: product.price,
-                  priceDiscounted: product.priceDiscounted,
-                  image: product.images[0].url,
-                  key: product.key,
-                  quantity: 1,
-                });
-              }}
-            >
-              ADD TO CART
-            </button>
-          </div>
+          );
+        })}
+      </div>
+
+      {filteredProducts.length > itemsPerPage && (
+        <div className="pagination-container">
+          <button
+            onClick={goToPrevPage}
+            disabled={currentPage === 1}
+            className="pagination-button"
+            aria-label="Previous page"
+          >
+            <FaAngleLeft />
+          </button>
+
+          <span className="current-page-indicator">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+            className="pagination-button"
+            aria-label="Next page"
+          >
+            <FaAngleRight />
+          </button>
         </div>
-      ))}
+      )}
     </div>
   );
 };

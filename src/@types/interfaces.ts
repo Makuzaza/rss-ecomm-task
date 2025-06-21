@@ -78,6 +78,8 @@ export interface ProductCatalogProps {
   filterMinPrice?: string;
   filterMaxPrice?: string;
   filterDiscountOnly?: boolean;
+  itemsPerPage?: number;
+  onResetFilters?: () => void;
 }
 
 export interface MyProductsData {
@@ -162,4 +164,30 @@ export interface CartContextType {
   cartItems: CartItem[];
   addToCart: (product: CartItem) => void;
   cartCount: number;
+  removeFromCart: (productId: string) => void;
+  clearCart: () => void;
+  updateQuantity: (id: string, newQuantity: number) => void;
+  incrementQuantity: (id: string) => void;
+  decrementQuantity: (id: string) => void;
+  totalItems: number;
+}
+
+interface QuantityChangeEvent extends React.ChangeEvent<HTMLInputElement> {
+  customProperty?: string;
+}
+
+export interface HandleQuantityChange {
+  (e: QuantityChangeEvent, id: string | number): void;
+}
+
+export interface UpdateQuantityFn {
+  (id: string, newQuantity: number): void;
+}
+
+export interface IncrementQuantityFn {
+  (id: string): void;
+}
+
+export interface DecrementQuantityFn {
+  (id: string): void;
 }

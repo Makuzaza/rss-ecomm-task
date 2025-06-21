@@ -212,7 +212,8 @@
 
 /* ADD TO CART BUTTON */
 .buy-section {
-  text-align: center;
+  display: flex;
+  justify-content: center;
   margin-top: 1rem;
 }
 

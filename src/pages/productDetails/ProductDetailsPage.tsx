@@ -7,9 +7,11 @@ import {
 } from "@/utils/textProcessing";
 import DOMPurify from "dompurify";
 import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
+import { FaShoppingCart, FaTimes } from "react-icons/fa";
 
 import "./ProductDetailsPage.css";
 import { type MyProductsData } from "@/@types/interfaces";
+import { useCart } from "@/context/CartContext";
 
 const ProductDetailsPage = () => {
   const apiClient = useApiClient();
@@ -22,6 +24,7 @@ const ProductDetailsPage = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
+  const { cartItems, addToCart, removeFromCart } = useCart();
 
   const { id } = useParams<{ id: string }>();
 
@@ -53,12 +56,13 @@ const ProductDetailsPage = () => {
     document.body.style.overflow = "hidden";
   };
 
-  const handleAddToCart = () => {
-    console.log("Added to cart:", product.name);
-  };
   const closeImageModal = () => {
     setIsModalOpen(false);
     document.body.style.overflow = "auto";
+  };
+
+  const isProductInCart = (productId: string) => {
+    return cartItems.some((item) => item.id === productId);
   };
 
   // ESC KEY HANDLER FOR MODAL
@@ -75,7 +79,7 @@ const ProductDetailsPage = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isModalOpen, closeImageModal]);
+  }, [isModalOpen, closeImageModal, product]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -118,6 +122,7 @@ const ProductDetailsPage = () => {
 
   // HTML SANITIZATION
   const sanitizedDesc = DOMPurify.sanitize(product.description);
+  const inCart = isProductInCart(product.id);
 
   return (
     <div className="main-content">
@@ -255,11 +260,37 @@ const ProductDetailsPage = () => {
               <span className="price-regular">{product.price} &euro;</span>
             )}
           </div>
-          {/* ADD TO CART BUTTON */}
+          {/* ADD TO CART / REMOVE FROM CART BUTTON */}
           <div className="buy-section">
-            <button className="button__addToCart" onClick={handleAddToCart}>
-              Add to Cart
-            </button>
+            {inCart ? (
+              <button
+                className="button__removeFromCart"
+                onClick={(e) => {
+                  e.preventDefault();
+                  removeFromCart(product.id);
+                }}
+              >
+                <FaTimes /> REMOVE FROM CART
+              </button>
+            ) : (
+              <button
+                className="button__addToCart"
+                onClick={(e) => {
+                  e.preventDefault();
+                  addToCart({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    priceDiscounted: product.priceDiscounted,
+                    image: product.images[0].url,
+                    key: product.key,
+                    quantity: 1,
+                  });
+                }}
+              >
+                <FaShoppingCart /> ADD TO CART
+              </button>
+            )}
           </div>
         </div>
       </div>

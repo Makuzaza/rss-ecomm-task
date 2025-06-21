@@ -24,12 +24,13 @@
 .cards-item {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   background-color: white;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  padding: 10px;
 }
 
 .cards-item:hover {
@@ -45,7 +46,8 @@
 }
 
 .cards-item-card {
-  text-align: center;
+  display: flex;
+  justify-content: center;
   padding: 10px;
 }
 
@@ -88,7 +90,8 @@
   font-size: 1.5rem;
 }
 
-.button__addToCart {
+.button__addToCart,
+.button__removeFromCart {
   color: rgb(255, 255, 255);
   background-color: rgba(76, 176, 76, 0.8);
   border: none;
@@ -97,11 +100,72 @@
   border-radius: 4px;
   font-weight: 500;
   transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.button__addToCart {
+  background-color: rgba(76, 176, 76, 0.8);
+}
+
+.button__removeFromCart {
+  background-color: rgba(244, 67, 54, 0.8);
 }
 
 .button__addToCart:hover {
   cursor: pointer;
   background-color: #45a049;
+}
+
+.button__removeFromCart:hover {
+  cursor: pointer;
+  background-color: #c82333;
+}
+
+.product-catalog-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 30px 0;
+  gap: 15px;
+}
+
+.pagination-button {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.current-page-indicator {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+.cards-container {
+  flex: 1;
 }
 
 @media (max-width: 768px) {
