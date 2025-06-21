@@ -7,6 +7,7 @@ const ProductsPage = () => {
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [onlyDiscounted, setOnlyDiscounted] = useState<boolean>(false);
+  const [resetTrigger, setResetTrigger] = useState(0);
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortOption(e.target.value);
@@ -29,6 +30,7 @@ const ProductsPage = () => {
     setMinPrice("");
     setMaxPrice("");
     setOnlyDiscounted(false);
+    setResetTrigger((prev) => prev + 1);
   }
 
   return (
@@ -40,6 +42,7 @@ const ProductsPage = () => {
               Min Price:
               <input
                 type="number"
+                min="0"
                 value={minPrice}
                 onChange={handleMinPriceChange}
                 placeholder="0"
@@ -50,6 +53,7 @@ const ProductsPage = () => {
               Max Price:
               <input
                 type="number"
+                min="0"
                 value={maxPrice}
                 onChange={handleMaxPriceChange}
                 placeholder="0"
@@ -123,6 +127,7 @@ const ProductsPage = () => {
         filterMinPrice={minPrice}
         filterMaxPrice={maxPrice}
         filterDiscountOnly={onlyDiscounted}
+        key={resetTrigger}
       />
     </div>
   );

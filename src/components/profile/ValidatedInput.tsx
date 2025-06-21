@@ -3,8 +3,15 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ValidatedInputProps } from "../../@types/interfaces";
 
 const ValidatedInput: React.FC<ValidatedInputProps> = ({
-  label, type, value, placeholder, error,
-  onChange, showToggle, isShown, onToggleShow,
+  label,
+  type,
+  value,
+  placeholder,
+  error,
+  onChange,
+  showToggle,
+  isShown,
+  onToggleShow,
 }) => (
   <div className="validated-input">
     <label htmlFor={labelId(label)} className="p-text-personal">
@@ -16,7 +23,7 @@ const ValidatedInput: React.FC<ValidatedInputProps> = ({
         placeholder={placeholder}
         aria-invalid={!!error}
         aria-describedby={error ? `${labelId(label)}-error` : undefined}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         className="edit-input"
       />
     </label>

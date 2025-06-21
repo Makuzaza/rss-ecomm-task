@@ -15,7 +15,7 @@ export const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
-  console.log('[Header] Cart count:', cartCount); // Debug
+  console.log("[Header] Cart count:", cartCount); // Debug
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -76,7 +76,9 @@ export const Header = () => {
             <div className="cart-icon">
               <Link to="/cart" className="cart-link">
                 <FaShoppingBasket />
-                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+                {cartCount > 0 && (
+                  <span className="cart-count">{cartCount}</span>
+                )}
               </Link>
             </div>
           </div>
@@ -169,7 +171,7 @@ export const Header = () => {
                   className="mobile-nav-link"
                   style={{ paddingLeft: "14px" }}
                 >
-                  <CategoryDropdown onItemSelected={toggleMobileMenu}/>
+                  <CategoryDropdown onItemSelected={toggleMobileMenu} />
                 </div>
               </li>
               <li className="mobile-nav-item">
