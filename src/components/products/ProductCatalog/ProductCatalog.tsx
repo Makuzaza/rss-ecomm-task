@@ -37,6 +37,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { cartItems, addToCart, removeFromCart } = useCart();
+  
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -52,10 +53,8 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
       if (categoryId) {
         try {
           setLoading(true);
-          const data: MyProductsData[] = await apiClient.searchData(
-            "category",
-            categoryId,
-          );
+          const response = await apiClient.searchData("category", categoryId);
+          const data: MyProductsData[] = response.products;
           setFilteredProducts(data);
           setError(null);
         } catch (err) {
@@ -75,7 +74,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
             limit: propsLimit,
             sort: propsApiSort,
           };
-          const data: MyProductsData[] = await apiClient.getAllProducts(arg);
+          const { products: data } = await apiClient.getAllProducts(arg);
 
           // SORT PRODUCTS DATA
           const sortedData = sortProducts(data, propsSort);
@@ -211,15 +210,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     onClick={(e) => {
                       e.preventDefault();
                       console.log("Adding to cart:", product.name);
-                      addToCart({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        priceDiscounted: product.priceDiscounted,
-                        image: product.images[0].url,
-                        key: product.key,
-                        quantity: 1,
-                      });
+                      addToCart(product.id, 1);
                     }}
                   >
                     <FaShoppingCart />

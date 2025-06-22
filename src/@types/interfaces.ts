@@ -1,12 +1,13 @@
 import {
   type Customer,
-  // CustomerSignInResult,
   type MyCustomerDraft,
   type Image,
   type ProductVariant,
+  Cart,
+  Category,
 } from "@commercetools/platform-sdk";
-import { Category } from "@commercetools/platform-sdk";
 
+// Error type
 export interface CommerceToolsError {
   body: {
     statusCode: number;
@@ -19,6 +20,7 @@ export interface CommerceToolsError {
   };
 }
 
+// Registration form
 export type RegisterFormFields = {
   email: string;
   password: string;
@@ -36,23 +38,27 @@ export type RegisterFormFields = {
   billingPostalCode: string;
 };
 
+// Country
 export interface СountriesList {
   name: string;
   code: string;
 }
 
+// User
 export interface User {
   firstName: string;
   lastName: string;
   email: string;
 }
 
+// Token storage
 export interface TokenStore {
   token: string;
   expirationTime: number;
   refreshToken?: string;
 }
 
+// Auth context
 export interface AuthContextType {
   isAuth: boolean;
   customer: Customer | null;
@@ -69,6 +75,7 @@ export interface AuthContextType {
   relogin: (params: { email: string; password: string }) => Promise<void>;
 }
 
+// Product catalog props
 export interface ProductCatalogProps {
   categoryId?: string;
   propsLimit?: number;
@@ -82,6 +89,7 @@ export interface ProductCatalogProps {
   onResetFilters?: () => void;
 }
 
+// Product representation
 export interface MyProductsData {
   id: string;
   key?: string;
@@ -95,15 +103,18 @@ export interface MyProductsData {
   variants?: ProductVariant[];
 }
 
+// Filters
 export interface MyProductFilter {
   minPrice: string;
   maxPrice: string;
   discountOnly: boolean;
 }
 
+// Sorting & searching
 export type SortDirection = "asc" | "desc";
 export type SearchTypes = "name" | "category";
 
+// Customer profile
 export interface CustomerAddress {
   id?: string;
   streetName: string;
@@ -124,6 +135,7 @@ export interface CustomerProfile {
   defaultShippingAddressId?: string;
 }
 
+// UI/UX types
 export interface ClickOutsideEvent extends MouseEvent {
   target: Node;
 }
@@ -150,6 +162,7 @@ export interface CategoryDropdownProps {
   onItemSelected?: () => void;
 }
 
+// Cart
 export interface CartItem {
   id: string;
   name: string;
@@ -160,18 +173,26 @@ export interface CartItem {
   key: string;
 }
 
+// Cart context
 export interface CartContextType {
+  cart?: Cart | null;
   cartItems: CartItem[];
-  addToCart: (product: CartItem) => void;
+  addToCart: (product: CartItem | string, variantId?: number) => void | Promise<void>;
+  removeFromCart: (productId: string, variantId?: number) => void;
+  isInCart?: (productId: string, variantId?: number) => boolean;
+  isLoadingAddToCart?: (productId: string) => boolean;
   cartCount: number;
-  removeFromCart: (productId: string) => void;
   clearCart: () => void;
-  updateQuantity: (id: string, newQuantity: number) => void;
-  incrementQuantity: (id: string) => void;
-  decrementQuantity: (id: string) => void;
-  totalItems: number;
+  updateQuantity?: (id: string, newQuantity: number) => void;
+  incrementQuantity?: (id: string) => void;
+  decrementQuantity?: (id: string) => void;
+  reloadCart?: () => Promise<void>;
+  removeLineItem?: (lineItemId: string) => Promise<void>;
+  clearEntireCart?: () => Promise<void>;
+  totalItems?: number;
 }
 
+// Quantity change
 interface QuantityChangeEvent extends React.ChangeEvent<HTMLInputElement> {
   customProperty?: string;
 }

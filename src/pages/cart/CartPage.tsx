@@ -175,7 +175,9 @@ const CartPage = () => {
           </div>
           <div className="cart-actions">
             <button
-              onClick={clearCart}
+              onClick={async () => {
+                await clearCart();
+              }}
               className="button__clear-all"
               aria-label="Clear all items from cart"
             >
