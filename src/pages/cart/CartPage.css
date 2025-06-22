@@ -208,6 +208,10 @@
   border-radius: 4px;
 }
 
+.discount-info {
+  color: red
+}
+
 @media screen and (max-width: 500px) {
   .cart-page {
     padding: 0;

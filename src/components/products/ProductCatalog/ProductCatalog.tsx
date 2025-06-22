@@ -131,7 +131,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   };
 
   const isProductInCart = (productId: string) => {
-    return cartItems.some((item) => item.id === productId);
+    return cartItems.some((item) => item.productId === productId);
   };
 
   if (loading) return <div className="loading-container">Loading...</div>;

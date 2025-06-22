@@ -7,62 +7,55 @@ import { HandleQuantityChange } from "@/@types/interfaces";
 
 const CartPage = () => {
   const {
+    cart,
     cartItems,
     removeFromCart,
     clearCart,
     incrementQuantity,
     changeQuantity,
     decrementQuantity,
+    applyPromoCode,
   } = useCart();
 
   const [promoCode, setPromoCode] = useState("");
-  const [appliedPromo, setAppliedPromo] = useState("");
-  const [discount, setDiscount] = useState(0);
   const [promoMessage, setPromoMessage] = useState("");
-  
+  const [promoApplied, setPromoApplied] = useState(false);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.priceDiscounted || item.price) * item.quantity,
-    0,
+    0
   );
-
-  const totalPrice = (subtotal * (1 - discount)).toFixed(2);
+  const totalCartPrice = cart?.totalPrice?.centAmount
+  ? (cart.totalPrice.centAmount / 100).toFixed(2)
+  : subtotal.toFixed(2);
 
   const handleQuantityChange: HandleQuantityChange = (e, id) => {
     const newQuantity = parseInt(e.target.value) || 1;
     changeQuantity(String(id), newQuantity);
   };
 
-  const applyPromoCode = () => {
+  const handleApplyPromo = async () => {
     if (!promoCode) {
-      setPromoMessage("Please enter a valid promo code");
+      setPromoMessage("Please enter a promo code.");
       return;
     }
 
-    const promoCodes: Record<string, number> = {
-      PROMO: 0.1,
-      DISCOUNT20: 0.2,
-      SAVE15: 0.15,
-    };
-
-    if (promoCode.toUpperCase() in promoCodes) {
-      const newDiscount = promoCodes[promoCode.toUpperCase()];
-      setDiscount(newDiscount);
-      setAppliedPromo(promoCode.toUpperCase());
-      setPromoMessage(`Promo code applied! ${newDiscount * 100}% discount`);
-    } else {
-      setDiscount(0);
-      setAppliedPromo("");
-      setPromoMessage("Insert a valid promo code, for example: PROMO");
+    try {
+      await applyPromoCode(promoCode.trim());
+      setPromoMessage("Promo code applied successfully!");
+      setPromoApplied(true);
+    } catch {
+      setPromoMessage("Invalid or expired promo code.");
+      setPromoApplied(false);
     }
   };
 
-  const removePromoCode = () => {
+  const handleRemovePromo = () => {
     setPromoCode("");
-    setAppliedPromo("");
-    setDiscount(0);
     setPromoMessage("");
+    setPromoApplied(false);
+    // CommerceTools не поддерживает удаление промокода напрямую без реализации removeDiscountCode
   };
 
   return (
@@ -70,6 +63,7 @@ const CartPage = () => {
       <h2>
         Your Cart ({totalItems} {totalItems === 1 ? "item" : "items"})
       </h2>
+
       {cartItems.length > 0 ? (
         <>
           <ul className="cart-items-list">
@@ -84,17 +78,10 @@ const CartPage = () => {
                   }}
                 />
                 <div className="cart-item-details">
-                  <div>
-                    <strong>{item.name}</strong>
-                  </div>
-                  <div>
-                    Price: {(item.priceDiscounted || item.price).toFixed(2)} €
-                  </div>
+                  <strong>{item.name}</strong>
+                  <div>Price: {(item.priceDiscounted || item.price).toFixed(2)} €</div>
                   <div className="quantity-controls">
-                    <button
-                      onClick={() => decrementQuantity(item.id)}
-                      aria-label={`Decrease quantity of ${item.name}`}
-                    >
+                    <button onClick={() => decrementQuantity(item.id)} aria-label="Decrease quantity">
                       <FaMinus />
                     </button>
                     <input
@@ -102,27 +89,18 @@ const CartPage = () => {
                       min="1"
                       value={item.quantity}
                       onChange={(e) => handleQuantityChange(e, item.id)}
-                      aria-label={`Quantity of ${item.name}`}
                     />
-                    <button
-                      onClick={() => incrementQuantity(item.id)}
-                      aria-label={`Increase quantity of ${item.name}`}
-                    >
+                    <button onClick={() => incrementQuantity(item.id)} aria-label="Increase quantity">
                       <FaPlus />
                     </button>
                   </div>
                   <div>
-                    Subtotal:{" "}
-                    {(
-                      (item.priceDiscounted || item.price) * item.quantity
-                    ).toFixed(2)}{" "}
-                    €
+                    Subtotal: {((item.priceDiscounted || item.price) * item.quantity).toFixed(2)} €
                   </div>
                 </div>
                 <button
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.productId, item.key ? parseInt(item.key) : undefined)}
                   className="button__remove-item"
-                  aria-label={`Remove ${item.name} from cart`}
                 >
                   <FaTrash />
                 </button>
@@ -130,7 +108,7 @@ const CartPage = () => {
             ))}
           </ul>
 
-          {/* Promo Code Section */}
+          {/* Promo Code */}
           <div className="promo-code-section">
             <div className="promo-code-input">
               <input
@@ -138,50 +116,40 @@ const CartPage = () => {
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
                 placeholder="Enter promo code"
-                disabled={!!appliedPromo}
+                disabled={promoApplied}
               />
-              {!appliedPromo ? (
-                <button onClick={applyPromoCode}>Apply</button>
+              {!promoApplied ? (
+                <button onClick={handleApplyPromo}>Apply</button>
               ) : (
-                <button onClick={removePromoCode}>Remove</button>
+                <button onClick={handleRemovePromo}>Clear</button>
               )}
             </div>
             {promoMessage && (
-              <div
-                className={`promo-message ${discount > 0 ? "success" : "error"}`}
-              >
+              <div className={`promo-message ${promoApplied ? "success" : "error"}`}>
                 {promoMessage}
               </div>
             )}
           </div>
 
+          {/* Summary */}
           <div className="cart-summary">
-            <p>
-              <strong>Total Items: {totalItems}</strong>
-            </p>
-            <p>
-              <strong>Price without discount: {subtotal.toFixed(2)} €</strong>
-            </p>
-            {appliedPromo && (
-              <p>
-                <strong>
-                  Discount ({appliedPromo}): -{(subtotal * discount).toFixed(2)}{" "}
-                  €
-                </strong>
+            <p><strong>Total Items: {totalItems}</strong></p>
+            <p><strong>Price without discount: {subtotal.toFixed(2)} €</strong></p>
+            
+            {parseFloat(totalCartPrice) < subtotal && (
+              <p className="discount-info">
+                <strong>Discount applied: –{(subtotal - parseFloat(totalCartPrice)).toFixed(2)} €</strong>
               </p>
             )}
+
             <p className="total-price">
-              <strong>Total Price: {totalPrice} €</strong>
+              <strong>Total Price: {totalCartPrice} €</strong>
             </p>
           </div>
+
+          {/* Actions */}
           <div className="cart-actions">
-            <button
-              onClick={async () => {
-                await clearCart();
-              }}
-              className="button__clear-all"
-              aria-label="Clear all items from cart"
-            >
+            <button onClick={clearCart} className="button__clear-all">
               Clear All
             </button>
             <Link to="/products" className="button__continue-shopping">

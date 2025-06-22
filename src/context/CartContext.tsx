@@ -194,6 +194,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return loadingItems.includes(productId);
   };
 
+  const applyPromoCode = async (code: string) => {
+    if (!cartService || !cart) return;
+
+    try {
+      const updatedCart = await cartService.addDiscountCode(cart.id, cart.version, code);
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Failed to apply promo code:", err);
+      throw err; // чтобы можно было отловить в UI
+    }
+  };
+
   useEffect(() => {
     if (!cartService) return;
 
@@ -229,6 +241,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         changeQuantity,
         incrementQuantity,
         decrementQuantity,
+        applyPromoCode,
       }}
     >
       {children}
