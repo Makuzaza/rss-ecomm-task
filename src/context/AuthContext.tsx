@@ -28,7 +28,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { clearCart, reloadCart } = useCart();
+  const { cart, reloadCart, clearCart, removeAllDiscountCodes } = useCart();
+  
+
+
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -128,6 +131,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 
   const logout = useCallback(async () => {
+    const token = localStorage.getItem("accessToken");
+
+    try {
+      if (token && cart && cart.discountCodes.length > 0) {
+        await removeAllDiscountCodes(); // ✅ Один раз — удаляет все скидки
+      }
+    } catch (err) {
+      console.warn("Failed to remove discount codes during logout", err);
+    }
+
     localStorage.removeItem("accessToken");
     localStorage.removeItem("customerCartId");
     setCustomer(null);
@@ -135,8 +148,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     apiClient.initAnonymousClient();
     clearCart();
-    await reloadCart();
-  }, [clearCart, reloadCart]);
+    await removeAllDiscountCodes();
+    await clearCart(); // <--- создаёт полностью новую корзину
+    await reloadCart(); // <--- перезагружает корзину после очистки
+  }, [cart, clearCart, reloadCart, removeAllDiscountCodes]);
 
   const register = useCallback(
     async (data: MyCustomerDraft): Promise<Customer> => {

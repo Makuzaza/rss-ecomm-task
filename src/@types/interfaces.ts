@@ -194,6 +194,8 @@ export interface CartContextType {
   totalItems?: number;
   changeQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   applyPromoCode: (code: string) => Promise<void>;
+  cartService: ICartService;
+  removeAllDiscountCodes: () => Promise<void>;
 }
 
 // Quantity change
@@ -217,5 +219,6 @@ export interface ICartService {
   updateCart(cartId: string, payload: MyCartUpdate): Promise<Cart>;
   changeLineItemQuantity(cartId: string, version: number, lineItemId: string, quantity: number): Promise<Cart>;
   addDiscountCode(cartId: string, version: number, code: string): Promise<Cart>;
+  removeDiscountCode(cartId: string, version: number, discountCodeId: string): Promise<Cart>;
 
 }

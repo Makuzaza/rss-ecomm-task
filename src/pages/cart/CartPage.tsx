@@ -134,17 +134,30 @@ const CartPage = () => {
           {/* Summary */}
           <div className="cart-summary">
             <p><strong>Total Items: {totalItems}</strong></p>
-            <p><strong>Price without discount: {subtotal.toFixed(2)} €</strong></p>
-            
-            {parseFloat(totalCartPrice) < subtotal && (
-              <p className="discount-info">
-                <strong>Discount applied: –{(subtotal - parseFloat(totalCartPrice)).toFixed(2)} €</strong>
+
+            {parseFloat(totalCartPrice) < subtotal ? (
+              <>
+                <p className="original-price">
+                  <span style={{ textDecoration: "line-through", color: "gray" }}>
+                    {subtotal.toFixed(2)} €
+                  </span>
+                </p>
+                <p className="discount-info">
+                  <strong style={{ color: "RED" }}>
+                    Discount applied: –{(subtotal - parseFloat(totalCartPrice)).toFixed(2)} €
+                  </strong>
+                </p>
+                <p className="total-price">
+                  <strong style={{ fontSize: "1.3rem", color: "#2e7d32" }}>
+                    Total Price: {totalCartPrice} €
+                  </strong>
+                </p>
+              </>
+            ) : (
+              <p className="total-price">
+                <strong>Total Price: {totalCartPrice} €</strong>
               </p>
             )}
-
-            <p className="total-price">
-              <strong>Total Price: {totalCartPrice} €</strong>
-            </p>
           </div>
 
           {/* Actions */}

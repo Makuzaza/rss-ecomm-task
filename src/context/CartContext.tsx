@@ -126,6 +126,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Failed to remove line item:", err);
     }
   };
+  const removeAllDiscountCodes = async () => {
+    if (!cartService || !cart) return;
+
+    try {
+      let updatedCart = cart;
+
+      for (const discount of cart.discountCodes) {
+        const payload: MyCartUpdate = {
+          version: updatedCart.version,
+          actions: [
+            {
+              action: "removeDiscountCode",
+              discountCode: { typeId: "discount-code", id: discount.discountCode.id },
+            },
+          ],
+        };
+        updatedCart = await cartService.updateCart(updatedCart.id, payload);
+      }
+
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Failed to remove discount codes:", err);
+    }
+  };
 
   const clearCart = async () => {
     if (!cartService) return;
@@ -242,6 +266,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         incrementQuantity,
         decrementQuantity,
         applyPromoCode,
+        cartService,
+        removeAllDiscountCodes,
       }}
     >
       {children}

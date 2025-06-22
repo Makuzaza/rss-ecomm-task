@@ -95,5 +95,32 @@ export class AnonymousCartService implements ICartService {
     return response.body;
   }
 
+    async removeDiscountCode(cartId: string, version: number, discountCodeId: string): Promise<Cart> {
+    const payload: MyCartUpdate = {
+      version,
+      actions: [
+        {
+          action: "removeDiscountCode",
+          discountCode: {
+            typeId: "discount-code",
+            id: discountCodeId,
+          },
+        },
+      ],
+    };
+
+    const response = await this.apiRoot
+      .withProjectKey({ projectKey: this.projectKey })
+      .me()
+      .carts()
+      .withId({ ID: cartId })
+      .post({ body: payload })
+      .execute();
+
+    return response.body;
+  }
+
+  
+
 
 }
