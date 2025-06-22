@@ -22,6 +22,7 @@ import {
   type MyProductsData,
 } from "../@types/interfaces";
 import {
+  ClientResponse,
   // AuthMiddlewareOptions,
   // ClientBuilder,
   TokenStore,
@@ -693,7 +694,48 @@ export class ApiClient extends CreateApiClient {
   /**
    * Remove a line item from the cart
    */
-  async removeLineItemFromCart(
+  public async removeFromCart(
+    cartId: string,
+    version: number,
+    lineItemId: string
+  ) {
+    return this.getAuth()
+      ? this.removeFromCustomerCart(cartId, version, lineItemId)
+      : this.removeFromDefaultCart(cartId, version, lineItemId);
+  }
+
+  public async removeFromDefaultCart(
+    cartId: string,
+    version: number,
+    lineItemId: string
+  ) {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
+    const body: MyCartUpdate = {
+      version,
+      actions: [
+        {
+          action: "removeLineItem",
+          lineItemId,
+        } as MyCartUpdateAction,
+      ],
+    };
+    try {
+      const res = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .carts()
+        .withId({ ID: cartId })
+        .post({ body })
+        .execute();
+
+      return res.body;
+    } catch (error) {
+      console.error("Failed to remove product from cart:", error);
+    }
+  }
+
+  public async removeFromCustomerCart(
     cartId: string,
     version: number,
     lineItemId: string
@@ -710,24 +752,70 @@ export class ApiClient extends CreateApiClient {
         } as MyCartUpdateAction,
       ],
     };
+    try {
+      const res = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .carts()
+        .withId({ ID: cartId })
+        .post({ body })
+        .execute();
 
-    const res = await apiRoot
-      .withProjectKey({ projectKey: this.PROJECT_KEY })
-      .me()
-      .carts()
-      .withId({ ID: cartId })
-      .post({ body })
-      .execute();
-
-    return res.body;
+      return res.body;
+    } catch (error) {
+      console.error("Failed to remove product from cart:", error);
+    }
   }
 
-  public async clearMyCart(
+  // async removeLineItemFromCart(
+  //   cartId: string,
+  //   version: number,
+  //   lineItemId: string
+  // ) {
+  //   const apiRoot = this.getApiRoot(this.client);
+  //   if (!apiRoot) throw new Error("Unauthorized action");
+
+  //   const body: MyCartUpdate = {
+  //     version,
+  //     actions: [
+  //       {
+  //         action: "removeLineItem",
+  //         lineItemId,
+  //       } as MyCartUpdateAction,
+  //     ],
+  //   };
+
+  //   const res = await apiRoot
+  //     .withProjectKey({ projectKey: this.PROJECT_KEY })
+  //     .me()
+  //     .carts()
+  //     .withId({ ID: cartId })
+  //     .post({ body })
+  //     .execute();
+
+  //   return res.body;
+  // }
+
+  // CLEAR CART
+  public async clearCart(
     cartId: string,
     version: number,
     lineItemIds: string[]
-  ): Promise<Cart> {
+  ): Promise<ClientResponse<Cart>> {
+    return this.getAuth()
+      ? this.clearCustomerCart(cartId, version, lineItemIds)
+      : this.clearDefaultCart(cartId, version, lineItemIds);
+  }
+
+  // CLEAR CUSTOMER CART
+  public async clearCustomerCart(
+    cartId: string,
+    version: number,
+    lineItemIds: string[]
+  ): Promise<ClientResponse<Cart>> {
     const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
     const body: MyCartUpdate = {
       version,
       actions: lineItemIds.map((lineItemId) => ({
@@ -735,29 +823,96 @@ export class ApiClient extends CreateApiClient {
         lineItemId,
       })),
     };
-
-    const res = await apiRoot
-      .withProjectKey({ projectKey: this.PROJECT_KEY })
-      .me()
-      .carts()
-      .withId({ ID: cartId })
-      .post({ body })
-      .execute();
-
-    return res.body;
+    try {
+      const res = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .carts()
+        .withId({ ID: cartId })
+        .post({ body })
+        .execute();
+      return res;
+    } catch (error) {
+      console.error("Failed to clear customer cart:", error);
+    }
   }
 
-  public async deleteCart(cartId: string, version: number): Promise<void> {
+  // CLEAR DEFAULT CART
+  public async clearDefaultCart(
+    cartId: string,
+    version: number,
+    lineItemIds: string[]
+  ): Promise<ClientResponse<Cart>> {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
+    const body: MyCartUpdate = {
+      version,
+      actions: lineItemIds.map((lineItemId) => ({
+        action: "removeLineItem",
+        lineItemId,
+      })),
+    };
+    try {
+      const res = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .carts()
+        .withId({ ID: cartId })
+        .post({ body })
+        .execute();
+      return res;
+    } catch (error) {
+      console.error("Failed to clear customer cart:", error);
+    }
+  }
+
+  // DELETE CART
+  public async deleteCart(cartId: string, version: number): Promise<Cart> {
+    return this.getAuth()
+      ? this.deleteCustomerCart(cartId, version)
+      : this.deleteDefaultCart(cartId, version);
+  }
+  // DELETE DEFAULT CART
+  public async deleteDefaultCart(
+    cartId: string,
+    version: number
+  ): Promise<Cart> {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
+    try {
+      const { body: deletedCart } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .carts()
+        .withId({ ID: cartId })
+        .delete({ queryArgs: { version } })
+        .execute();
+      return deletedCart;
+    } catch (error) {
+      console.error("Failed to delete default cart:", error);
+    }
+  }
+
+  // DELETE CUSTOMER CART
+  public async deleteCustomerCart(
+    cartId: string,
+    version: number
+  ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
 
-    await apiRoot
-      .withProjectKey({ projectKey: this.PROJECT_KEY })
-      .me()
-      .carts()
-      .withId({ ID: cartId })
-      .delete({ queryArgs: { version } })
-      .execute();
+    try {
+      const { body: deletedCart } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .carts()
+        .withId({ ID: cartId })
+        .delete({ queryArgs: { version } })
+        .execute();
+      return deletedCart;
+    } catch (error) {
+      console.error("Failed to delete customer cart:", error);
+    }
   }
 
   // end

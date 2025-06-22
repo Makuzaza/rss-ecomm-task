@@ -69,7 +69,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const removeLineItem = async (lineItemId: string) => {
     if (!cart) return;
     try {
-      const updatedCart = await apiClient.removeLineItemFromCart(
+      const updatedCart = await apiClient.removeFromCart(
         cart.id,
         cart.version,
         lineItemId
@@ -88,7 +88,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       const lineItemIds = [...updatedCart.lineItems].map((item) => item.id);
 
       for (const lineItemId of lineItemIds) {
-        updatedCart = await apiClient.removeLineItemFromCart(
+        updatedCart = await apiClient.removeFromCart(
           updatedCart.id,
           updatedCart.version,
           lineItemId
