@@ -1,15 +1,23 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Cart } from "@commercetools/platform-sdk";
 import { useApiClient } from "./ApiClientContext";
 import {
   CartContextType,
-//   UpdateQuantityFn,
-//   ChangeQuantityFn,
+  //   UpdateQuantityFn,
+  //   ChangeQuantityFn,
 } from "@/@types/interfaces";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const apiClient = useApiClient();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loadingItems, setLoadingItems] = useState<string[]>([]);
@@ -50,7 +58,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const reloadCart = async () => {
     try {
-      const activeCart = await apiClient.getMyActiveCart();
+      const activeCart = await apiClient.getCart();
       setCart(activeCart);
       localStorage.setItem("cartId", activeCart.id);
     } catch (err) {
@@ -61,7 +69,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const removeLineItem = async (lineItemId: string) => {
     if (!cart) return;
     try {
-      const updatedCart = await apiClient.removeLineItemFromCart(cart.id, cart.version, lineItemId);
+      const updatedCart = await apiClient.removeLineItemFromCart(
+        cart.id,
+        cart.version,
+        lineItemId
+      );
       setCart(updatedCart);
     } catch (err) {
       console.error("Failed to remove line item:", err);
@@ -93,36 +105,48 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoadingItems((prev) => [...prev, productId]);
 
     try {
-      let activeCart = cart;
-      let customer;
+      const cart = await apiClient.getCart();
+      console.log("Your cart:", cart);
 
-      if (!activeCart) {
-        const storedCartId = localStorage.getItem("cartId");
-        if (storedCartId) {
-          try {
-            activeCart = await apiClient.getCartById(storedCartId);
-          } catch {
-            localStorage.removeItem("cartId");
-          }
-        }
-
-        if (!activeCart) {
-          try {
-            customer = await apiClient.getCustomerProfile();
-          } catch {
-            customer = undefined;
-          }
-
-          activeCart = await apiClient.createMyCart(customer);
-          localStorage.setItem("cartId", activeCart.id);
-        }
-
-        setCart(activeCart);
-      }
-
-      const updatedCart = await apiClient.addProductToCart(productId, variantId, customer);
+      const updatedCart = await apiClient.addProductToCart(
+        cart,
+        productId,
+        variantId
+      );
+      console.log("Your updated cart:", updatedCart);
       setCart(updatedCart);
     } catch (err) {
+      // try {
+      //   let activeCart = cart;
+      //   let customer;
+
+      //   if (!activeCart) {
+      //     const storedCartId = localStorage.getItem("cartId");
+      //     if (storedCartId) {
+      //       try {
+      //         activeCart = await apiClient.getCartById(storedCartId);
+      //       } catch {
+      //         localStorage.removeItem("cartId");
+      //       }
+      //     }
+
+      //     if (!activeCart) {
+      //       try {
+      //         customer = await apiClient.getCustomerProfile();
+      //       } catch {
+      //         customer = undefined;
+      //       }
+
+      //       activeCart = await apiClient.createMyCart(customer);
+      //       localStorage.setItem("cartId", activeCart.id);
+      //     }
+
+      // const updatedCart = await apiClient.addProductToCart(
+      //   productId,
+      //   variantId,
+      //   customer
+      // );
+      // setCart(updatedCart);
       console.error("Add to cart failed:", err);
     } finally {
       setLoadingItems((prev) => prev.filter((id) => id !== productId));
@@ -191,7 +215,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         apiClient.initClientFromStorage();
         try {
-          const activeCart = await apiClient.getMyActiveCart();
+          const activeCart = await apiClient.getCart();
           setCart(activeCart);
           localStorage.setItem("cartId", activeCart.id);
         } catch {

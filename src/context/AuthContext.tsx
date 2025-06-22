@@ -23,7 +23,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-  // Initialize auth state from localStorage
+// Initialize auth state from localStorage
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -31,41 +31,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true); // Set initial loading to true
   const [error, setError] = useState<string | null>(null);
   const { clearCart, reloadCart } = useCart(); // Combined call
-  
+
   // ✅ You already imported apiClient correctly
 
   // ✅ INIT LOGIC FOR AUTHENTICATED CUSTOMERS
-useEffect(() => {
-  const initializeAuth = async () => {
-    try {
-      console.log("AccessToken in localStorage:", localStorage.getItem("accessToken"));
-      apiClient.initClientFromStorage(); // загружает клиент с токеном
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        console.log(
+          "AccessToken in localStorage:",
+          localStorage.getItem("accessToken")
+        );
+        apiClient.initClientFromStorage(); // загружает клиент с токеном
 
-      const raw = localStorage.getItem("accessToken");
-      const token = raw ? JSON.parse(raw) : null;
+        const raw = localStorage.getItem("accessToken");
+        const token = raw ? JSON.parse(raw) : null;
 
-      const isValid = token?.expirationTime && token.expirationTime > Date.now();
+        const isValid =
+          token?.expirationTime && token.expirationTime > Date.now();
 
-      if (!isValid) {
-        console.warn("Token expired");
+        if (!isValid) {
+          console.warn("Token expired");
+          localStorage.removeItem("accessToken");
+          return;
+        }
+
+        // Попробуй вызвать /me
+        const customer = await apiClient.getCustomerProfile();
+        setCustomer(customer);
+        setToken(token.token);
+      } catch (error) {
+        console.warn("Auth restoration failed:", error);
         localStorage.removeItem("accessToken");
-        return;
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Попробуй вызвать /me
-      const customer = await apiClient.getCustomerProfile();
-      setCustomer(customer);
-      setToken(token.token);
-    } catch (error) {
-      console.warn("Auth restoration failed:", error);
-      localStorage.removeItem("accessToken");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  initializeAuth();
-}, []);
+    initializeAuth();
+  }, []);
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -73,7 +77,7 @@ useEffect(() => {
     async (
       email: string,
       password: string,
-      options?: { preventRedirect?: boolean },
+      options?: { preventRedirect?: boolean }
     ): Promise<Customer> => {
       setLoading(true);
       clearError();
@@ -81,9 +85,12 @@ useEffect(() => {
       let customerProfile: Customer;
 
       try {
-        const customerSignIn = await apiClient.getCustomerWithPassword(email, password);
+        const customerSignIn = await apiClient.getCustomerWithPassword(
+          email,
+          password
+        );
         setCustomer(customerSignIn);
-        
+
         const storedToken = localStorage.getItem("accessToken");
         if (storedToken) {
           const parsedToken: TokenStore = JSON.parse(storedToken);
@@ -105,7 +112,7 @@ useEffect(() => {
         setLoading(false);
       }
     },
-    [clearError, navigate, reloadCart], 
+    [clearError, navigate, reloadCart]
   );
 
   const loginWithToken = useCallback(
@@ -131,18 +138,19 @@ useEffect(() => {
         setLoading(false);
       }
     },
-    [clearError],
+    [clearError]
   );
 
-    const logout = useCallback(async () => {
+  const logout = useCallback(async () => {
     localStorage.removeItem("accessToken");
+    apiClient.setAuth(false);
     setCustomer(null);
     setToken(null);
 
-    apiClient.initAnonymousClient(); // ✅ переключаем client на anonymous
+    // apiClient.initAnonymousClient(); // ✅ переключаем client на anonymous
 
-    clearCart();                     // 🔁 сбрасываем локальную корзину
-    await reloadCart();              // ✅ создаём новую анонимную корзину
+    clearCart(); // 🔁 сбрасываем локальную корзину
+    await reloadCart(); // ✅ создаём новую анонимную корзину
   }, [clearCart, reloadCart]);
 
   const register = useCallback(
@@ -150,7 +158,7 @@ useEffect(() => {
       setLoading(true);
       clearError();
       localStorage.removeItem("accessToken");
-      
+
       try {
         const customerSignUp = await apiClient.registerCustomer(customerData);
         let customerProfile: Customer;
@@ -181,7 +189,7 @@ useEffect(() => {
         setLoading(false);
       }
     },
-    [clearError],
+    [clearError]
   );
 
   const refreshToken = useCallback(async (): Promise<void> => {
@@ -206,7 +214,7 @@ useEffect(() => {
         console.error("Relogin failed", err);
       }
     },
-    [login],
+    [login]
   );
 
   const value: AuthContextType = {

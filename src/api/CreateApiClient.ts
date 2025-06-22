@@ -10,7 +10,7 @@ import {
   createApiBuilderFromCtpClient,
   ApiRoot,
 } from "@commercetools/platform-sdk";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
 class CreateApiClient {
   protected BASE_URI = process.env.REACT_APP_BASE_URL;
@@ -32,9 +32,11 @@ class CreateApiClient {
   protected defaultClient: Client;
   protected client: Client;
   protected apiRoot: ApiRoot;
+  protected isAuth: boolean;
 
   constructor() {
     this.defaultClient = this.buildDefaultClient(true);
+    this.isAuth = false;
   }
   // API ROOT
   protected getApiRoot(client: Client) {
@@ -50,7 +52,7 @@ class CreateApiClient {
         this.BASE_URI,
         credentials,
         this.OAUTH_URI,
-        this.PROJECT_KEY,
+        this.PROJECT_KEY
       )
       .build();
   }
@@ -108,15 +110,15 @@ class CreateApiClient {
       .build();
   }
 
-  protected getOrCreateAnonymousId(): string {
-    const key = "anonymous_id";
-    let id = localStorage.getItem(key);
-    if (!id) {
-      id = uuidv4();
-      localStorage.setItem(key, id);
-    }
-    return id;
-  }
+  // protected getOrCreateAnonymousId(): string {
+  //   const key = "anonymous_id";
+  //   let id = localStorage.getItem(key);
+  //   if (!id) {
+  //     id = uuidv4();
+  //     localStorage.setItem(key, id);
+  //   }
+  //   return id;
+  // }
 
   // end
 }
