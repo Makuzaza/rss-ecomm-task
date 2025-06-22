@@ -23,37 +23,49 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+  // Initialize auth state from localStorage
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Set initial loading to true
   const [error, setError] = useState<string | null>(null);
-  const { clearCart } = useCart();
-  const { reloadCart } = useCart();
+  const { clearCart, reloadCart } = useCart(); // Combined call
+  
+  // ✅ You already imported apiClient correctly
 
-  // Initialize auth state from localStorage
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const storedToken = localStorage.getItem("accessToken");
-      if (storedToken) {
-        try {
-          const parsedToken: TokenStore = JSON.parse(storedToken);
-          if (parsedToken.expirationTime > Date.now()) {
-            setToken(parsedToken.token);
-            await loginWithToken(parsedToken.token);
-          } else {
-            localStorage.removeItem("accessToken");
-          }
-        } catch (err) {
-          console.error("Failed to parse stored token:", err);
-          localStorage.removeItem("accessToken");
-        }
+  // ✅ INIT LOGIC FOR AUTHENTICATED CUSTOMERS
+useEffect(() => {
+  const initializeAuth = async () => {
+    try {
+      console.log("AccessToken in localStorage:", localStorage.getItem("accessToken"));
+      apiClient.initClientFromStorage(); // загружает клиент с токеном
+
+      const raw = localStorage.getItem("accessToken");
+      const token = raw ? JSON.parse(raw) : null;
+
+      const isValid = token?.expirationTime && token.expirationTime > Date.now();
+
+      if (!isValid) {
+        console.warn("Token expired");
+        localStorage.removeItem("accessToken");
+        return;
       }
-    };
 
-    initializeAuth();
-  }, []);
+      // Попробуй вызвать /me
+      const customer = await apiClient.getCustomerProfile();
+      setCustomer(customer);
+      setToken(token.token);
+    } catch (error) {
+      console.warn("Auth restoration failed:", error);
+      localStorage.removeItem("accessToken");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  initializeAuth();
+}, []);
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -65,24 +77,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     ): Promise<Customer> => {
       setLoading(true);
       clearError();
+      localStorage.removeItem("accessToken");
       let customerProfile: Customer;
 
       try {
         const customerSignIn = await apiClient.getCustomerWithPassword(email, password);
-
-        if (customerSignIn) {
-          customerProfile = await apiClient.getCustomerProfile();
-          setCustomer(customerProfile);
-
-          // 👉 reload cart after login
-          await reloadCart();
-        }
-
+        setCustomer(customerSignIn);
+        
         const storedToken = localStorage.getItem("accessToken");
         if (storedToken) {
           const parsedToken: TokenStore = JSON.parse(storedToken);
           setToken(parsedToken.token);
         }
+
+        await reloadCart();
 
         if (!options?.preventRedirect) {
           navigate("/");
@@ -126,18 +134,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     [clearError],
   );
 
-    const logout = useCallback(() => {
-    localStorage.removeItem("accessToken");
-    setCustomer(null);
-    setToken(null);
-    clearCart(); 
-  }, [clearCart]);
+    const logout = useCallback(async () => {
+  localStorage.removeItem("accessToken");
+  setCustomer(null);
+  setToken(null);
+
+  apiClient.initAnonymousClient(); // ✅ переключаем client на anonymous
+
+  clearCart();                     // 🔁 сбрасываем локальную корзину
+  await reloadCart();              // ✅ создаём новую анонимную корзину
+}, [clearCart, reloadCart]);
 
   const register = useCallback(
     async (customerData: MyCustomerDraft): Promise<Customer> => {
       setLoading(true);
       clearError();
-
+      localStorage.removeItem("accessToken");
+      
       try {
         const customerSignUp = await apiClient.registerCustomer(customerData);
         let customerProfile: Customer;

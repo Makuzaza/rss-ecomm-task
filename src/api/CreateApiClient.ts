@@ -75,14 +75,16 @@ class CreateApiClient {
       host: this.OAUTH_URI,
       projectKey: this.PROJECT_KEY,
       credentials: {
-        clientId: this.ADMIN_CREDENTIALS.clientId,
-        clientSecret: this.ADMIN_CREDENTIALS.clientSecret,
+        clientId: this.SPA_CREDENTIALS.clientId,
+        clientSecret: this.SPA_CREDENTIALS.clientSecret,
         user: {
           username: email,
           password: password,
         },
       },
-      scopes: [`manage_project:${this.PROJECT_KEY}`],
+      scopes: [ `manage_my_profile:${this.PROJECT_KEY}`,
+      `manage_my_orders:${this.PROJECT_KEY}`,
+      `view_published_products:${this.PROJECT_KEY}`,],
       tokenCache: customTokenCache,
       httpClient: fetch,
     };

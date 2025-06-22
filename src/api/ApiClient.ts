@@ -462,9 +462,9 @@ export class ApiClient extends CreateApiClient {
       projectKey: this.PROJECT_KEY,
       credentials: this.SPA_CREDENTIALS,
       scopes: [
-        `manage_my_profile`,
-        `manage_my_orders`,
-        `view_published_products`,
+        `manage_my_profile:${this.PROJECT_KEY}`,
+        `manage_my_orders:${this.PROJECT_KEY}`,
+        `view_published_products:${this.PROJECT_KEY}`,
       ],
       anonymousId,
       tokenCache: {
