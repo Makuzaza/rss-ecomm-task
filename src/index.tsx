@@ -8,6 +8,7 @@ import {
 import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/context/ApiClientContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { apiClient } from "./api/ApiClient";
 
 // PAGES
 import HomePage from "@/pages/home/HomePage";
@@ -125,6 +126,8 @@ const router = createBrowserRouter([
     ],
   },
 ]);
+
+apiClient.initClientFromStorage();
 
 container.render(
   <ApiClientProvider>

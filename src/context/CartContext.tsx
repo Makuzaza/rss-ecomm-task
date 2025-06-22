@@ -1,18 +1,38 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Cart } from "@commercetools/platform-sdk";
-import { useApiClient } from "./ApiClientContext";
-import {
-  CartContextType,
-//   UpdateQuantityFn,
-//   ChangeQuantityFn,
-} from "@/@types/interfaces";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Cart, MyCartUpdate } from "@commercetools/platform-sdk";
+import { CartContextType, ICartService } from "@/@types/interfaces";
+import { CartServiceFactory } from "@/api/cart/CartServiceFactory";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const apiClient = useApiClient();
+  const [cartService, setCartService] = useState<ICartService | null>(null);
   const [cart, setCart] = useState<Cart | null>(null);
   const [loadingItems, setLoadingItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const service = CartServiceFactory.create();
+      setCartService(service);
+    } catch (err) {
+      console.error("Failed to create CartService:", err);
+    }
+  }, []);
+
+  const ensureCart = async (): Promise<Cart> => {
+    if (!cartService) throw new Error("Cart service not ready");
+    try {
+      return await cartService.getActiveCart();
+    } catch {
+      return await cartService.createCart();
+    }
+  };
 
   const cartItems = useMemo(() => {
     if (!cart) return [];
@@ -20,112 +40,112 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: item.productId,
       name: item.name?.["en-US"] || "",
       price: item.price?.value.centAmount / 100,
-      priceDiscounted:
-        item.discountedPricePerQuantity?.[0]?.discountedPrice?.value
-          ?.centAmount / 100,
+      priceDiscounted: item.discountedPricePerQuantity?.[0]?.discountedPrice?.value?.centAmount / 100,
       quantity: item.quantity,
       image: item.variant?.images?.[0]?.url || "",
       key: item.variant?.key || "",
     }));
   }, [cart]);
 
-  const cartCount = useMemo(() => {
-    return cart?.lineItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
-  }, [cart]);
-
+  const cartCount = useMemo(() => cart?.lineItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0, [cart]);
   const totalItems = useMemo(() => cartItems.length, [cartItems]);
 
-  const clearCart = async () => {
-    if (!cart) return;
-
-    try {
-      await apiClient.deleteCart(cart.id, cart.version);
-      const newCart = await apiClient.createMyCart();
-      setCart(newCart);
-      localStorage.setItem("cartId", newCart.id);
-    } catch (err) {
-      console.error("Failed to clear cart:", err);
-    }
-  };
-
   const reloadCart = async () => {
+    if (!cartService) return;
     try {
-      const activeCart = await apiClient.getMyActiveCart();
-      setCart(activeCart);
-      localStorage.setItem("cartId", activeCart.id);
+      const updatedCart = await cartService.getActiveCart();
+      setCart(updatedCart);
     } catch (err) {
       console.warn("Failed to reload cart:", err);
     }
   };
 
-  const removeLineItem = async (lineItemId: string) => {
-    if (!cart) return;
+  const clearEntireCart = async () => {
+    if (!cartService || !cart || cart.lineItems.length === 0) return;
+
     try {
-      const updatedCart = await apiClient.removeLineItemFromCart(cart.id, cart.version, lineItemId);
+      let updatedCart = cart;
+      const lineItemIds = updatedCart.lineItems.map((item) => item.id);
+
+      for (const lineItemId of lineItemIds) {
+        const payload: MyCartUpdate = {
+          version: updatedCart.version,
+          actions: [{ action: "removeLineItem", lineItemId }],
+        };
+        updatedCart = await cartService.updateCart(updatedCart.id, payload);
+      }
+
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Failed to clear cart:", err);
+    }
+  };
+
+  const removeLineItem = async (lineItemId: string) => {
+    if (!cartService || !cart) return;
+
+    try {
+      const payload: MyCartUpdate = {
+        version: cart.version,
+        actions: [{ action: "removeLineItem", lineItemId }],
+      };
+      const updatedCart = await cartService.updateCart(cart.id, payload);
       setCart(updatedCart);
     } catch (err) {
       console.error("Failed to remove line item:", err);
     }
   };
 
-  const clearEntireCart = async () => {
-    if (!cart || cart.lineItems.length === 0) return;
-
+  const clearCart = async () => {
+    if (!cartService) return;
     try {
-      let updatedCart = cart;
-      const lineItemIds = [...updatedCart.lineItems].map((item) => item.id);
-
-      for (const lineItemId of lineItemIds) {
-        updatedCart = await apiClient.removeLineItemFromCart(
-          updatedCart.id,
-          updatedCart.version,
-          lineItemId
-        );
-      }
-
-      setCart(updatedCart);
+      const newCart = await cartService.createCart();
+      setCart(newCart);
     } catch (err) {
       console.error("Failed to clear cart:", err);
     }
   };
 
   const addToCart = async (productId: string, variantId: number = 1) => {
+    if (!cartService) return;
+
     setLoadingItems((prev) => [...prev, productId]);
 
     try {
-      let activeCart = cart;
-      let customer;
+      const currentCart = cart ?? (await ensureCart());
 
-      if (!activeCart) {
-        const storedCartId = localStorage.getItem("cartId");
-        if (storedCartId) {
-          try {
-            activeCart = await apiClient.getCartById(storedCartId);
-          } catch {
-            localStorage.removeItem("cartId");
-          }
-        }
+      const payload: MyCartUpdate = {
+        version: currentCart.version,
+        actions: [
+          {
+            action: "addLineItem",
+            productId,
+            variantId,
+            quantity: 1,
+          },
+        ],
+      };
 
-        if (!activeCart) {
-          try {
-            customer = await apiClient.getCustomerProfile();
-          } catch {
-            customer = undefined;
-          }
-
-          activeCart = await apiClient.createMyCart(customer);
-          localStorage.setItem("cartId", activeCart.id);
-        }
-
-        setCart(activeCart);
-      }
-
-      const updatedCart = await apiClient.addProductToCart(productId, variantId, customer);
+      const updatedCart = await cartService.updateCart(currentCart.id, payload);
       setCart(updatedCart);
     } catch (err) {
       console.error("Add to cart failed:", err);
     } finally {
       setLoadingItems((prev) => prev.filter((id) => id !== productId));
+    }
+  };
+
+  const removeFromCart = (productId: string, variantId?: number) => {
+    if (!cartService || !cart) return;
+
+    const lineItem = cart.lineItems.find(
+      (item) =>
+        item.productId === productId &&
+        (variantId ? item.variant.id === variantId : true)
+    );
+
+    if (lineItem) {
+      removeLineItem(lineItem.id);
     }
   };
 
@@ -143,67 +163,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return loadingItems.includes(productId);
   };
 
-  // const updateQuantity: UpdateQuantityFn = (id, newQuantity) => {
-  //   if (newQuantity < 1) {
-  //     removeFromCart(id);
-  //     return;
-  //   }
-
-  //   setCartItems((prevItems) =>
-  //     prevItems.map((item) =>
-  //       item.id === id ? { ...item, quantity: newQuantity } : item
-  //     )
-  //   );
-  // };
-
-  // const incrementQuantity: ChangeQuantityFn = (id) => {
-  //   setCartItems((prevItems) =>
-  //     prevItems.map((item) =>
-  //       item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-  //     )
-  //   );
-  // };
-
-  // const decrementQuantity: ChangeQuantityFn = (id) => {
-  //   setCartItems((prevItems) =>
-  //     prevItems.map((item) =>
-  //       item.id === id ? { ...item, quantity: Math.max(1, item.quantity - 1) } : item
-  //     )
-  //   );
-  // };
-
-  const removeFromCart = (productId: string, variantId?: number) => {
-    if (!cart) return;
-
-    const lineItem = cart.lineItems.find(
-      (item) =>
-        item.productId === productId &&
-        (variantId ? item.variant.id === variantId : true)
-    );
-
-    if (lineItem) {
-      removeLineItem(lineItem.id);
-    }
-  };
-
   useEffect(() => {
+    if (!cartService) return;
+
     const initCart = async () => {
       try {
-        apiClient.initClientFromStorage();
-        try {
-          const activeCart = await apiClient.getMyActiveCart();
-          setCart(activeCart);
-          localStorage.setItem("cartId", activeCart.id);
-        } catch {
-          console.warn("No active cart found.");
-        }
+        const initialCart = await ensureCart();
+        setCart(initialCart);
       } catch (err) {
-        console.error("Cart initialization failed:", err);
+        console.error("Cart init failed:", err);
       }
     };
 
     initCart();
-  }, [apiClient]);
+  }, [cartService]);
+
+  if (!cartService) return <div>Loading cart...</div>;
 
   return (
     <CartContext.Provider
@@ -219,9 +194,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removeLineItem,
         clearEntireCart,
         removeFromCart,
-        // updateQuantity,
-        // incrementQuantity,
-        // decrementQuantity,
         totalItems,
       }}
     >

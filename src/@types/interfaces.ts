@@ -5,6 +5,7 @@ import {
   type ProductVariant,
   Cart,
   Category,
+  MyCartUpdate,
 } from "@commercetools/platform-sdk";
 
 // Error type
@@ -205,4 +206,10 @@ export type UpdateQuantityFn = (id: string, newQuantity: number) => void;
 
 export interface ChangeQuantityFn {
   (id: string): void;
+}
+
+export interface ICartService {
+  getActiveCart(): Promise<Cart>;
+  createCart(customer?: Customer): Promise<Cart>;
+  updateCart(cartId: string, payload: MyCartUpdate): Promise<Cart>;
 }

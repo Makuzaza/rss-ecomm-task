@@ -6,16 +6,15 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiClient } from "@/api/ApiClient";
 import {
   Customer,
-  // CustomerSignInResult,
   MyCustomerDraft,
 } from "@commercetools/platform-sdk";
 import { TokenStore, AuthContextType } from "@/@types/interfaces";
-import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
-// Assuming you have a utility function to reload the cart
+import { mergeAnonymousCartWithCustomerCart } from "@/api/cart/cartMergeUtils";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -23,49 +22,40 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-  // Initialize auth state from localStorage
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Set initial loading to true
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { clearCart, reloadCart } = useCart(); // Combined call
-  
-  // ✅ You already imported apiClient correctly
+  const { clearCart, reloadCart } = useCart();
 
-  // ✅ INIT LOGIC FOR AUTHENTICATED CUSTOMERS
-useEffect(() => {
-  const initializeAuth = async () => {
-    try {
-      console.log("AccessToken in localStorage:", localStorage.getItem("accessToken"));
-      apiClient.initClientFromStorage(); // загружает клиент с токеном
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        apiClient.initClientFromStorage();
+        const raw = localStorage.getItem("accessToken");
+        const storedToken: TokenStore | null = raw ? JSON.parse(raw) : null;
 
-      const raw = localStorage.getItem("accessToken");
-      const token = raw ? JSON.parse(raw) : null;
+        const isValid = storedToken?.expirationTime && storedToken.expirationTime > Date.now();
+        if (!isValid) {
+          localStorage.removeItem("accessToken");
+          return;
+        }
 
-      const isValid = token?.expirationTime && token.expirationTime > Date.now();
-
-      if (!isValid) {
-        console.warn("Token expired");
+        const customer = await apiClient.getCustomerProfile();
+        setCustomer(customer);
+        setToken(storedToken.token);
+      } catch (error) {
+        console.warn("Auth restoration failed:", error);
         localStorage.removeItem("accessToken");
-        return;
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Попробуй вызвать /me
-      const customer = await apiClient.getCustomerProfile();
-      setCustomer(customer);
-      setToken(token.token);
-    } catch (error) {
-      console.warn("Auth restoration failed:", error);
-      localStorage.removeItem("accessToken");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  initializeAuth();
-}, []);
+    initializeAuth();
+  }, []);
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -78,16 +68,20 @@ useEffect(() => {
       setLoading(true);
       clearError();
       localStorage.removeItem("accessToken");
-      let customerProfile: Customer;
 
       try {
         const customerSignIn = await apiClient.getCustomerWithPassword(email, password);
         setCustomer(customerSignIn);
-        
-        const storedToken = localStorage.getItem("accessToken");
-        if (storedToken) {
-          const parsedToken: TokenStore = JSON.parse(storedToken);
-          setToken(parsedToken.token);
+
+        const stored = localStorage.getItem("accessToken");
+        if (stored) {
+          const parsed: TokenStore = JSON.parse(stored);
+          setToken(parsed.token);
+        }
+
+        const mergedCart = await mergeAnonymousCartWithCustomerCart();
+        if (mergedCart) {
+          localStorage.setItem("customerCartId", mergedCart.id);
         }
 
         await reloadCart();
@@ -96,37 +90,36 @@ useEffect(() => {
           navigate("/");
         }
 
-        return customerProfile;
+        return customerSignIn;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Login failed";
-        setError(message);
-        throw new Error(message);
+        const msg = err instanceof Error ? err.message : "Login failed";
+        setError(msg);
+        throw new Error(msg);
       } finally {
         setLoading(false);
       }
     },
-    [clearError, navigate, reloadCart], 
+    [clearError, navigate, reloadCart],
   );
 
   const loginWithToken = useCallback(
     async (token: string): Promise<void> => {
       setLoading(true);
       clearError();
-      let customerProfile: Customer;
+
       try {
         const customerSignIn = await apiClient.getCustomerWithToken(token);
         if (customerSignIn) {
-          customerProfile = await apiClient.getCustomerProfile();
-          setCustomer(customerProfile);
+          const profile = await apiClient.getCustomerProfile();
+          setCustomer(profile);
           setToken(token);
         } else {
           localStorage.removeItem("accessToken");
         }
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Session validation failed";
-        setError(message);
-        throw new Error(message);
+        const msg = err instanceof Error ? err.message : "Session validation failed";
+        setError(msg);
+        throw new Error(msg);
       } finally {
         setLoading(false);
       }
@@ -134,49 +127,44 @@ useEffect(() => {
     [clearError],
   );
 
-    const logout = useCallback(async () => {
+  const logout = useCallback(async () => {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("customerCartId");
     setCustomer(null);
     setToken(null);
 
-    apiClient.initAnonymousClient(); // ✅ переключаем client на anonymous
-
-    clearCart();                     // 🔁 сбрасываем локальную корзину
-    await reloadCart();              // ✅ создаём новую анонимную корзину
+    apiClient.initAnonymousClient();
+    clearCart();
+    await reloadCart();
   }, [clearCart, reloadCart]);
 
   const register = useCallback(
-    async (customerData: MyCustomerDraft): Promise<Customer> => {
+    async (data: MyCustomerDraft): Promise<Customer> => {
       setLoading(true);
       clearError();
       localStorage.removeItem("accessToken");
-      
+
       try {
-        const customerSignUp = await apiClient.registerCustomer(customerData);
-        let customerProfile: Customer;
-        if (customerSignUp) {
-          customerProfile = await apiClient.getCustomerProfile();
-          setCustomer(customerProfile);
+        await apiClient.registerCustomer(data);
+        const profile = await apiClient.getCustomerProfile();
+        setCustomer(profile);
 
-          // If registration includes automatic login
-          const storedToken = localStorage.getItem("accessToken");
-          if (storedToken) {
-            const parsedToken: TokenStore = JSON.parse(storedToken);
-            setToken(parsedToken.token);
-          }
+        const stored = localStorage.getItem("accessToken");
+        if (stored) {
+          const parsed: TokenStore = JSON.parse(stored);
+          setToken(parsed.token);
         }
-        return customerProfile;
-      } catch (err) {
-        let message = "Registration failed";
 
+        return profile;
+      } catch (err) {
+        let msg = "Registration failed";
         if (err instanceof Error) {
-          message = err.message.includes("DuplicateField")
+          msg = err.message.includes("DuplicateField")
             ? "Email already exists"
             : err.message;
         }
-
-        setError(message);
-        throw new Error(message);
+        setError(msg);
+        throw new Error(msg);
       } finally {
         setLoading(false);
       }
@@ -186,8 +174,8 @@ useEffect(() => {
 
   const refreshToken = useCallback(async (): Promise<void> => {
     if (!token) return;
-
     setLoading(true);
+
     try {
       await loginWithToken(token);
     } catch (err) {
@@ -230,7 +218,7 @@ useEffect(() => {
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;

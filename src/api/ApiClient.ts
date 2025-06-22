@@ -21,7 +21,7 @@ import {
   type CommerceToolsError,
   type MyProductsData,
 } from "../@types/interfaces";
-import { AuthMiddlewareOptions, ClientBuilder, TokenStore  } from "@commercetools/ts-client";
+import { AuthMiddlewareOptions, ClientBuilder, ClientResponse, TokenStore  } from "@commercetools/ts-client";
 
 
 interface AnonymousAuthOptions extends AuthMiddlewareOptions {
@@ -35,12 +35,53 @@ export class ApiClient extends CreateApiClient {
    */
   public async getCustomerWithPassword(
     email: string,
-    password: string,
+    password: string
   ): Promise<Customer> {
     try {
       this.client = this.buildClientWithPassword(email, password);
-      const apiRoot = this.getApiRoot(this.client);
+      const apiRoot = this.getApiRootSafe();
 
+      const response: ClientResponse<Customer> = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .me()
+        .get()
+        .execute();
+
+      return response.body;
+    } catch (error: unknown) {
+      console.error("Failed to get customer with password:", error);
+
+      // Проверка: это стандартная ошибка с текстом
+      if (
+        error instanceof Error &&
+        error.message.includes("Customer account with the given credentials not found")
+      ) {
+        throw new Error("Invalid email or password");
+      }
+
+      // Проверка: это объект с полем 'body.message'
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "body" in error &&
+        typeof (error as { body: unknown }).body === "object" &&
+        (error as { body: { message?: unknown } }).body?.message &&
+        typeof (error as { body: { message: unknown } }).body.message === "string"
+      ) {
+        throw new Error((error as { body: { message: string } }).body.message);
+      }
+
+      throw new Error("Authentication failed");
+    }
+  }
+  /**
+   * BUILD CUSTOMER WITH TOKEN
+   */
+  public async getCustomerWithToken(token: string) {
+    this.client = this.buildClientWithToken(token);
+    const apiRoot = this.getApiRootSafe();
+
+    try {
       const { body: customer } = await apiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
         .me()
@@ -48,37 +89,8 @@ export class ApiClient extends CreateApiClient {
         .execute();
       return customer;
     } catch (error) {
-      if (
-        error.toString() ===
-        "BadRequest: Customer account with the given credentials not found."
-      ) {
-        throw new Error("Invalid email or password");
-      }
-
-      // Fallback to generic message
-      throw new Error(error.toString());
-    }
-  }
-
-  /**
-   * BUILD CUSTOMER WITH TOKEN
-   */
-  public async getCustomerWithToken(token: string) {
-    this.client = this.buildClientWithToken(token);
-    const apiRoot = this.getApiRoot(this.client);
-
-    try {
-      const { body: customer } = await apiRoot
-        .withProjectKey({
-          projectKey: this.PROJECT_KEY,
-        })
-        .me()
-        .get()
-        .execute();
-
-      return customer;
-    } catch (error) {
-      console.log(error);
+      console.error(error);
+      throw new Error("Failed to fetch customer by token");
     }
   }
 
@@ -100,7 +112,8 @@ export class ApiClient extends CreateApiClient {
 
       return customer;
     } catch (error) {
-      console.log(error);
+      console.error("Update failed", error);
+      throw new Error("Failed to update customer");
     }
   }
 
@@ -580,6 +593,34 @@ public async deleteCart(cartId: string, version: number): Promise<void> {
     .execute();
 }
 
+public get publicApiRoot() {
+  return this.getApiRootSafe();
+}
+
+public get publicProjectKey() {
+  return this.PROJECT_KEY;
+}
+
+private getApiRootSafe(client = this.client) {
+  if (!client) throw new Error("API client is not initialized");
+  return this.getApiRoot(client);
+}
+
+public isAuthorized(): boolean {
+  const raw = localStorage.getItem("accessToken");
+  if (!raw) return false;
+  try {
+    const token = JSON.parse(raw) as TokenStore;
+    return token.expirationTime > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+public logout() {
+  localStorage.removeItem("accessToken");
+  this.initAnonymousClient();
+}
 
   // end
 }
