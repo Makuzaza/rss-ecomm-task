@@ -166,6 +166,7 @@ export interface CategoryDropdownProps {
 // Cart
 export interface CartItem {
   id: string;
+  productId: string;
   name: string;
   price: number;
   priceDiscounted?: number;
@@ -191,6 +192,7 @@ export interface CartContextType {
   removeLineItem?: (lineItemId: string) => Promise<void>;
   clearEntireCart?: () => Promise<void>;
   totalItems?: number;
+  changeQuantity: (lineItemId: string, quantity: number) => Promise<void>;
 }
 
 // Quantity change
@@ -212,4 +214,5 @@ export interface ICartService {
   getActiveCart(): Promise<Cart>;
   createCart(customer?: Customer): Promise<Cart>;
   updateCart(cartId: string, payload: MyCartUpdate): Promise<Cart>;
+  changeLineItemQuantity(cartId: string, version: number, lineItemId: string, quantity: number): Promise<Cart>;
 }

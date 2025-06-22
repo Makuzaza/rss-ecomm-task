@@ -36,19 +36,50 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const cartItems = useMemo(() => {
     if (!cart) return [];
+
     return cart.lineItems.map((item) => ({
-      id: item.productId,
+      id: item.id, 
+      productId: item.productId,
       name: item.name?.["en-US"] || "",
       price: item.price?.value.centAmount / 100,
-      priceDiscounted: item.discountedPricePerQuantity?.[0]?.discountedPrice?.value?.centAmount / 100,
+      priceDiscounted:
+        item.discountedPricePerQuantity?.[0]?.discountedPrice?.value?.centAmount / 100,
       quantity: item.quantity,
       image: item.variant?.images?.[0]?.url || "",
       key: item.variant?.key || "",
     }));
   }, [cart]);
-
+  
   const cartCount = useMemo(() => cart?.lineItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0, [cart]);
   const totalItems = useMemo(() => cartItems.length, [cartItems]);
+
+  const changeQuantity = async (lineItemId: string, quantity: number) => {
+    if (!cartService || !cart) return;
+
+    try {
+      const updatedCart = await cartService.changeLineItemQuantity(cart.id, cart.version, lineItemId, quantity);
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Failed to change quantity:", err);
+    }
+  };
+
+  const incrementQuantity = async (lineItemId: string) => {
+    if (!cart || !cartService) return;
+    const lineItem = cart.lineItems.find((item) => item.id === lineItemId);
+    if (!lineItem) return;
+
+    await changeQuantity(lineItemId, lineItem.quantity + 1);
+  };
+
+  const decrementQuantity = async (lineItemId: string) => {
+    if (!cart || !cartService) return;
+    const lineItem = cart.lineItems.find((item) => item.id === lineItemId);
+    if (!lineItem) return;
+
+    const newQuantity = Math.max(1, lineItem.quantity - 1);
+    await changeQuantity(lineItemId, newQuantity);
+  };
 
   const reloadCart = async () => {
     if (!cartService) return;
@@ -195,6 +226,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearEntireCart,
         removeFromCart,
         totalItems,
+        changeQuantity,
+        incrementQuantity,
+        decrementQuantity,
       }}
     >
       {children}

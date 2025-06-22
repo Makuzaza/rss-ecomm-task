@@ -51,4 +51,27 @@ export class AnonymousCartService implements ICartService {
 
     return response.body;
   }
+
+  async changeLineItemQuantity(cartId: string, version: number, lineItemId: string, quantity: number): Promise<Cart> {
+    const payload: MyCartUpdate = {
+      version,
+      actions: [
+        {
+          action: "changeLineItemQuantity",
+          lineItemId,
+          quantity,
+        },
+      ],
+    };
+
+    const response = await this.apiRoot
+      .withProjectKey({ projectKey: this.projectKey })
+      .carts()
+      .withId({ ID: cartId })
+      .post({ body: payload })
+      .execute();
+
+    return response.body;
+  }
+
 }

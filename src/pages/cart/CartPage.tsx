@@ -11,14 +11,15 @@ const CartPage = () => {
     removeFromCart,
     clearCart,
     incrementQuantity,
+    changeQuantity,
     decrementQuantity,
-    updateQuantity,
   } = useCart();
 
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState("");
   const [discount, setDiscount] = useState(0);
   const [promoMessage, setPromoMessage] = useState("");
+  
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartItems.reduce(
@@ -30,7 +31,7 @@ const CartPage = () => {
 
   const handleQuantityChange: HandleQuantityChange = (e, id) => {
     const newQuantity = parseInt(e.target.value) || 1;
-    updateQuantity(String(id), newQuantity);
+    changeQuantity(String(id), newQuantity);
   };
 
   const applyPromoCode = () => {
