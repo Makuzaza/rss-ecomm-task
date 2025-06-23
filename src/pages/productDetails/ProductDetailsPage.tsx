@@ -77,7 +77,7 @@ const ProductDetailsPage = () => {
     const lineItem = cart.lineItems.find(
       (item) =>
         item.productId === product.id &&
-        item.variant.id === selectedVariant
+        item.variant.id === selectedVariant + 1
     );
 
     if (lineItem) {

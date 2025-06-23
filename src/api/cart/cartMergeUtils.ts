@@ -30,12 +30,19 @@ export const mergeAnonymousCartWithCustomerCart = async (): Promise<Cart | null>
         return res;
       });
 
+
+
     const newItems: MyCartUpdateAction[] = anonCart.lineItems.map((item) => ({
       action: "addLineItem",
       productId: item.productId,
       variantId: item.variant.id,
       quantity: item.quantity,
     }));
+
+    console.log("Merging anonymous cart...");
+  console.log("Anonymous cart ID:", anonymousCartId);
+  console.log("Customer cart ID:", customerCart.id);
+  console.log("Line items to move:", newItems);
 
     if (newItems.length > 0) {
       const { body: updatedCart } = await apiClient.publicApiRoot

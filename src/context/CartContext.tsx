@@ -106,7 +106,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!cartService || !cart || cart.lineItems.length === 0) return;
 
     try {
-      let updatedCart = cart;
+       let updatedCart = await cartService.getActiveCart();
       const lineItemIds = updatedCart.lineItems.map((item) => item.id);
 
       for (const lineItemId of lineItemIds) {
@@ -127,36 +127,65 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!cartService || !cart) return;
 
     try {
+
+      const freshCart = await cartService.getActiveCart();
       const payload: MyCartUpdate = {
-        version: cart.version,
+        version: freshCart.version,
         actions: [{ action: "removeLineItem", lineItemId }],
       };
-      const updatedCart = await cartService.updateCart(cart.id, payload);
+      const updatedCart = await cartService.updateCart(freshCart.id, payload);
       setCart(updatedCart);
     } catch (err) {
       console.error("Failed to remove line item:", err);
     }
   };
-  const removeAllDiscountCodes = async () => {
+  // const removeAllDiscountCodes = async () => {
+  //   if (!cartService || !cart) return;
+
+  //   try {
+  //     let updatedCart = cart;
+
+  //     for (const discount of cart.discountCodes) {
+  //       const payload: MyCartUpdate = {
+  //         version: updatedCart.version,
+  //         actions: [
+  //           {
+  //             action: "removeDiscountCode",
+  //             discountCode: {
+  //               typeId: "discount-code",
+  //               id: discount.discountCode.id,
+  //             },
+  //           },
+  //         ],
+  //       };
+  //       updatedCart = await cartService.updateCart(updatedCart.id, payload);
+  //     }
+
+  //     setCart(updatedCart);
+  //   } catch (err) {
+  //     console.error("Failed to remove discount codes:", err);
+  //   }
+  // };
+
+    const removeAllDiscountCodes = async () => {
     if (!cartService || !cart) return;
 
     try {
-      let updatedCart = cart;
+  let updatedCart = await cartService.getActiveCart();
 
-      for (const discount of cart.discountCodes) {
-        const payload: MyCartUpdate = {
-          version: updatedCart.version,
-          actions: [
-            {
-              action: "removeDiscountCode",
-              discountCode: {
-                typeId: "discount-code",
-                id: discount.discountCode.id,
-              },
-            },
-          ],
-        };
+    for (const discount of updatedCart.discountCodes) {
+      const payload: MyCartUpdate = {
+        version: updatedCart.version,
+        actions: [{
+          action: "removeDiscountCode",
+          discountCode: {
+            typeId: "discount-code",
+            id: discount.discountCode.id,
+          },
+        }],
+      };
         updatedCart = await cartService.updateCart(updatedCart.id, payload);
+  
       }
 
       setCart(updatedCart);
@@ -164,6 +193,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Failed to remove discount codes:", err);
     }
   };
+
 
   const clearCart = async () => {
     if (!cartService) return;
@@ -268,6 +298,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const resetCartService = () => {
+    const newService = CartServiceFactory.create();
+    setCartService(newService);
+  };
+
   useEffect(() => {
     if (!cartService) return;
 
@@ -307,6 +342,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         removePromoCode,
         cartService,
         removeAllDiscountCodes,
+        resetCartService,
       }}
     >
       {children}

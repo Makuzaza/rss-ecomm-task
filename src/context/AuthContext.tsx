@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { cart, reloadCart, clearCart, removeAllDiscountCodes } = useCart();
+  const { cart, reloadCart, clearCart, removeAllDiscountCodes, resetCartService } = useCart();
   
 
 
@@ -62,48 +62,98 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const clearError = useCallback(() => setError(null), []);
 
+  // const login = useCallback(
+  //   async (
+  //     email: string,
+  //     password: string,
+  //     options?: { preventRedirect?: boolean },
+  //   ): Promise<Customer> => {
+  //     setLoading(true);
+  //     clearError();
+  //     localStorage.removeItem("accessToken");
+
+  //     try {
+  //       const customerSignIn = await apiClient.getCustomerWithPassword(email, password);
+  //       setCustomer(customerSignIn);
+
+  //       const stored = localStorage.getItem("accessToken");
+  //       if (stored) {
+  //         const parsed: TokenStore = JSON.parse(stored);
+  //         setToken(parsed.token);
+  //       }
+
+  //       const mergedCart = await mergeAnonymousCartWithCustomerCart();
+  //       if (mergedCart) {
+  //         localStorage.setItem("customerCartId", mergedCart.id);
+  //       }
+  //       resetCartService();
+  //       await reloadCart();
+        
+  //       if (!options?.preventRedirect) {
+  //         navigate("/");
+  //       }
+
+  //       return customerSignIn;
+  //     } catch (err) {
+  //       const msg = err instanceof Error ? err.message : "Login failed";
+  //       setError(msg);
+  //       throw new Error(msg);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   },
+  //   [clearError, navigate, reloadCart],
+  // );
+
   const login = useCallback(
-    async (
-      email: string,
-      password: string,
-      options?: { preventRedirect?: boolean },
-    ): Promise<Customer> => {
-      setLoading(true);
-      clearError();
-      localStorage.removeItem("accessToken");
+  async (
+    email: string,
+    password: string,
+    options?: { preventRedirect?: boolean }
+  ): Promise<Customer> => {
+    setLoading(true);
+    clearError();
+    localStorage.removeItem("accessToken");
 
-      try {
-        const customerSignIn = await apiClient.getCustomerWithPassword(email, password);
-        setCustomer(customerSignIn);
+    try {
+      // 🔐 Логин по email/password
+      const customerSignIn = await apiClient.getCustomerWithPassword(email, password);
+      setCustomer(customerSignIn);
 
-        const stored = localStorage.getItem("accessToken");
-        if (stored) {
-          const parsed: TokenStore = JSON.parse(stored);
-          setToken(parsed.token);
-        }
-
-        const mergedCart = await mergeAnonymousCartWithCustomerCart();
-        if (mergedCart) {
-          localStorage.setItem("customerCartId", mergedCart.id);
-        }
-
-        await reloadCart();
-
-        if (!options?.preventRedirect) {
-          navigate("/");
-        }
-
-        return customerSignIn;
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Login failed";
-        setError(msg);
-        throw new Error(msg);
-      } finally {
-        setLoading(false);
+      const stored = localStorage.getItem("accessToken");
+      if (stored) {
+        const parsed: TokenStore = JSON.parse(stored);
+        setToken(parsed.token);
       }
-    },
-    [clearError, navigate, reloadCart],
-  );
+
+      // 🔁 Мерджим корзину — если была анонимная
+      await mergeAnonymousCartWithCustomerCart()
+
+      // 🧼 Очищаем временные ID (внутри merge тоже, на всякий)
+      localStorage.removeItem("anonymousCartId");
+      localStorage.removeItem("anonymousId");
+
+      // 🧠 Пересоздаём сервис (CustomerCartService)
+      resetCartService();
+
+      // 🔄 Обновляем корзину из customer-контекста
+      await reloadCart();
+
+      if (!options?.preventRedirect) {
+        navigate("/");
+      }
+
+      return customerSignIn;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Login failed";
+      setError(msg);
+      throw new Error(msg);
+    } finally {
+      setLoading(false);
+    }
+  },
+  [clearError, navigate, reloadCart]
+);
 
   const loginWithToken = useCallback(
     async (token: string): Promise<void> => {
@@ -130,28 +180,58 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     [clearError],
   );
 
+  // const logout = useCallback(async () => {
+  //   const token = localStorage.getItem("accessToken");
+
+  //   try {
+  //     if (token && cart && cart.discountCodes.length > 0) {
+  //       await removeAllDiscountCodes(); // ✅ Один раз — удаляет все скидки
+  //     }
+  //   } catch (err) {
+  //     console.warn("Failed to remove discount codes during logout", err);
+  //   }
+
+  //   localStorage.removeItem("accessToken");
+  //   localStorage.removeItem("customerCartId");
+  //   setCustomer(null);
+  //   setToken(null);
+
+  //   apiClient.initAnonymousClient();
+  //   clearCart();
+  //   await removeAllDiscountCodes();
+  //   await clearCart(); // <--- создаёт полностью новую корзину
+  //   await reloadCart(); // <--- перезагружает корзину после очистки
+  // }, [cart, clearCart, reloadCart, removeAllDiscountCodes]);
+
   const logout = useCallback(async () => {
-    const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("accessToken");
 
-    try {
-      if (token && cart && cart.discountCodes.length > 0) {
-        await removeAllDiscountCodes(); // ✅ Один раз — удаляет все скидки
-      }
-    } catch (err) {
-      console.warn("Failed to remove discount codes during logout", err);
+  try {
+    if (token && cart && cart.discountCodes.length > 0) {
+      await removeAllDiscountCodes();
     }
+  } catch (err) {
+    console.warn("Failed to remove discount codes during logout", err);
+  }
 
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("customerCartId");
-    setCustomer(null);
-    setToken(null);
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("customerCartId");
+  setCustomer(null);
+  setToken(null);
 
-    apiClient.initAnonymousClient();
-    clearCart();
-    await removeAllDiscountCodes();
-    await clearCart(); // <--- создаёт полностью новую корзину
-    await reloadCart(); // <--- перезагружает корзину после очистки
-  }, [cart, clearCart, reloadCart, removeAllDiscountCodes]);
+  // 🔁 Переключаемся на анонимного клиента
+  apiClient.initAnonymousClient();
+
+  // 🧼 Очищаем корзину (и создаём новую)
+  await removeAllDiscountCodes();
+  await clearCart(); // новая анонимная корзина
+  await reloadCart();
+
+  // ✅ Сохраняем ID новой анонимной корзины (если доступна)
+  if (cart && cart.id) {
+    localStorage.setItem("anonymousCartId", cart.id);
+  }
+}, [cart, clearCart, reloadCart, removeAllDiscountCodes]);
 
   const register = useCallback(
     async (data: MyCustomerDraft): Promise<Customer> => {

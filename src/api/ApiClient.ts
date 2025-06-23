@@ -565,29 +565,31 @@ export class ApiClient extends CreateApiClient {
    */
 
   public initClientFromStorage() {
-    const raw = localStorage.getItem("accessToken");
+  const raw = localStorage.getItem("accessToken");
 
-    if (raw) {
-      try {
-        const token = JSON.parse(raw) as TokenStore;
-        const now = Date.now();
+  if (raw) {
+    try {
+      const token = JSON.parse(raw) as TokenStore;
+      const now = Date.now();
 
-        if (token.expirationTime && token.expirationTime > now) {
-          this.client = this.buildClientWithToken(token.token);
-          return;
-        }
+      // const hasManageOrders = token.token?.includes("manage_orders");
 
-        console.warn("Access token expired, removing.");
-        localStorage.removeItem("accessToken");
-      } catch (e) {
-        console.error("Failed to parse accessToken", e);
-        localStorage.removeItem("accessToken");
+      if (token.expirationTime && token.expirationTime > now ) {
+        this.client = this.buildClientWithToken(token.token);
+        return;
       }
-    }
 
-    // Fallback to anonymous
-    this.initAnonymousClient();
+      console.warn("Token invalid or insufficient scope — removing.");
+      localStorage.removeItem("accessToken");
+    } catch (e) {
+      console.error("Failed to parse accessToken", e);
+      localStorage.removeItem("accessToken");
+    }
   }
+
+  // Fallback to anonymous
+  this.initAnonymousClient();
+}
 
   /**
    * Remove a line item from the cart

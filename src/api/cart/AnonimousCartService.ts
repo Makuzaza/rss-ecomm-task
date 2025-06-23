@@ -15,6 +15,7 @@ export class AnonymousCartService implements ICartService {
 
     const response = await this.apiRoot
       .withProjectKey({ projectKey: this.projectKey })
+      .me()
       .carts()
       .withId({ ID: cartId })
       .get()
@@ -34,9 +35,12 @@ export class AnonymousCartService implements ICartService {
 
     const response = await this.apiRoot
       .withProjectKey({ projectKey: this.projectKey })
+      .me()
       .carts()
       .post({ body })
       .execute();
+
+      localStorage.setItem("anonymousCartId", response.body.id);
 
     return response.body;
   }
@@ -44,6 +48,7 @@ export class AnonymousCartService implements ICartService {
   async updateCart(cartId: string, payload: MyCartUpdate): Promise<Cart> {
     const response = await this.apiRoot
       .withProjectKey({ projectKey: this.projectKey })
+      .me()
       .carts()
       .withId({ ID: cartId })
       .post({ body: payload })

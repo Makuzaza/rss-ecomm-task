@@ -200,6 +200,7 @@ export interface CartContextType {
   removePromoCode: (code: string) => Promise<void>;
   cartService: ICartService;
   removeAllDiscountCodes: () => Promise<void>;
+  resetCartService: () => void;
 }
 
 // Quantity change
