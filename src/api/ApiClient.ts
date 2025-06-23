@@ -34,6 +34,10 @@ interface AnonymousAuthOptions extends AuthMiddlewareOptions {
   fetch: typeof fetch;
 }
 export class ApiClient extends CreateApiClient {
+  constructor() {
+    super();
+    this.getAllCarts();
+  }
   /**
    * BUILD CUSTOMER WITH PASSWORD
    */
@@ -406,6 +410,23 @@ export class ApiClient extends CreateApiClient {
         .activeCart()
         .get()
         .execute();
+      return cart;
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to fetch active cart");
+    }
+  }
+
+  public async getAllCarts() {
+    const apiRoot = this.getApiRoot(this.defaultClient);
+    if (!apiRoot) throw new Error("Unauthorized action");
+    try {
+      const { body: cart } = await apiRoot
+        .withProjectKey({ projectKey: this.PROJECT_KEY })
+        .carts()
+        .get()
+        .execute();
+      console.log("All Carts:", cart);
       return cart;
     } catch (error) {
       console.log(error);
