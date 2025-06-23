@@ -114,7 +114,7 @@ const RegisterPage = () => {
   }, [showBillingAddress]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => {
@@ -134,7 +134,7 @@ const RegisterPage = () => {
         value,
         updatedForm,
         europeanCountries,
-        showBillingAddress,
+        showBillingAddress
       );
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -145,7 +145,7 @@ const RegisterPage = () => {
   };
 
   const handleBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     const error = validateField(
@@ -153,7 +153,7 @@ const RegisterPage = () => {
       value,
       formData,
       europeanCountries,
-      showBillingAddress,
+      showBillingAddress
     );
     setErrors((prevErrors) => ({
       ...prevErrors,
@@ -165,7 +165,7 @@ const RegisterPage = () => {
     const { isValid, errors } = validateRegisterForm(
       formData,
       europeanCountries,
-      showBillingAddress,
+      showBillingAddress
     );
     setErrors(errors);
     return isValid;
@@ -199,7 +199,7 @@ const RegisterPage = () => {
           });
         }
 
-        const result = await apiClient.registerCustomer({
+        await apiClient.registerCustomer({
           email: formData.email,
           password: formData.password,
           firstName: formData.firstName,
@@ -210,8 +210,6 @@ const RegisterPage = () => {
           defaultBillingAddress:
             showBillingAddress && defaultBillingAddress ? 1 : undefined,
         });
-
-        console.log("Registration successful:", result);
 
         // Auto login customer
         await login(formData.email, formData.password);

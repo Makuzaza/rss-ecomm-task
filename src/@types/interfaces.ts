@@ -179,7 +179,10 @@ export interface CartItem {
 export interface CartContextType {
   cart?: Cart | null;
   cartItems: CartItem[];
-  addToCart: (product: CartItem | string, variantId?: number) => void | Promise<void>;
+  addToCart: (
+    product: CartItem | string,
+    variantId?: number
+  ) => void | Promise<void>;
   removeFromCart: (productId: string, variantId?: number) => void;
   isInCart?: (productId: string, variantId?: number) => boolean;
   isLoadingAddToCart?: (productId: string) => boolean;
@@ -194,6 +197,7 @@ export interface CartContextType {
   totalItems?: number;
   changeQuantity: (lineItemId: string, quantity: number) => Promise<void>;
   applyPromoCode: (code: string) => Promise<void>;
+  removePromoCode: (code: string) => Promise<void>;
   cartService: ICartService;
   removeAllDiscountCodes: () => Promise<void>;
 }
@@ -217,8 +221,16 @@ export interface ICartService {
   getActiveCart(): Promise<Cart>;
   createCart(customer?: Customer): Promise<Cart>;
   updateCart(cartId: string, payload: MyCartUpdate): Promise<Cart>;
-  changeLineItemQuantity(cartId: string, version: number, lineItemId: string, quantity: number): Promise<Cart>;
+  changeLineItemQuantity(
+    cartId: string,
+    version: number,
+    lineItemId: string,
+    quantity: number
+  ): Promise<Cart>;
   addDiscountCode(cartId: string, version: number, code: string): Promise<Cart>;
-  removeDiscountCode(cartId: string, version: number, discountCodeId: string): Promise<Cart>;
-
+  removeDiscountCode(
+    cartId: string,
+    version: number,
+    discountCodeId: string
+  ): Promise<Cart>;
 }

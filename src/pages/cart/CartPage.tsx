@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Link } from "react-router-dom";
 import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
@@ -15,11 +15,20 @@ const CartPage = () => {
     changeQuantity,
     decrementQuantity,
     applyPromoCode,
+    removePromoCode,
   } = useCart();
 
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
+
+  useEffect(() => {
+    if (cart?.discountCodes && cart.discountCodes.length > 0) {
+      setPromoApplied(true);
+    } else {
+      setPromoApplied(false);
+    }
+  }, [cart]);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartItems.reduce(
@@ -27,8 +36,8 @@ const CartPage = () => {
     0
   );
   const totalCartPrice = cart?.totalPrice?.centAmount
-  ? (cart.totalPrice.centAmount / 100).toFixed(2)
-  : subtotal.toFixed(2);
+    ? (cart.totalPrice.centAmount / 100).toFixed(2)
+    : subtotal.toFixed(2);
 
   const handleQuantityChange: HandleQuantityChange = (e, id) => {
     const newQuantity = parseInt(e.target.value) || 1;
@@ -37,25 +46,43 @@ const CartPage = () => {
 
   const handleApplyPromo = async () => {
     if (!promoCode) {
-      setPromoMessage("Please enter a promo code.");
+      setPromoMessage("Please enter a promo code. For example: PROMO20");
       return;
     }
 
-    try {
-      await applyPromoCode(promoCode.trim());
-      setPromoMessage("Promo code applied successfully!");
-      setPromoApplied(true);
-    } catch {
-      setPromoMessage("Invalid or expired promo code.");
-      setPromoApplied(false);
+    const promoCodes: Record<string, number> = {
+      PROMO20: 0.2,
+      // SAVE15: 0.15,
+    };
+
+    if (promoCode.toUpperCase() in promoCodes) {
+      const newDiscount = promoCodes[promoCode.toUpperCase()];
+
+      try {
+        await applyPromoCode(promoCode.trim());
+        setPromoMessage("Promo code applied successfully!");
+        setPromoApplied(true);
+      } catch {
+        setPromoMessage("Invalid or expired promo code.");
+        setPromoApplied(false);
+      }
+      setPromoMessage(`Promo code applied! ${newDiscount * 100}% discount`);
+    } else {
+      // setDiscount(0);
+      // setAppliedPromo("");
+      setPromoMessage("Insert a valid promo code, for example: PROMO20");
     }
   };
 
-  const handleRemovePromo = () => {
-    setPromoCode("");
-    setPromoMessage("");
-    setPromoApplied(false);
-    // CommerceTools не поддерживает удаление промокода напрямую без реализации removeDiscountCode
+  const handleRemovePromo = async () => {
+    try {
+      await removePromoCode(promoCode.trim());
+      setPromoCode("");
+      setPromoMessage("");
+      setPromoApplied(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -79,9 +106,14 @@ const CartPage = () => {
                 />
                 <div className="cart-item-details">
                   <strong>{item.name}</strong>
-                  <div>Price: {(item.priceDiscounted || item.price).toFixed(2)} €</div>
+                  <div>
+                    Price: {(item.priceDiscounted || item.price).toFixed(2)} €
+                  </div>
                   <div className="quantity-controls">
-                    <button onClick={() => decrementQuantity(item.id)} aria-label="Decrease quantity">
+                    <button
+                      onClick={() => decrementQuantity(item.id)}
+                      aria-label="Decrease quantity"
+                    >
                       <FaMinus />
                     </button>
                     <input
@@ -90,16 +122,28 @@ const CartPage = () => {
                       value={item.quantity}
                       onChange={(e) => handleQuantityChange(e, item.id)}
                     />
-                    <button onClick={() => incrementQuantity(item.id)} aria-label="Increase quantity">
+                    <button
+                      onClick={() => incrementQuantity(item.id)}
+                      aria-label="Increase quantity"
+                    >
                       <FaPlus />
                     </button>
                   </div>
                   <div>
-                    Subtotal: {((item.priceDiscounted || item.price) * item.quantity).toFixed(2)} €
+                    Subtotal:{" "}
+                    {(
+                      (item.priceDiscounted || item.price) * item.quantity
+                    ).toFixed(2)}{" "}
+                    €
                   </div>
                 </div>
                 <button
-                  onClick={() => removeFromCart(item.productId, item.key ? parseInt(item.key) : undefined)}
+                  onClick={() =>
+                    removeFromCart(
+                      item.productId,
+                      item.key ? parseInt(item.key) : undefined
+                    )
+                  }
                   className="button__remove-item"
                 >
                   <FaTrash />
@@ -115,7 +159,9 @@ const CartPage = () => {
                 type="text"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
-                placeholder="Enter promo code"
+                placeholder={
+                  promoApplied ? "Promo code applied" : "Enter promo code"
+                }
                 disabled={promoApplied}
               />
               {!promoApplied ? (
@@ -125,7 +171,9 @@ const CartPage = () => {
               )}
             </div>
             {promoMessage && (
-              <div className={`promo-message ${promoApplied ? "success" : "error"}`}>
+              <div
+                className={`promo-message ${promoApplied ? "success" : "error"}`}
+              >
                 {promoMessage}
               </div>
             )}
@@ -133,18 +181,23 @@ const CartPage = () => {
 
           {/* Summary */}
           <div className="cart-summary">
-            <p><strong>Total Items: {totalItems}</strong></p>
+            <p>
+              <strong>Total Items: {totalItems}</strong>
+            </p>
 
             {parseFloat(totalCartPrice) < subtotal ? (
               <>
                 <p className="original-price">
-                  <span style={{ textDecoration: "line-through", color: "gray" }}>
+                  <span
+                    style={{ textDecoration: "line-through", color: "gray" }}
+                  >
                     {subtotal.toFixed(2)} €
                   </span>
                 </p>
                 <p className="discount-info">
                   <strong style={{ color: "RED" }}>
-                    Discount applied: –{(subtotal - parseFloat(totalCartPrice)).toFixed(2)} €
+                    Discount applied: –
+                    {(subtotal - parseFloat(totalCartPrice)).toFixed(2)} €
                   </strong>
                 </p>
                 <p className="total-price">

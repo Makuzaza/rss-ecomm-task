@@ -11,7 +11,9 @@ import { CartServiceFactory } from "@/api/cart/CartServiceFactory";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [cartService, setCartService] = useState<ICartService | null>(null);
   const [cart, setCart] = useState<Cart | null>(null);
   const [loadingItems, setLoadingItems] = useState<string[]>([]);
@@ -38,26 +40,35 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!cart) return [];
 
     return cart.lineItems.map((item) => ({
-      id: item.id, 
+      id: item.id,
       productId: item.productId,
       name: item.name?.["en-US"] || "",
       price: item.price?.value.centAmount / 100,
       priceDiscounted:
-        item.discountedPricePerQuantity?.[0]?.discountedPrice?.value?.centAmount / 100,
+        item.discountedPricePerQuantity?.[0]?.discountedPrice?.value
+          ?.centAmount / 100,
       quantity: item.quantity,
       image: item.variant?.images?.[0]?.url || "",
       key: item.variant?.key || "",
     }));
   }, [cart]);
-  
-  const cartCount = useMemo(() => cart?.lineItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0, [cart]);
+
+  const cartCount = useMemo(
+    () => cart?.lineItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
+    [cart]
+  );
   const totalItems = useMemo(() => cartItems.length, [cartItems]);
 
   const changeQuantity = async (lineItemId: string, quantity: number) => {
     if (!cartService || !cart) return;
 
     try {
-      const updatedCart = await cartService.changeLineItemQuantity(cart.id, cart.version, lineItemId, quantity);
+      const updatedCart = await cartService.changeLineItemQuantity(
+        cart.id,
+        cart.version,
+        lineItemId,
+        quantity
+      );
       setCart(updatedCart);
     } catch (err) {
       console.error("Failed to change quantity:", err);
@@ -138,7 +149,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           actions: [
             {
               action: "removeDiscountCode",
-              discountCode: { typeId: "discount-code", id: discount.discountCode.id },
+              discountCode: {
+                typeId: "discount-code",
+                id: discount.discountCode.id,
+              },
             },
           ],
         };
@@ -220,13 +234,37 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applyPromoCode = async (code: string) => {
     if (!cartService || !cart) return;
-
     try {
-      const updatedCart = await cartService.addDiscountCode(cart.id, cart.version, code);
+      const updatedCart = await cartService.addDiscountCode(
+        cart.id,
+        cart.version,
+        code
+      );
       setCart(updatedCart);
     } catch (err) {
       console.error("Failed to apply promo code:", err);
-      throw err; // чтобы можно было отловить в UI
+      throw err;
+    }
+  };
+
+  const removePromoCode = async () => {
+    if (!cartService || !cart) return;
+
+    try {
+      const cart = await cartService.getActiveCart();
+      const codeID = cart.discountCodes[0].discountCode.id;
+      if (codeID) {
+        const updatedCart = await cartService.removeDiscountCode(
+          cart.id,
+          cart.version,
+          codeID
+        );
+
+        setCart(updatedCart);
+      }
+    } catch (err) {
+      console.error("Failed to remove promo code:", err);
+      throw err;
     }
   };
 
@@ -266,6 +304,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         incrementQuantity,
         decrementQuantity,
         applyPromoCode,
+        removePromoCode,
         cartService,
         removeAllDiscountCodes,
       }}

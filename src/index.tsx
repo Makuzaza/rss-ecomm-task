@@ -21,8 +21,9 @@ import ProductDetailsPage from "@/pages/productDetails/ProductDetailsPage";
 import CategoryPage from "@/pages/category/CategoryPage";
 import ProductsPage from "@/pages/products/ProductsPage";
 import SearchResultsPage from "@/pages/search/SearchResultsPage";
-import CategoryProductsPage from "./pages/category/CategoryProductsPage";
-import CartPage from "./pages/cart/CartPage";
+import CategoryProductsPage from "@/pages/category/CategoryProductsPage";
+import CartPage from "@/pages/cart/CartPage";
+import TeamPage from "@/pages/team/TeamPage";
 
 const root = document.getElementById("root");
 
@@ -66,6 +67,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={"Loading..."}>
             <AboutPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/team",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <TeamPage />
           </Suspense>
         ),
       },
@@ -132,5 +141,5 @@ apiClient.initClientFromStorage();
 container.render(
   <ApiClientProvider>
     <RouterProvider router={router} />
-  </ApiClientProvider>,
+  </ApiClientProvider>
 );

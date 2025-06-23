@@ -32,12 +32,11 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 }) => {
   const apiClient = useApiClient();
   const [filteredProducts, setFilteredProducts] = useState<MyProductsData[]>(
-    [],
+    []
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { cartItems, addToCart, removeFromCart } = useCart();
-  
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -114,7 +113,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredProducts.slice(
     indexOfFirstItem,
-    indexOfLastItem,
+    indexOfLastItem
   );
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
@@ -209,7 +208,6 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     className="button__addToCart"
                     onClick={(e) => {
                       e.preventDefault();
-                      console.log("Adding to cart:", product.name);
                       addToCart(product.id, 1);
                     }}
                   >
