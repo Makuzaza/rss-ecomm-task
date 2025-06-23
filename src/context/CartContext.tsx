@@ -238,7 +238,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       const updatedCart = await cartService.addDiscountCode(
         cart.id,
         cart.version,
-        code
+        code.toUpperCase()
       );
       setCart(updatedCart);
     } catch (err) {

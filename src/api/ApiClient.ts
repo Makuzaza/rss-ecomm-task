@@ -1,7 +1,8 @@
 import CreateApiClient from "./CreateApiClient";
 import {
   productProjectionNormalization,
-  productDataNormalization
+  productDataNormalization,
+  productSearchNormalization,
 } from "@/utils/dataNormalization";
 
 // types
@@ -21,15 +22,18 @@ import {
   type CommerceToolsError,
   type MyProductsData,
 } from "../@types/interfaces";
-import { AuthMiddlewareOptions, ClientBuilder, ClientResponse, TokenStore  } from "@commercetools/ts-client";
-
+import {
+  AuthMiddlewareOptions,
+  ClientBuilder,
+  ClientResponse,
+  TokenStore,
+} from "@commercetools/ts-client";
 
 interface AnonymousAuthOptions extends AuthMiddlewareOptions {
   anonymousId: string;
   fetch: typeof fetch;
 }
 export class ApiClient extends CreateApiClient {
-  
   /**
    * BUILD CUSTOMER WITH PASSWORD
    */
@@ -54,7 +58,9 @@ export class ApiClient extends CreateApiClient {
       // Проверка: это стандартная ошибка с текстом
       if (
         error instanceof Error &&
-        error.message.includes("Customer account with the given credentials not found")
+        error.message.includes(
+          "Customer account with the given credentials not found"
+        )
       ) {
         throw new Error("Invalid email or password");
       }
@@ -66,7 +72,8 @@ export class ApiClient extends CreateApiClient {
         "body" in error &&
         typeof (error as { body: unknown }).body === "object" &&
         (error as { body: { message?: unknown } }).body?.message &&
-        typeof (error as { body: { message: unknown } }).body.message === "string"
+        typeof (error as { body: { message: unknown } }).body.message ===
+          "string"
       ) {
         throw new Error((error as { body: { message: string } }).body.message);
       }
@@ -121,7 +128,7 @@ export class ApiClient extends CreateApiClient {
    * REGISTER CUSTOMER
    */
   public async registerCustomer(
-    customerData: MyCustomerDraft,
+    customerData: MyCustomerDraft
   ): Promise<CustomerSignInResult> {
     const client = this.buildDefaultClient(false);
     this.apiRoot = this.getApiRoot(client);
@@ -141,7 +148,7 @@ export class ApiClient extends CreateApiClient {
       const err = error as CommerceToolsError;
 
       const duplicateEmail = err.body.errors?.find(
-        (e) => e.code === "DuplicateField" && e.field === "email",
+        (e) => e.code === "DuplicateField" && e.field === "email"
       );
 
       if (duplicateEmail) {
@@ -244,81 +251,113 @@ export class ApiClient extends CreateApiClient {
    * SEARCH DATA
    */
 
+  // public async searchData(
+  //   searchType: SearchTypes,
+  //   searchValue: string,
+  //   options: {
+  //     limit?: number;
+  //     offset?: number;
+  //     sort?: string | string[];
+  //     minPrice?: number;
+  //     maxPrice?: number;
+  //     discountOnly?: boolean;
+  //   } = {}
+  // ): Promise<{ products: MyProductsData[]; total: number }> {
+  //   const apiRoot = this.getApiRoot(this.defaultClient);
+
+  //   const filterArgs: string[] = [];
+
+  //   if (typeof options.minPrice === "number") {
+  //     filterArgs.push(
+  //       `variants.price.centAmount:range(${options.minPrice * 100} to *)`
+  //     );
+  //   }
+
+  //   if (typeof options.maxPrice === "number") {
+  //     filterArgs.push(
+  //       `variants.price.centAmount:range(* to ${options.maxPrice * 100})`
+  //     );
+  //   }
+
+  //   if (options.discountOnly) {
+  //     filterArgs.push("variants.prices.discounted.exists:true");
+  //   }
+
+  //   const queryArgs: {
+  //     [key: string]: string | string[] | number | boolean | undefined;
+  //   } = {
+  //     limit: options.limit,
+  //     offset: options.offset,
+  //     sort: options.sort,
+  //   };
+
+  //   if (searchType === "name") {
+  //     queryArgs["text.en-US"] = searchValue;
+  //   } else if (searchType === "category") {
+  //     filterArgs.push(`categories.id:"${searchValue}"`);
+  //   }
+
+  //   if (filterArgs.length > 0) {
+  //     queryArgs["filter.query"] = filterArgs;
+  //   }
+
+  //   try {
+  //     const { body } = await apiRoot
+  //       .withProjectKey({ projectKey: this.PROJECT_KEY })
+  //       .productProjections()
+  //       .search()
+  //       .get({ queryArgs })
+  //       .execute();
+
+  //     const products = productProjectionNormalization({ results: body.results });
+  //     const total = body.total ?? products.length;
+
+  //     return { products, total };
+  //   } catch (error) {
+  //     console.error("Failed to search products:", error);
+  //     throw new Error("Failed to fetch filtered products");
+  //   }
+  // }
+
+  // ***** SEARCH DATA *****
   public async searchData(
     searchType: SearchTypes,
-    searchValue: string,
-    options: {
-      limit?: number;
-      offset?: number;
-      sort?: string | string[];
-      minPrice?: number;
-      maxPrice?: number;
-      discountOnly?: boolean;
-    } = {}
-  ): Promise<{ products: MyProductsData[]; total: number }> {
+    searchValue: string
+  ): Promise<MyProductsData[]> {
     const apiRoot = this.getApiRoot(this.defaultClient);
 
-    const filterArgs: string[] = [];
-
-    if (typeof options.minPrice === "number") {
-      filterArgs.push(
-        `variants.price.centAmount:range(${options.minPrice * 100} to *)`
-      );
-    }
-
-    if (typeof options.maxPrice === "number") {
-      filterArgs.push(
-        `variants.price.centAmount:range(* to ${options.maxPrice * 100})`
-      );
-    }
-
-    if (options.discountOnly) {
-      filterArgs.push("variants.prices.discounted.exists:true");
-    }
-
-    const queryArgs: {
-      [key: string]: string | string[] | number | boolean | undefined;
-    } = {
-      limit: options.limit,
-      offset: options.offset,
-      sort: options.sort,
-    };
-
-    if (searchType === "name") {
-      queryArgs["text.en-US"] = searchValue;
-    } else if (searchType === "category") {
-      filterArgs.push(`categories.id:"${searchValue}"`);
-    }
-
-    if (filterArgs.length > 0) {
-      queryArgs["filter.query"] = filterArgs;
+    let searchArgs = {};
+    switch (searchType) {
+      case "name":
+        searchArgs = { "text.en-US": searchValue, limit: 10 };
+        break;
+      case "category":
+        searchArgs = { "filter.query": `categories.id:"${searchValue}"` };
+        break;
     }
 
     try {
-      const { body } = await apiRoot
-        .withProjectKey({ projectKey: this.PROJECT_KEY })
+      const { body: data } = await apiRoot
+        .withProjectKey({
+          projectKey: this.PROJECT_KEY,
+        })
         .productProjections()
         .search()
-        .get({ queryArgs })
+        .get({
+          queryArgs: searchArgs,
+        })
         .execute();
-
-      const products = productProjectionNormalization({ results: body.results });
-      const total = body.total ?? products.length;
-
-      return { products, total };
+      return productSearchNormalization(data);
     } catch (error) {
-      console.error("Failed to search products:", error);
-      throw new Error("Failed to fetch filtered products");
+      console.log(error);
     }
   }
-
-
 
   /**
    * UPDATE CUSTOMER
    */
   public async updateCustomer(
-    updatePayload: MyCustomerUpdate,
+    updatePayload: MyCustomerUpdate
   ): Promise<Customer> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -339,7 +378,7 @@ export class ApiClient extends CreateApiClient {
   public async changePassword(
     currentPassword: string,
     newPassword: string,
-    version: number,
+    version: number
   ) {
     const apiRoot = this.getApiRoot(this.client);
 
@@ -413,7 +452,7 @@ export class ApiClient extends CreateApiClient {
   public async addProductToCart(
     productId: string,
     variantId: number = 1,
-    customer?: Customer,
+    customer?: Customer
   ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -455,9 +494,8 @@ export class ApiClient extends CreateApiClient {
     }
   }
 
-
   public async getCartById(cartId: string) {
-    const apiRoot = this.getApiRoot(this.client); 
+    const apiRoot = this.getApiRoot(this.client);
     const { body: cart } = await apiRoot
       .withProjectKey({ projectKey: this.PROJECT_KEY })
       .me()
@@ -468,7 +506,6 @@ export class ApiClient extends CreateApiClient {
 
     return cart;
   }
-
 
   public initAnonymousClient() {
     const anonymousId = this.getOrCreateAnonymousId();
@@ -534,7 +571,11 @@ export class ApiClient extends CreateApiClient {
   /**
    * Remove a line item from the cart
    */
-  async removeLineItemFromCart(cartId: string, version: number, lineItemId: string) {
+  async removeLineItemFromCart(
+    cartId: string,
+    version: number,
+    lineItemId: string
+  ) {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
 
@@ -559,68 +600,72 @@ export class ApiClient extends CreateApiClient {
     return res.body;
   }
 
-  public async clearMyCart(cartId: string, version: number, lineItemIds: string[]): Promise<Cart> {
-  const apiRoot = this.getApiRoot(this.client);
-  const body: MyCartUpdate = {
-    version,
-    actions: lineItemIds.map((lineItemId) => ({
-      action: "removeLineItem",
-      lineItemId,
-    })),
-  };
+  public async clearMyCart(
+    cartId: string,
+    version: number,
+    lineItemIds: string[]
+  ): Promise<Cart> {
+    const apiRoot = this.getApiRoot(this.client);
+    const body: MyCartUpdate = {
+      version,
+      actions: lineItemIds.map((lineItemId) => ({
+        action: "removeLineItem",
+        lineItemId,
+      })),
+    };
 
-  const res = await apiRoot
-    .withProjectKey({ projectKey: this.PROJECT_KEY })
-    .me()
-    .carts()
-    .withId({ ID: cartId })
-    .post({ body })
-    .execute();
+    const res = await apiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .me()
+      .carts()
+      .withId({ ID: cartId })
+      .post({ body })
+      .execute();
 
-  return res.body;
-}
-
-public async deleteCart(cartId: string, version: number): Promise<void> {
-  const apiRoot = this.getApiRoot(this.client);
-  if (!apiRoot) throw new Error("Unauthorized action");
-
-  await apiRoot
-    .withProjectKey({ projectKey: this.PROJECT_KEY })
-    .me()
-    .carts()
-    .withId({ ID: cartId })
-    .delete({ queryArgs: { version } })
-    .execute();
-}
-
-public get publicApiRoot() {
-  return this.getApiRootSafe();
-}
-
-public get publicProjectKey() {
-  return this.PROJECT_KEY;
-}
-
-private getApiRootSafe(client = this.client) {
-  if (!client) throw new Error("API client is not initialized");
-  return this.getApiRoot(client);
-}
-
-public isAuthorized(): boolean {
-  const raw = localStorage.getItem("accessToken");
-  if (!raw) return false;
-  try {
-    const token = JSON.parse(raw) as TokenStore;
-    return token.expirationTime > Date.now();
-  } catch {
-    return false;
+    return res.body;
   }
-}
 
-public logout() {
-  localStorage.removeItem("accessToken");
-  this.initAnonymousClient();
-}
+  public async deleteCart(cartId: string, version: number): Promise<void> {
+    const apiRoot = this.getApiRoot(this.client);
+    if (!apiRoot) throw new Error("Unauthorized action");
+
+    await apiRoot
+      .withProjectKey({ projectKey: this.PROJECT_KEY })
+      .me()
+      .carts()
+      .withId({ ID: cartId })
+      .delete({ queryArgs: { version } })
+      .execute();
+  }
+
+  public get publicApiRoot() {
+    return this.getApiRootSafe();
+  }
+
+  public get publicProjectKey() {
+    return this.PROJECT_KEY;
+  }
+
+  private getApiRootSafe(client = this.client) {
+    if (!client) throw new Error("API client is not initialized");
+    return this.getApiRoot(client);
+  }
+
+  public isAuthorized(): boolean {
+    const raw = localStorage.getItem("accessToken");
+    if (!raw) return false;
+    try {
+      const token = JSON.parse(raw) as TokenStore;
+      return token.expirationTime > Date.now();
+    } catch {
+      return false;
+    }
+  }
+
+  public logout() {
+    localStorage.removeItem("accessToken");
+    this.initAnonymousClient();
+  }
 
   // end
 }

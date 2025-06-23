@@ -19,11 +19,11 @@
   padding: 0 20px 0 5px;
 }
 
-.nav-container ul {
+/* .nav-container ul {
   display: flex;
   flex-direction: row;
   align-items: center;
-}
+} */
 
 .nav-item {
   position: static;

@@ -19,7 +19,7 @@ const SearchResultsPage = () => {
       setLoading(true);
 
       apiClient
-        .searchhData("name", query)
+        .searchData("name", query)
         .then((response) => {
           setResults(response);
           setLoading(false);
