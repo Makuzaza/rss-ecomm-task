@@ -53,7 +53,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
         try {
           setLoading(true);
           const response = await apiClient.searchData("category", categoryId);
-          const data: MyProductsData[] = response.products;
+          const data: MyProductsData[] = response;
           setFilteredProducts(data);
           setError(null);
         } catch (err) {

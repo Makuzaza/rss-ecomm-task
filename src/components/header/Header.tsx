@@ -94,11 +94,6 @@ export const Header = () => {
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/team" className="nav-link">
-              Team
-            </Link>
-          </li>
-          <li className="nav-item">
             <div className="nav-link">
               <CategoryDropdown />
             </div>

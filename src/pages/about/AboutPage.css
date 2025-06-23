@@ -1,36 +1,96 @@
-#about {
+.team-container {
   max-width: 800px;
-  margin: 2rem auto;
   padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-family: monospace;
-  color: #333;
-  line-height: 1.6;
+  font-family: Arial, sans-serif;
 }
 
 #about h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
   text-align: center;
+  padding-top: 1em;
+  margin: 0;
 }
 
-#about p {
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+.cards-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  gap: 2rem;
 }
 
-@media screen and (max-width: 600px) {
-  #about {
-    padding: 10px;
-    margin: 0;
-  }
+.team-card {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.05);
+}
 
-  #about h2 {
-    font-size: 1.4rem;
-  }
+.photo-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 120px;
+}
 
-  #about p {
-    font-size: 0.8rem;
-  }
+.team-photo {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.member-badge {
+  margin-top: 10px;
+  width: 64px;
+  height: 64px;
+}
+
+.team-info {
+  flex: 1;
+  padding: 0 0.8em;
+}
+
+.team-info h3 {
+  margin: 0 0 0.5rem;
+}
+
+.team-info .role {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.bio,
+.contributions {
+  margin: 0.5rem 0;
+}
+
+.github-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.github-link:hover {
+  text-decoration: underline;
+}
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 2rem;
+}
+
+.rss-logo {
+  max-width: 160px;
+  height: auto;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.rss-logo:hover {
+  opacity: 1;
+  cursor: pointer;
 }
