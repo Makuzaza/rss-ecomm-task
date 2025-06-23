@@ -3,7 +3,6 @@ import { ICartService } from "@/@types/interfaces";
 import { CustomerCartService } from "./CustomerCartService";
 import { AnonymousCartService } from "./AnonimousCartService";
 
-
 export class CartServiceFactory {
   static create(): ICartService {
     const apiRoot = apiClient.publicApiRoot;
@@ -26,5 +25,4 @@ export class CartServiceFactory {
 
     return new AnonymousCartService(apiRoot, projectKey);
   }
-  
 }

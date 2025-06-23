@@ -55,7 +55,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const cartCount = useMemo(
     () => cart?.lineItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
-    [cart]
+    [cart],
   );
   const totalItems = useMemo(() => cartItems.length, [cartItems]);
 
@@ -67,7 +67,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         cart.id,
         cart.version,
         lineItemId,
-        quantity
+        quantity,
       );
       setCart(updatedCart);
     } catch (err) {
@@ -106,7 +106,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!cartService || !cart || cart.lineItems.length === 0) return;
 
     try {
-       let updatedCart = await cartService.getActiveCart();
+      let updatedCart = await cartService.getActiveCart();
       const lineItemIds = updatedCart.lineItems.map((item) => item.id);
 
       for (const lineItemId of lineItemIds) {
@@ -127,7 +127,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!cartService || !cart) return;
 
     try {
-
       const freshCart = await cartService.getActiveCart();
       const payload: MyCartUpdate = {
         version: freshCart.version,
@@ -167,25 +166,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   //   }
   // };
 
-    const removeAllDiscountCodes = async () => {
+  const removeAllDiscountCodes = async () => {
     if (!cartService || !cart) return;
 
     try {
-  let updatedCart = await cartService.getActiveCart();
+      let updatedCart = await cartService.getActiveCart();
 
-    for (const discount of updatedCart.discountCodes) {
-      const payload: MyCartUpdate = {
-        version: updatedCart.version,
-        actions: [{
-          action: "removeDiscountCode",
-          discountCode: {
-            typeId: "discount-code",
-            id: discount.discountCode.id,
-          },
-        }],
-      };
+      for (const discount of updatedCart.discountCodes) {
+        const payload: MyCartUpdate = {
+          version: updatedCart.version,
+          actions: [
+            {
+              action: "removeDiscountCode",
+              discountCode: {
+                typeId: "discount-code",
+                id: discount.discountCode.id,
+              },
+            },
+          ],
+        };
         updatedCart = await cartService.updateCart(updatedCart.id, payload);
-  
       }
 
       setCart(updatedCart);
@@ -193,7 +193,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Failed to remove discount codes:", err);
     }
   };
-
 
   const clearCart = async () => {
     if (!cartService) return;
@@ -240,7 +239,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     const lineItem = cart.lineItems.find(
       (item) =>
         item.productId === productId &&
-        (variantId ? item.variant.id === variantId : true)
+        (variantId ? item.variant.id === variantId : true),
     );
 
     if (lineItem) {
@@ -253,7 +252,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       cart?.lineItems?.some(
         (item) =>
           item.productId === productId &&
-          (variantId ? item.variant.id === variantId : true)
+          (variantId ? item.variant.id === variantId : true),
       ) ?? false
     );
   };
@@ -268,7 +267,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       const updatedCart = await cartService.addDiscountCode(
         cart.id,
         cart.version,
-        code.toUpperCase()
+        code.toUpperCase(),
       );
       setCart(updatedCart);
     } catch (err) {
@@ -287,7 +286,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         const updatedCart = await cartService.removeDiscountCode(
           cart.id,
           cart.version,
-          codeID
+          codeID,
         );
 
         setCart(updatedCart);

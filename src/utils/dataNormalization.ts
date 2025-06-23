@@ -1,6 +1,5 @@
 import { type MyProductsData } from "@/@types/interfaces";
 import {
-
   type ProductPagedQueryResponse,
   type ProductProjectionPagedSearchResponse,
   Product,
@@ -28,7 +27,6 @@ export function productDataNormalization(product: Product): MyProductsData {
   };
 }
 
-
 export function allProductsNormalization(
   data: ProductPagedQueryResponse,
 ): MyProductsData[] {
@@ -36,7 +34,6 @@ export function allProductsNormalization(
     return productDataNormalization(data);
   });
 }
-
 
 type ProductProjectionContainer = {
   results: ProductProjection[];
@@ -65,7 +62,6 @@ export function productProjectionNormalization(
     };
   });
 }
-
 
 export function productSearchNormalization(
   data: ProductProjectionPagedSearchResponse,
@@ -111,4 +107,3 @@ export function singleProductProjectionNormalization(
     variants: data.variants,
   };
 }
-

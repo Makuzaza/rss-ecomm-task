@@ -132,5 +132,5 @@ apiClient.initClientFromStorage();
 container.render(
   <ApiClientProvider>
     <RouterProvider router={router} />
-  </ApiClientProvider>
+  </ApiClientProvider>,
 );

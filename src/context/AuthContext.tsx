@@ -8,10 +8,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "@/api/ApiClient";
-import {
-  Customer,
-  MyCustomerDraft,
-} from "@commercetools/platform-sdk";
+import { Customer, MyCustomerDraft } from "@commercetools/platform-sdk";
 import { TokenStore, AuthContextType } from "@/@types/interfaces";
 import { useCart } from "@/context/CartContext";
 import { mergeAnonymousCartWithCustomerCart } from "@/api/cart/cartMergeUtils";
@@ -28,10 +25,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { cart, reloadCart, clearCart, removeAllDiscountCodes, resetCartService } = useCart();
-  
-
-
+  const {
+    cart,
+    reloadCart,
+    clearCart,
+    removeAllDiscountCodes,
+    resetCartService,
+  } = useCart();
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -40,7 +40,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const raw = localStorage.getItem("accessToken");
         const storedToken: TokenStore | null = raw ? JSON.parse(raw) : null;
 
-        const isValid = storedToken?.expirationTime && storedToken.expirationTime > Date.now();
+        const isValid =
+          storedToken?.expirationTime &&
+          storedToken.expirationTime > Date.now();
         if (!isValid) {
           localStorage.removeItem("accessToken");
           return;
@@ -88,7 +90,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   //       }
   //       resetCartService();
   //       await reloadCart();
-        
+
   //       if (!options?.preventRedirect) {
   //         navigate("/");
   //       }
@@ -106,54 +108,58 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // );
 
   const login = useCallback(
-  async (
-    email: string,
-    password: string,
-    options?: { preventRedirect?: boolean }
-  ): Promise<Customer> => {
-    setLoading(true);
-    clearError();
-    localStorage.removeItem("accessToken");
+    async (
+      email: string,
+      password: string,
+      options?: { preventRedirect?: boolean },
+    ): Promise<Customer> => {
+      setLoading(true);
+      clearError();
+      localStorage.removeItem("accessToken");
 
-    try {
-      // 🔐 Логин по email/password
-      const customerSignIn = await apiClient.getCustomerWithPassword(email, password);
-      setCustomer(customerSignIn);
+      try {
+        // 🔐 Логин по email/password
+        const customerSignIn = await apiClient.getCustomerWithPassword(
+          email,
+          password,
+        );
+        setCustomer(customerSignIn);
 
-      const stored = localStorage.getItem("accessToken");
-      if (stored) {
-        const parsed: TokenStore = JSON.parse(stored);
-        setToken(parsed.token);
+        const stored = localStorage.getItem("accessToken");
+        if (stored) {
+          const parsed: TokenStore = JSON.parse(stored);
+          setToken(parsed.token);
+        }
+
+        // merge anonymous cart with customer cart
+        await mergeAnonymousCartWithCustomerCart();
+
+        // 🧼   Clean temporary localstorage
+        localStorage.removeItem("anonymousCartId");
+        localStorage.removeItem("anonymousId");
+
+        // reset cart service
+        // (this will create a new cart for the customer)
+        resetCartService();
+
+        // 🔄 Reload the cart
+        await reloadCart();
+
+        if (!options?.preventRedirect) {
+          navigate("/");
+        }
+
+        return customerSignIn;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Login failed";
+        setError(msg);
+        throw new Error(msg);
+      } finally {
+        setLoading(false);
       }
-
-      // 🔁 Мерджим корзину — если была анонимная
-      await mergeAnonymousCartWithCustomerCart()
-
-      // 🧼 Очищаем временные ID (внутри merge тоже, на всякий)
-      localStorage.removeItem("anonymousCartId");
-      localStorage.removeItem("anonymousId");
-
-      // 🧠 Пересоздаём сервис (CustomerCartService)
-      resetCartService();
-
-      // 🔄 Обновляем корзину из customer-контекста
-      await reloadCart();
-
-      if (!options?.preventRedirect) {
-        navigate("/");
-      }
-
-      return customerSignIn;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Login failed";
-      setError(msg);
-      throw new Error(msg);
-    } finally {
-      setLoading(false);
-    }
-  },
-  [clearError, navigate, reloadCart]
-);
+    },
+    [clearError, navigate, reloadCart],
+  );
 
   const loginWithToken = useCallback(
     async (token: string): Promise<void> => {
@@ -170,7 +176,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.removeItem("accessToken");
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Session validation failed";
+        const msg =
+          err instanceof Error ? err.message : "Session validation failed";
         setError(msg);
         throw new Error(msg);
       } finally {
@@ -204,34 +211,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // }, [cart, clearCart, reloadCart, removeAllDiscountCodes]);
 
   const logout = useCallback(async () => {
-  const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken");
 
-  try {
-    if (token && cart && cart.discountCodes.length > 0) {
-      await removeAllDiscountCodes();
+    try {
+      if (token && cart && cart.discountCodes.length > 0) {
+        await removeAllDiscountCodes();
+      }
+    } catch (err) {
+      console.warn("Failed to remove discount codes during logout", err);
     }
-  } catch (err) {
-    console.warn("Failed to remove discount codes during logout", err);
-  }
 
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("customerCartId");
-  setCustomer(null);
-  setToken(null);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("customerCartId");
+    setCustomer(null);
+    setToken(null);
 
-  // 🔁 Переключаемся на анонимного клиента
-  apiClient.initAnonymousClient();
+    //  Redirect to anonymous client
+    apiClient.initAnonymousClient();
 
-  // 🧼 Очищаем корзину (и создаём новую)
-  await removeAllDiscountCodes();
-  await clearCart(); // новая анонимная корзина
-  await reloadCart();
+    //  Clean cart and create a new one
+    await removeAllDiscountCodes();
+    await clearCart(); 
+    await reloadCart();
 
-  // ✅ Сохраняем ID новой анонимной корзины (если доступна)
-  if (cart && cart.id) {
-    localStorage.setItem("anonymousCartId", cart.id);
-  }
-}, [cart, clearCart, reloadCart, removeAllDiscountCodes]);
+    // Set anonymous cart ID in localStorage
+    if (cart && cart.id) {
+      localStorage.setItem("anonymousCartId", cart.id);
+    }
+  }, [cart, clearCart, reloadCart, removeAllDiscountCodes]);
 
   const register = useCallback(
     async (data: MyCustomerDraft): Promise<Customer> => {

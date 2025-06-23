@@ -43,7 +43,7 @@ export class ApiClient extends CreateApiClient {
    */
   public async getCustomerWithPassword(
     email: string,
-    password: string
+    password: string,
   ): Promise<Customer> {
     try {
       this.client = this.buildClientWithPassword(email, password);
@@ -63,7 +63,7 @@ export class ApiClient extends CreateApiClient {
       if (
         error instanceof Error &&
         error.message.includes(
-          "Customer account with the given credentials not found"
+          "Customer account with the given credentials not found",
         )
       ) {
         throw new Error("Invalid email or password");
@@ -132,7 +132,7 @@ export class ApiClient extends CreateApiClient {
    * REGISTER CUSTOMER
    */
   public async registerCustomer(
-    customerData: MyCustomerDraft
+    customerData: MyCustomerDraft,
   ): Promise<CustomerSignInResult> {
     const client = this.buildDefaultClient(false);
     this.apiRoot = this.getApiRoot(client);
@@ -152,7 +152,7 @@ export class ApiClient extends CreateApiClient {
       const err = error as CommerceToolsError;
 
       const duplicateEmail = err.body.errors?.find(
-        (e) => e.code === "DuplicateField" && e.field === "email"
+        (e) => e.code === "DuplicateField" && e.field === "email",
       );
 
       if (duplicateEmail) {
@@ -326,7 +326,7 @@ export class ApiClient extends CreateApiClient {
   // ***** SEARCH DATA *****
   public async searchData(
     searchType: SearchTypes,
-    searchValue: string
+    searchValue: string,
   ): Promise<MyProductsData[]> {
     const apiRoot = this.getApiRoot(this.defaultClient);
 
@@ -361,7 +361,7 @@ export class ApiClient extends CreateApiClient {
    * UPDATE CUSTOMER
    */
   public async updateCustomer(
-    updatePayload: MyCustomerUpdate
+    updatePayload: MyCustomerUpdate,
   ): Promise<Customer> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -382,7 +382,7 @@ export class ApiClient extends CreateApiClient {
   public async changePassword(
     currentPassword: string,
     newPassword: string,
-    version: number
+    version: number,
   ) {
     const apiRoot = this.getApiRoot(this.client);
 
@@ -439,7 +439,7 @@ export class ApiClient extends CreateApiClient {
     if (!apiRoot) throw new Error("Unauthorized action");
 
     const shippingAddress = customer?.addresses?.find(
-      (addr) => addr.id === customer.defaultShippingAddressId
+      (addr) => addr.id === customer.defaultShippingAddressId,
     );
 
     const countryFromCustomer = shippingAddress?.country;
@@ -473,7 +473,7 @@ export class ApiClient extends CreateApiClient {
   public async addProductToCart(
     productId: string,
     variantId: number = 1,
-    customer?: Customer
+    customer?: Customer,
   ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -565,31 +565,31 @@ export class ApiClient extends CreateApiClient {
    */
 
   public initClientFromStorage() {
-  const raw = localStorage.getItem("accessToken");
+    const raw = localStorage.getItem("accessToken");
 
-  if (raw) {
-    try {
-      const token = JSON.parse(raw) as TokenStore;
-      const now = Date.now();
+    if (raw) {
+      try {
+        const token = JSON.parse(raw) as TokenStore;
+        const now = Date.now();
 
-      // const hasManageOrders = token.token?.includes("manage_orders");
+        // const hasManageOrders = token.token?.includes("manage_orders");
 
-      if (token.expirationTime && token.expirationTime > now ) {
-        this.client = this.buildClientWithToken(token.token);
-        return;
+        if (token.expirationTime && token.expirationTime > now) {
+          this.client = this.buildClientWithToken(token.token);
+          return;
+        }
+
+        console.warn("Token invalid or insufficient scope — removing.");
+        localStorage.removeItem("accessToken");
+      } catch (e) {
+        console.error("Failed to parse accessToken", e);
+        localStorage.removeItem("accessToken");
       }
-
-      console.warn("Token invalid or insufficient scope — removing.");
-      localStorage.removeItem("accessToken");
-    } catch (e) {
-      console.error("Failed to parse accessToken", e);
-      localStorage.removeItem("accessToken");
     }
-  }
 
-  // Fallback to anonymous
-  this.initAnonymousClient();
-}
+    // Fallback to anonymous
+    this.initAnonymousClient();
+  }
 
   /**
    * Remove a line item from the cart
@@ -597,7 +597,7 @@ export class ApiClient extends CreateApiClient {
   async removeLineItemFromCart(
     cartId: string,
     version: number,
-    lineItemId: string
+    lineItemId: string,
   ) {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -626,7 +626,7 @@ export class ApiClient extends CreateApiClient {
   public async clearMyCart(
     cartId: string,
     version: number,
-    lineItemIds: string[]
+    lineItemIds: string[],
   ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     const body: MyCartUpdate = {

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApiClient } from "@/context/ApiClientContext";
-import { getFirstParagraph, hasMultipleParagraphs } from "@/utils/textProcessing";
+import {
+  getFirstParagraph,
+  hasMultipleParagraphs,
+} from "@/utils/textProcessing";
 import DOMPurify from "dompurify";
 import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 import { FaShoppingCart, FaTimes } from "react-icons/fa";
@@ -77,7 +80,7 @@ const ProductDetailsPage = () => {
     const lineItem = cart.lineItems.find(
       (item) =>
         item.productId === product.id &&
-        item.variant.id === selectedVariant + 1
+        item.variant.id === selectedVariant + 1,
     );
 
     if (lineItem) {
@@ -117,16 +120,28 @@ const ProductDetailsPage = () => {
           <div className="slider-container">
             {product.images.length > 1 && (
               <>
-                <button onClick={handlePrevImage} className="slider-arrow left-arrow">
+                <button
+                  onClick={handlePrevImage}
+                  className="slider-arrow left-arrow"
+                >
                   <FiChevronLeft size={24} />
                 </button>
-                <button onClick={handleNextImage} className="slider-arrow right-arrow">
+                <button
+                  onClick={handleNextImage}
+                  className="slider-arrow right-arrow"
+                >
                   <FiChevronRight size={24} />
                 </button>
               </>
             )}
-            <div className="main-image" onClick={() => openImageModal(currentImageIndex)}>
-              <img src={product.images[currentImageIndex]?.url} alt={product.name} />
+            <div
+              className="main-image"
+              onClick={() => openImageModal(currentImageIndex)}
+            >
+              <img
+                src={product.images[currentImageIndex]?.url}
+                alt={product.name}
+              />
             </div>
           </div>
           <div className="thumbnail-container">
@@ -156,7 +171,9 @@ const ProductDetailsPage = () => {
                     className={`variant-thumbnail ${selectedVariant === idx ? "active" : ""}`}
                     onClick={() => setSelectedVariant(idx)}
                   >
-                    {variant.images?.[0] && <img src={variant.images[0].url} alt={`Variant ${idx}`} />}
+                    {variant.images?.[0] && (
+                      <img src={variant.images[0].url} alt={`Variant ${idx}`} />
+                    )}
                   </div>
                 ))}
               </div>
@@ -186,7 +203,9 @@ const ProductDetailsPage = () => {
           <div className="product-price-container">
             {product.priceDiscounted ? (
               <div className="price-with-discount">
-                <span className="price-discounted">{product.priceDiscounted} €</span>
+                <span className="price-discounted">
+                  {product.priceDiscounted} €
+                </span>
                 <span className="price-original">{product.price} €</span>
               </div>
             ) : (
@@ -196,7 +215,10 @@ const ProductDetailsPage = () => {
 
           <div className="buy-section">
             {inCart ? (
-              <button className="button__removeFromCart" onClick={handleRemoveFromCart}>
+              <button
+                className="button__removeFromCart"
+                onClick={handleRemoveFromCart}
+              >
                 <FaTimes /> REMOVE FROM CART
               </button>
             ) : (
@@ -218,7 +240,10 @@ const ProductDetailsPage = () => {
             <button className="close-modal" onClick={closeImageModal}>
               <FiX size={24} />
             </button>
-            <img src={product.images[currentImageIndex]?.url} alt="Modal View" />
+            <img
+              src={product.images[currentImageIndex]?.url}
+              alt="Modal View"
+            />
             {product.images.length > 1 && (
               <div className="modal-image-counter">
                 {currentImageIndex + 1} / {product.images.length}

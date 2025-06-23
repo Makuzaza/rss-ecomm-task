@@ -2,11 +2,10 @@ import { ICartService } from "@/@types/interfaces";
 import { Cart, MyCartUpdate } from "@commercetools/platform-sdk";
 import { ApiRoot } from "@commercetools/platform-sdk"; // нужен тип для apiRoot
 
-
 export class AnonymousCartService implements ICartService {
   constructor(
     private apiRoot: ApiRoot,
-    private projectKey: string
+    private projectKey: string,
   ) {}
 
   async getActiveCart(): Promise<Cart> {
@@ -25,7 +24,8 @@ export class AnonymousCartService implements ICartService {
   }
 
   async createCart(): Promise<Cart> {
-    const anonymousId = localStorage.getItem("anonymousId") || crypto.randomUUID();
+    const anonymousId =
+      localStorage.getItem("anonymousId") || crypto.randomUUID();
     localStorage.setItem("anonymousId", anonymousId);
 
     const body = {
@@ -40,7 +40,7 @@ export class AnonymousCartService implements ICartService {
       .post({ body })
       .execute();
 
-      localStorage.setItem("anonymousCartId", response.body.id);
+    localStorage.setItem("anonymousCartId", response.body.id);
 
     return response.body;
   }
@@ -57,7 +57,12 @@ export class AnonymousCartService implements ICartService {
     return response.body;
   }
 
-  async changeLineItemQuantity(cartId: string, version: number, lineItemId: string, quantity: number): Promise<Cart> {
+  async changeLineItemQuantity(
+    cartId: string,
+    version: number,
+    lineItemId: string,
+    quantity: number,
+  ): Promise<Cart> {
     const payload: MyCartUpdate = {
       version,
       actions: [
@@ -79,7 +84,11 @@ export class AnonymousCartService implements ICartService {
     return response.body;
   }
 
-  async addDiscountCode(cartId: string, version: number, code: string): Promise<Cart> {
+  async addDiscountCode(
+    cartId: string,
+    version: number,
+    code: string,
+  ): Promise<Cart> {
     const payload: MyCartUpdate = {
       version,
       actions: [
@@ -93,14 +102,18 @@ export class AnonymousCartService implements ICartService {
     const response = await this.apiRoot
       .withProjectKey({ projectKey: this.projectKey })
       .carts()
-      .withId({ ID: cartId }) 
+      .withId({ ID: cartId })
       .post({ body: payload })
       .execute();
 
     return response.body;
   }
 
-    async removeDiscountCode(cartId: string, version: number, discountCodeId: string): Promise<Cart> {
+  async removeDiscountCode(
+    cartId: string,
+    version: number,
+    discountCodeId: string,
+  ): Promise<Cart> {
     const payload: MyCartUpdate = {
       version,
       actions: [
@@ -124,8 +137,4 @@ export class AnonymousCartService implements ICartService {
 
     return response.body;
   }
-
-  
-
-
 }

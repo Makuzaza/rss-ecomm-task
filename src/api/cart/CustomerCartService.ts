@@ -1,12 +1,11 @@
 import { ICartService } from "@/@types/interfaces";
 import { Customer, MyCartUpdate, Cart } from "@commercetools/platform-sdk";
-import { ApiRoot } from "@commercetools/platform-sdk"; 
-
+import { ApiRoot } from "@commercetools/platform-sdk";
 
 export class CustomerCartService implements ICartService {
   constructor(
     private apiRoot: ApiRoot,
-    private projectKey: string
+    private projectKey: string,
   ) {}
 
   async getActiveCart(): Promise<Cart> {
@@ -24,7 +23,7 @@ export class CustomerCartService implements ICartService {
 
     if (customer?.defaultShippingAddressId) {
       const address = customer.addresses?.find(
-        (a) => a.id === customer.defaultShippingAddressId
+        (a) => a.id === customer.defaultShippingAddressId,
       );
       if (address?.country) body.country = address.country;
     }
@@ -49,7 +48,12 @@ export class CustomerCartService implements ICartService {
     return response.body;
   }
 
-  async changeLineItemQuantity(cartId: string, version: number, lineItemId: string, quantity: number): Promise<Cart> {
+  async changeLineItemQuantity(
+    cartId: string,
+    version: number,
+    lineItemId: string,
+    quantity: number,
+  ): Promise<Cart> {
     const payload: MyCartUpdate = {
       version,
       actions: [
@@ -72,7 +76,11 @@ export class CustomerCartService implements ICartService {
     return response.body;
   }
 
-  async addDiscountCode(cartId: string, version: number, code: string): Promise<Cart> {
+  async addDiscountCode(
+    cartId: string,
+    version: number,
+    code: string,
+  ): Promise<Cart> {
     const payload: MyCartUpdate = {
       version,
       actions: [
@@ -92,10 +100,13 @@ export class CustomerCartService implements ICartService {
       .execute();
 
     return response.body;
-}
+  }
 
-
-  async removeDiscountCode(cartId: string, version: number, discountCodeId: string): Promise<Cart> {
+  async removeDiscountCode(
+    cartId: string,
+    version: number,
+    discountCodeId: string,
+  ): Promise<Cart> {
     const payload: MyCartUpdate = {
       version,
       actions: [
@@ -119,5 +130,4 @@ export class CustomerCartService implements ICartService {
 
     return response.body;
   }
-
 }

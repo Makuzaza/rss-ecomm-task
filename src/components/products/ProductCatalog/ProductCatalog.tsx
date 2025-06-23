@@ -32,7 +32,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 }) => {
   const apiClient = useApiClient();
   const [filteredProducts, setFilteredProducts] = useState<MyProductsData[]>(
-    []
+    [],
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -113,7 +113,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredProducts.slice(
     indexOfFirstItem,
-    indexOfLastItem
+    indexOfLastItem,
   );
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
