@@ -33,7 +33,7 @@ const CartPage = () => {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.priceDiscounted || item.price) * item.quantity,
-    0,
+    0
   );
   const totalCartPrice = cart?.totalPrice?.centAmount
     ? (cart.totalPrice.centAmount / 100).toFixed(2)
@@ -63,13 +63,10 @@ const CartPage = () => {
         setPromoMessage("Promo code applied successfully!");
         setPromoApplied(true);
       } catch {
-        setPromoMessage("Invalid or expired promo code.");
+        setPromoMessage(`Promo code applied! ${newDiscount * 100}% discount`);
         setPromoApplied(false);
       }
-      setPromoMessage(`Promo code applied! ${newDiscount * 100}% discount`);
     } else {
-      // setDiscount(0);
-      // setAppliedPromo("");
       setPromoMessage("Insert a valid promo code, for example: PROMO20");
     }
   };
@@ -141,7 +138,7 @@ const CartPage = () => {
                   onClick={() =>
                     removeFromCart(
                       item.productId,
-                      item.key ? parseInt(item.key) : undefined,
+                      item.key ? parseInt(item.key) : undefined
                     )
                   }
                   className="button__remove-item"
