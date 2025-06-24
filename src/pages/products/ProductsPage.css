@@ -2,9 +2,9 @@
   margin: 0 20px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 10px;
-  position: relative;
+  padding: 0;
 }
 
 .sort-select {
@@ -52,10 +52,6 @@
   gap: 0.5rem;
 }
 
-.sort-controls {
-  margin-bottom: 1rem;
-}
-
 .products-filters {
   display: flex;
   flex-direction: row;
@@ -98,7 +94,6 @@
 }
 .applied-filters ul {
   margin: 0;
-  padding-left: 18px;
 }
 .applied-filters li {
   margin-bottom: 2px;
