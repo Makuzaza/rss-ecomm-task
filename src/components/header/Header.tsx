@@ -15,7 +15,6 @@ export const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
-  console.log("[Header] Cart count:", cartCount); // Debug
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

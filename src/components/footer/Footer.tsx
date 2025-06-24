@@ -13,7 +13,7 @@ export const Footer = () => {
               target="_blank"
               rel="noreferrer"
             >
-              Team
+              GitHub
             </a>
             <a
               className="social-item-link"

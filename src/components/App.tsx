@@ -9,8 +9,8 @@ import { CartProvider } from "./../context/CartContext";
 
 export const App = () => {
   return (
-    <AuthProvider>
-      <CartProvider>
+    <CartProvider>
+      <AuthProvider>
         <div className="app-container">
           <Header />
           <main className="main-content">
@@ -19,7 +19,7 @@ export const App = () => {
           <Footer />
         </div>
         <ToastContainer />
-      </CartProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </CartProvider>
   );
 };

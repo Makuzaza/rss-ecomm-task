@@ -184,6 +184,7 @@
 }
 
 .promo-message {
+  margin-top: 8px;
   padding: 8px;
   border-radius: 4px;
 }
@@ -206,6 +207,10 @@
   background-color: #c1e8c1;
   padding: 5px;
   border-radius: 4px;
+}
+
+.discount-info {
+  color: red;
 }
 
 @media screen and (max-width: 500px) {
