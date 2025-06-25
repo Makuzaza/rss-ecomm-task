@@ -36,7 +36,7 @@ interface AnonymousAuthOptions extends AuthMiddlewareOptions {
 export class ApiClient extends CreateApiClient {
   constructor() {
     super();
-    this.getAllCarts();
+    // this.getAllCarts();
   }
   /**
    * BUILD CUSTOMER WITH PASSWORD
@@ -59,7 +59,6 @@ export class ApiClient extends CreateApiClient {
     } catch (error: unknown) {
       console.error("Failed to get customer with password:", error);
 
-      // Проверка: это стандартная ошибка с текстом
       if (
         error instanceof Error &&
         error.message.includes(
@@ -68,8 +67,6 @@ export class ApiClient extends CreateApiClient {
       ) {
         throw new Error("Invalid email or password");
       }
-
-      // Проверка: это объект с полем 'body.message'
       if (
         typeof error === "object" &&
         error !== null &&
@@ -214,8 +211,41 @@ export class ApiClient extends CreateApiClient {
     limit?: number;
     sort?: string | string[];
     offset?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    discountOnly?: boolean;
   }): Promise<{ products: MyProductsData[]; total: number }> {
     const apiRoot = this.getApiRoot(this.defaultClient);
+    const filterArgs: string[] = [];
+
+    if (typeof args?.minPrice === "number") {
+      filterArgs.push(
+        `variants.price.centAmount:range(${args.minPrice * 100} to *)`,
+      );
+    }
+
+    if (typeof args?.maxPrice === "number") {
+      filterArgs.push(
+        `variants.price.centAmount:range(* to ${args.maxPrice * 100})`,
+      );
+    }
+
+    if (args?.discountOnly) {
+      filterArgs.push("variants.prices.discounted.exists:true");
+    }
+
+    const queryArgs: {
+      [key: string]: string | string[] | number | boolean | undefined;
+    } = {
+      limit: args?.limit,
+      offset: args?.offset,
+      sort: args?.sort,
+    };
+
+    if (filterArgs.length > 0) {
+      queryArgs["filter.query"] = filterArgs;
+    }
+
     try {
       const { body: data }: { body: ProductProjectionPagedQueryResponse } =
         await apiRoot
@@ -223,7 +253,7 @@ export class ApiClient extends CreateApiClient {
           .productProjections()
           .get({ queryArgs: args })
           .execute();
-
+      // console.log("API data:", data);
       const normalized = productProjectionNormalization(data);
       return { products: normalized, total: data.total };
     } catch (error) {
@@ -255,75 +285,6 @@ export class ApiClient extends CreateApiClient {
    * SEARCH DATA
    */
 
-  // public async searchData(
-  //   searchType: SearchTypes,
-  //   searchValue: string,
-  //   options: {
-  //     limit?: number;
-  //     offset?: number;
-  //     sort?: string | string[];
-  //     minPrice?: number;
-  //     maxPrice?: number;
-  //     discountOnly?: boolean;
-  //   } = {}
-  // ): Promise<{ products: MyProductsData[]; total: number }> {
-  //   const apiRoot = this.getApiRoot(this.defaultClient);
-
-  //   const filterArgs: string[] = [];
-
-  //   if (typeof options.minPrice === "number") {
-  //     filterArgs.push(
-  //       `variants.price.centAmount:range(${options.minPrice * 100} to *)`
-  //     );
-  //   }
-
-  //   if (typeof options.maxPrice === "number") {
-  //     filterArgs.push(
-  //       `variants.price.centAmount:range(* to ${options.maxPrice * 100})`
-  //     );
-  //   }
-
-  //   if (options.discountOnly) {
-  //     filterArgs.push("variants.prices.discounted.exists:true");
-  //   }
-
-  //   const queryArgs: {
-  //     [key: string]: string | string[] | number | boolean | undefined;
-  //   } = {
-  //     limit: options.limit,
-  //     offset: options.offset,
-  //     sort: options.sort,
-  //   };
-
-  //   if (searchType === "name") {
-  //     queryArgs["text.en-US"] = searchValue;
-  //   } else if (searchType === "category") {
-  //     filterArgs.push(`categories.id:"${searchValue}"`);
-  //   }
-
-  //   if (filterArgs.length > 0) {
-  //     queryArgs["filter.query"] = filterArgs;
-  //   }
-
-  //   try {
-  //     const { body } = await apiRoot
-  //       .withProjectKey({ projectKey: this.PROJECT_KEY })
-  //       .productProjections()
-  //       .search()
-  //       .get({ queryArgs })
-  //       .execute();
-
-  //     const products = productProjectionNormalization({ results: body.results });
-  //     const total = body.total ?? products.length;
-
-  //     return { products, total };
-  //   } catch (error) {
-  //     console.error("Failed to search products:", error);
-  //     throw new Error("Failed to fetch filtered products");
-  //   }
-  // }
-
-  // ***** SEARCH DATA *****
   public async searchData(
     searchType: SearchTypes,
     searchValue: string,

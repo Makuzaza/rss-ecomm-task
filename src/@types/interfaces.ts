@@ -79,6 +79,7 @@ export interface AuthContextType {
 // Product catalog props
 export interface ProductCatalogProps {
   categoryId?: string;
+  propsArgs?: { limit: number; offset: number; sort: string };
   propsLimit?: number;
   propsApiSort?: string;
   propsSort?: string;

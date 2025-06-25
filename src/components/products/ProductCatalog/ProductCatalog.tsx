@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApiClient } from "@/context/ApiClientContext";
-import { filterProducts, sortProducts } from "@/utils/dataProcessing";
 import DOMPurify from "dompurify";
 import {
-  type MyProductFilter,
   type MyProductsData,
   type ProductCatalogProps,
 } from "@/@types/interfaces";
@@ -21,9 +19,10 @@ import {
 const ProductCatalog: React.FC<ProductCatalogProps> = ({
   categoryId,
   propsProducts,
+  propsArgs,
   propsLimit = 20,
   propsApiSort,
-  propsSort = "name-asc",
+  propsSort = "createdAt desc",
   filterMinPrice,
   filterMaxPrice,
   filterDiscountOnly = false,
@@ -31,14 +30,13 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   onResetFilters,
 }) => {
   const apiClient = useApiClient();
-  const [filteredProducts, setFilteredProducts] = useState<MyProductsData[]>(
-    [],
-  );
+  const [products, setProducts] = useState<MyProductsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { cartItems, addToCart, removeFromCart } = useCart();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -54,7 +52,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           setLoading(true);
           const response = await apiClient.searchData("category", categoryId);
           const data: MyProductsData[] = response;
-          setFilteredProducts(data);
+          setProducts(data);
           setError(null);
         } catch (err) {
           setError(err.message);
@@ -62,31 +60,27 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           setLoading(false);
         }
       } else if (propsProducts) {
-        setFilteredProducts(propsProducts);
+        setProducts(propsProducts);
         setLoading(false);
       } else {
         try {
           setLoading(true);
 
           // GET PRODUCTS FROM API
-          const arg = {
-            limit: propsLimit,
-            sort: propsApiSort,
-          };
-          const { products: data } = await apiClient.getAllProducts(arg);
+          if (propsArgs.offset !== undefined) {
+            if (currentPage > 1) {
+              propsArgs.offset =
+                currentPage * propsArgs.limit - propsArgs.limit;
+            } else {
+              propsArgs.offset = 0;
+            }
+          }
+          console.log("props args:", propsArgs);
+          const { products: data, total } =
+            await apiClient.getAllProducts(propsArgs);
 
-          // SORT PRODUCTS DATA
-          const sortedData = sortProducts(data, propsSort);
-
-          // FILTER PRODUCTS DATA
-          const filterArg: MyProductFilter = {
-            minPrice: filterMinPrice,
-            maxPrice: filterMaxPrice,
-            discountOnly: filterDiscountOnly,
-          };
-          const filteredData = filterProducts(sortedData, filterArg);
-
-          setFilteredProducts(filteredData);
+          setProducts(data);
+          setTotalProducts(total);
           setError(null);
         } catch (err) {
           setError(err.message);
@@ -107,15 +101,11 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
     filterMinPrice,
     filterMaxPrice,
     filterDiscountOnly,
+    currentPage,
+    itemsPerPage,
   ]);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredProducts.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
@@ -136,7 +126,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="main-container">Error: {error}</div>;
 
-  if (filteredProducts.length === 0) {
+  if (products.length === 0) {
     return (
       <div className="main-container">
         <p className="no-found">
@@ -150,7 +140,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
     <div className="product-catalog-container">
       <div className="cards-container">
         {/* Array of Products */}
-        {currentItems.map((product) => {
+        {products.map((product) => {
           const inCart = isProductInCart(product.id);
 
           return (
@@ -221,7 +211,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
         })}
       </div>
 
-      {filteredProducts.length > itemsPerPage && (
+      {totalProducts > itemsPerPage && propsArgs.offset !== undefined && (
         <div className="pagination-container">
           <button
             onClick={goToPrevPage}

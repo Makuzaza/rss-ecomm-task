@@ -3,40 +3,40 @@ import ProductCatalog from "@/components/products/ProductCatalog/ProductCatalog"
 import "./ProductsPage.css";
 
 const ProductsPage = () => {
-  const [sortOption, setSortOption] = useState<string>("name-asc");
-  const [minPrice, setMinPrice] = useState<string>("");
-  const [maxPrice, setMaxPrice] = useState<string>("");
-  const [onlyDiscounted, setOnlyDiscounted] = useState<boolean>(false);
-  const [resetTrigger, setResetTrigger] = useState(0);
+  const [sortOption, setSortOption] = useState<string>("createdAt desc");
+  // const [minPrice, setMinPrice] = useState<string>("");
+  // const [maxPrice, setMaxPrice] = useState<string>("");
+  // const [onlyDiscounted, setOnlyDiscounted] = useState<boolean>(false);
+  // const [resetTrigger, setResetTrigger] = useState(0);
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortOption(e.target.value);
   };
 
-  const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMinPrice(e.target.value);
-  };
+  // const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setMinPrice(e.target.value);
+  // };
 
-  const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaxPrice(e.target.value);
-  };
+  // const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setMaxPrice(e.target.value);
+  // };
 
-  const handleDiscountToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOnlyDiscounted(e.target.checked);
-  };
+  // const handleDiscountToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setOnlyDiscounted(e.target.checked);
+  // };
 
-  function resetAllFilters(): void {
-    setSortOption("name-asc");
-    setMinPrice("");
-    setMaxPrice("");
-    setOnlyDiscounted(false);
-    setResetTrigger((prev) => prev + 1);
-  }
+  // function resetAllFilters(): void {
+  //   setSortOption("createdAt desc");
+  //   setMinPrice("");
+  //   setMaxPrice("");
+  //   setOnlyDiscounted(false);
+  //   setResetTrigger((prev) => prev + 1);
+  // }
 
   return (
     <div className="main-container">
       <div className="products-filters">
-        <div className="filter-controls">
+        {/* <div className="filter-controls">
           <div className="price-filter">
             <label>
               Min Price:
@@ -69,7 +69,7 @@ const ProductsPage = () => {
             />
             Only Discounted
           </label>
-        </div>
+        </div> */}
         <div className="sort-controls">
           <label htmlFor="sort">Sort by:</label>
           <select
@@ -78,37 +78,37 @@ const ProductsPage = () => {
             onChange={handleSortChange}
             className="sort-select"
           >
-            <option value="name-asc">Name (A-Z)</option>
-            <option value="name-desc">Name (Z-A)</option>
-            <option value="price-asc">Price (Low to High)</option>
-            <option value="price-desc">Price (High to Low)</option>
-            <option value="date-desc">Date (New Products)</option>
-            <option value="date-asc">Date (Old Products)</option>
+            {/* <option value="name asc">Name (A-Z)</option>
+            <option value="name desc">Name (Z-A)</option>
+            <option value="price asc">Price (Low to High)</option>
+            <option value="price desc">Price (High to Low)</option> */}
+            <option value="createdAt desc">Date (New Products)</option>
+            <option value="createdAt asc">Date (Old Products)</option>
           </select>
         </div>
       </div>
-      <div className="applied-filters-container">
+      {/* <div className="applied-filters-container">
         {(minPrice ||
           maxPrice ||
           onlyDiscounted ||
-          sortOption !== "name-asc") && (
+          sortOption !== "createdAt desc") && (
           <div className="applied-filters">
             <strong>Applied Filters:</strong>
             <ul>
               {minPrice && <li>Min Price: {minPrice}</li>}
               {maxPrice && <li>Max Price: {maxPrice}</li>}
               {onlyDiscounted && <li>Only Discounted</li>}
-              {sortOption !== "name-asc" && (
+              {sortOption !== "createdAt desc" && (
                 <li>
                   Sort:{" "}
                   {
                     {
-                      "name-asc": "Name (A-Z)",
-                      "name-desc": "Name (Z-A)",
-                      "price-asc": "Price (Low to High)",
-                      "price-desc": "Price (High to Low)",
-                      "date-asc": "Date (New First)",
-                      "date-desc": "Date (Old First)",
+                      // "createdAt desc": "Name (A-Z)",
+                      // "createdAt desc": "Name (Z-A)",
+                      // "createdAt desc": "Price (Low to High)",
+                      // "createdAt desc": "Price (High to Low)",
+                      "createdAt desc": "Date (New First)",
+                      "createdAt asc": "Date (Old First)",
                     }[sortOption]
                   }
                 </li>
@@ -120,14 +120,14 @@ const ProductsPage = () => {
         <button onClick={resetAllFilters} className="reset-button">
           Reset Filters
         </button>
-      </div>
+      </div> */}
       <ProductCatalog
-        propsLimit={200}
         propsSort={sortOption}
-        filterMinPrice={minPrice}
-        filterMaxPrice={maxPrice}
-        filterDiscountOnly={onlyDiscounted}
-        key={resetTrigger}
+        propsArgs={{ limit: 10, offset: 0, sort: sortOption }}
+        // filterMinPrice={minPrice}
+        // filterMaxPrice={maxPrice}
+        // filterDiscountOnly={onlyDiscounted}
+        // key={resetTrigger}
       />
     </div>
   );

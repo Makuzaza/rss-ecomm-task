@@ -231,7 +231,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     //  Clean cart and create a new one
     await removeAllDiscountCodes();
-    await clearCart(); 
+    await clearCart();
     await reloadCart();
 
     // Set anonymous cart ID in localStorage

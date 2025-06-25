@@ -33,7 +33,7 @@ const CartPage = () => {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.priceDiscounted || item.price) * item.quantity,
-    0
+    0,
   );
   const totalCartPrice = cart?.totalPrice?.centAmount
     ? (cart.totalPrice.centAmount / 100).toFixed(2)
@@ -138,7 +138,7 @@ const CartPage = () => {
                   onClick={() =>
                     removeFromCart(
                       item.productId,
-                      item.key ? parseInt(item.key) : undefined
+                      item.key ? parseInt(item.key) : undefined,
                     )
                   }
                   className="button__remove-item"
