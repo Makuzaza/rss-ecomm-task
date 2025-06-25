@@ -28,7 +28,7 @@ export function productDataNormalization(product: Product): MyProductsData {
 }
 
 export function allProductsNormalization(
-  data: ProductPagedQueryResponse,
+  data: ProductPagedQueryResponse
 ): MyProductsData[] {
   return data.results.map((data) => {
     return productDataNormalization(data);
@@ -40,7 +40,7 @@ type ProductProjectionContainer = {
 };
 
 export function productProjectionNormalization(
-  data: ProductProjectionContainer,
+  data: ProductProjectionContainer
 ): MyProductsData[] {
   return data.results.map((record) => {
     const price = record.masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
@@ -64,7 +64,7 @@ export function productProjectionNormalization(
 }
 
 export function productSearchNormalization(
-  data: ProductProjectionPagedSearchResponse,
+  data: ProductProjectionPagedSearchResponse
 ) {
   return data.results.map((record) => {
     const price = record.masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
@@ -88,7 +88,7 @@ export function productSearchNormalization(
 }
 
 export function singleProductProjectionNormalization(
-  data: ProductProjection,
+  data: ProductProjection
 ): MyProductsData {
   const price = data.masterVariant.prices?.[0]?.value.centAmount / 100 || 0;
   const discountedPrice =

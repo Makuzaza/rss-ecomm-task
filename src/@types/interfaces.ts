@@ -79,7 +79,7 @@ export interface AuthContextType {
 // Product catalog props
 export interface ProductCatalogProps {
   categoryId?: string;
-  propsArgs?: { limit: number; offset: number; sort: string };
+  propsArgs?: { limit?: number; offset?: number; sort?: string };
   propsLimit?: number;
   propsApiSort?: string;
   propsSort?: string;
@@ -182,7 +182,7 @@ export interface CartContextType {
   cartItems: CartItem[];
   addToCart: (
     product: CartItem | string,
-    variantId?: number,
+    variantId?: number
   ) => void | Promise<void>;
   removeFromCart: (productId: string, variantId?: number) => void;
   isInCart?: (productId: string, variantId?: number) => boolean;
@@ -227,12 +227,12 @@ export interface ICartService {
     cartId: string,
     version: number,
     lineItemId: string,
-    quantity: number,
+    quantity: number
   ): Promise<Cart>;
   addDiscountCode(cartId: string, version: number, code: string): Promise<Cart>;
   removeDiscountCode(
     cartId: string,
     version: number,
-    discountCodeId: string,
+    discountCodeId: string
   ): Promise<Cart>;
 }

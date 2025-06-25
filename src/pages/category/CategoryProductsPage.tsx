@@ -40,7 +40,10 @@ const CategoryProductsPage = () => {
   return (
     <div className="category-products-container">
       <h1 className="category-title">{categoryName}</h1>
-      <ProductCatalog categoryId={categoryId} />
+      <ProductCatalog
+        categoryId={categoryId}
+        propsArgs={{ limit: 10, offset: 0, sort: "createdAt desc" }}
+      />
     </div>
   );
 };

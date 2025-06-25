@@ -47,12 +47,27 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
   useEffect(() => {
     const fetchProducts = async () => {
+      // SET PAGINATION
+      if (propsArgs.offset !== undefined) {
+        if (currentPage > 1) {
+          propsArgs.offset = currentPage * propsArgs.limit - propsArgs.limit;
+        } else {
+          propsArgs.offset = 0;
+        }
+      }
+
       if (categoryId) {
         try {
           setLoading(true);
-          const response = await apiClient.searchData("category", categoryId);
-          const data: MyProductsData[] = response;
+          const response = await apiClient.searchData(
+            "category",
+            categoryId,
+            propsArgs
+          );
+
+          const data: MyProductsData[] = response.products;
           setProducts(data);
+          setTotalProducts(response.total);
           setError(null);
         } catch (err) {
           setError(err.message);
@@ -67,15 +82,6 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           setLoading(true);
 
           // GET PRODUCTS FROM API
-          if (propsArgs.offset !== undefined) {
-            if (currentPage > 1) {
-              propsArgs.offset =
-                currentPage * propsArgs.limit - propsArgs.limit;
-            } else {
-              propsArgs.offset = 0;
-            }
-          }
-          console.log("props args:", propsArgs);
           const { products: data, total } =
             await apiClient.getAllProducts(propsArgs);
 
