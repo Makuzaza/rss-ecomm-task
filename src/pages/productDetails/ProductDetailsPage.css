@@ -1,0 +1,370 @@
+.product-detail-container {
+  display: flex;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  gap: 3rem;
+}
+/* PRODUCT IMAGES */
+.product-gallery {
+  flex: 1;
+}
+
+.slider-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.main-image {
+  border: 1px solid #eee;
+  padding: 1rem;
+  border-radius: 8px;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* background-color: #f9f9f9; */
+}
+
+.main-image img {
+  max-width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.slider-arrow:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.slider-arrow:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.left-arrow {
+  left: 15px;
+}
+
+.right-arrow {
+  right: 15px;
+}
+
+.thumbnail-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #f9f9f9;
+}
+
+.thumbnail:hover {
+  border-color: #888;
+  transform: scale(1.05);
+}
+
+.thumbnail.active {
+  border-color: #0066cc;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* PRODUCT INFO */
+.product-info {
+  flex: 1;
+  padding: 0 1rem;
+}
+
+/* PRODUCT NAME */
+.product-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* PRODUCT VARIANTS */
+.variants-section {
+  margin: 1.5rem 0;
+}
+
+.variants-section h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.variant-thumbnails {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.variant-thumbnail {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.variant-thumbnail.active {
+  border-color: #0066cc;
+}
+
+.variant-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* PRODUCT DESCRIPTION */
+
+.product-description {
+  margin: 1.5rem 0;
+  line-height: 1.6;
+}
+
+.product-description h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.description-content {
+  line-height: 1.6;
+}
+
+.description-content p {
+  margin-bottom: 1rem;
+}
+
+.description-content ul,
+.description-content ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.description-content li {
+  margin-bottom: 0.5rem;
+}
+.show-more-btn-container {
+  text-align: center;
+}
+
+.show-more-btn {
+  background: none;
+  border: none;
+  color: #a5afb9;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  text-align: left;
+  display: inline-block;
+}
+
+.show-more-btn:hover {
+  text-decoration: underline;
+  color: #102d49;
+}
+/* PRODUCT PRICE */
+.price-section {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.product-price {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #0066cc;
+}
+
+/* ADD TO CART BUTTON */
+.buy-section {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* PAGE ERRORS */
+.product-loading,
+.product-error,
+.product-not-found {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.back-button {
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+/* IMAGE MODAL */
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content img {
+  max-height: 80vh;
+  max-width: 80vw;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.close-modal {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+.modal-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+  z-index: 1001;
+}
+
+.modal-arrow:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.left-arrow {
+  left: 30px;
+}
+
+.right-arrow {
+  right: 30px;
+}
+
+.modal-image-counter {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  z-index: 1001;
+}
+/* PRODUCT MAIN IMAGE */
+.main-image {
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+
+.main-image:hover {
+  transform: scale(1.01);
+}
+
+@media (max-width: 768px) {
+  .product-detail-container {
+    flex-direction: column;
+  }
+
+  .product-info {
+    padding: 0;
+  }
+
+  .modal-content img {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .close-modal {
+    top: -50px;
+    right: 0;
+  }
+
+  .modal-arrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .modal-image-counter {
+    bottom: 10px;
+  }
+}

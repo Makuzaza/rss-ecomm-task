@@ -1,0 +1,266 @@
+.profile-page {
+  width: 100%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+section.personal-info {
+  border: 1.6px solid #333;
+}
+
+section.addresses {
+  border: 1.6px solid #333;
+}
+
+.p-text {
+  font-size: 12px;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.p-text-personal {
+  font-size: 12px;
+  color: #333;
+  margin-top: 0px;
+  margin-bottom: 7px;
+}
+
+.p-text-address {
+  font-size: 12px;
+  color: #333;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.personal-info,
+.addresses {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+}
+
+.address-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  margin-top: 12px;
+}
+.h3-addresses {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.address-card {
+  border-bottom: 1px solid #ccc;
+}
+
+.address-card:last-child {
+  border-bottom: none;
+}
+
+.address-label {
+  font-size: 12px;
+  font-weight: bold;
+  margin: 2px 0;
+}
+
+.address-label.default {
+  color: #0070f3;
+}
+
+.address-label.not-default {
+  color: red;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.edit-form-container .error-message {
+  margin-top: 0px;
+}
+
+.edit-button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-right: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
+}
+
+.edit-button:hover {
+  background-color: #555;
+  padding: 5px 12px;
+}
+
+.edit-button-address {
+  background-color: #333;
+  margin: 5px 0px 6px 0px;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
+}
+
+.edit-button-address:hover {
+  background-color: #555;
+  padding: 5px 12px;
+}
+
+.add-address-button {
+  margin-top: 10px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    padding 0.3s;
+}
+
+.add-address-button:hover {
+  background-color: rgb(12, 106, 199);
+  padding: 5px 12px;
+}
+
+.address-edit-form {
+  padding: 10px;
+  transition: all 0.3s ease-in-out;
+}
+
+.personal-info {
+  transition: all 0.3s ease-in-out;
+}
+
+.edit-buttons-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+.edit-button-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 10px 0px 10px 0px;
+}
+
+.edit-input {
+  width: 97.5%;
+  padding: 5px;
+  margin-bottom: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.save-button {
+  background-color: rgb(7, 131, 7);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.close-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.label-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.default-billing-checkbox {
+  font-size: 14px;
+}
+
+.checkbox-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 500;
+  font-size: 12px;
+  color: #444;
+  transition: color 0.3s ease;
+}
+
+.checkbox-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: gray;
+  cursor: pointer;
+  transition: accent-color 0.3s ease;
+}
+
+.checkbox-toggle.active {
+  color: green;
+}
+
+.checkbox-toggle.active input[type="checkbox"] {
+  accent-color: green;
+}
+
+.button-container {
+  margin-top: 10px;
+}
+
+.edit-form-container .error-icon {
+  top: 5px;
+  right: 10px;
+}
+
+.save-button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
+  transition: all 0.2s ease-in-out;
+}
+
+.p-text-password {
+  margin: 0px 0px 5px 0px;
+  font-size: 12px;
+}
+
+.password-input-wrapper {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 4%;
+  top: 59%;
+  transform: translateY(-45%);
+  cursor: pointer;
+  color: #666;
+}
+
+
