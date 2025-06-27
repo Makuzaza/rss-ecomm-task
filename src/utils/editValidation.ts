@@ -20,7 +20,9 @@ export function validatePostalCode(
   return null;
 }
 
-export function validateAddress(address: CustomerAddress): Partial<Record<keyof CustomerAddress, string>> {
+export function validateAddress(
+  address: CustomerAddress,
+): Partial<Record<keyof CustomerAddress, string>> {
   const errors: Partial<Record<keyof CustomerAddress, string>> = {};
 
   if (!address.streetName) errors.streetName = "Street name is required.";
@@ -34,4 +36,3 @@ export function validateAddress(address: CustomerAddress): Partial<Record<keyof 
 
   return errors;
 }
-

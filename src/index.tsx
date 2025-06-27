@@ -8,6 +8,7 @@ import {
 import React, { Suspense } from "react";
 import { ApiClientProvider } from "@/context/ApiClientContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { apiClient } from "./api/ApiClient";
 
 // PAGES
 import HomePage from "@/pages/home/HomePage";
@@ -20,7 +21,8 @@ import ProductDetailsPage from "@/pages/productDetails/ProductDetailsPage";
 import CategoryPage from "@/pages/category/CategoryPage";
 import ProductsPage from "@/pages/products/ProductsPage";
 import SearchResultsPage from "@/pages/search/SearchResultsPage";
-import CategoryProductsPage from "./pages/category/CategoryProductsPage";
+import CategoryProductsPage from "@/pages/category/CategoryProductsPage";
+import CartPage from "@/pages/cart/CartPage";
 
 const root = document.getElementById("root");
 
@@ -78,6 +80,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "/cart",
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <CartPage />
+          </Suspense>
+        ),
+      },
+      {
         path: "/product",
         element: <Navigate to="/products" replace />,
       },
@@ -116,6 +126,8 @@ const router = createBrowserRouter([
     ],
   },
 ]);
+
+apiClient.initClientFromStorage();
 
 container.render(
   <ApiClientProvider>

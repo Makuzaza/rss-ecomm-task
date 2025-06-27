@@ -1,12 +1,14 @@
 import {
   type Customer,
-  // CustomerSignInResult,
   type MyCustomerDraft,
   type Image,
   type ProductVariant,
+  Cart,
+  Category,
+  MyCartUpdate,
 } from "@commercetools/platform-sdk";
-import { Category } from "@commercetools/platform-sdk";
 
+// Error type
 export interface CommerceToolsError {
   body: {
     statusCode: number;
@@ -19,6 +21,7 @@ export interface CommerceToolsError {
   };
 }
 
+// Registration form
 export type RegisterFormFields = {
   email: string;
   password: string;
@@ -36,23 +39,27 @@ export type RegisterFormFields = {
   billingPostalCode: string;
 };
 
+// Country
 export interface СountriesList {
   name: string;
   code: string;
 }
 
+// User
 export interface User {
   firstName: string;
   lastName: string;
   email: string;
 }
 
+// Token storage
 export interface TokenStore {
   token: string;
   expirationTime: number;
   refreshToken?: string;
 }
 
+// Auth context
 export interface AuthContextType {
   isAuth: boolean;
   customer: Customer | null;
@@ -69,6 +76,7 @@ export interface AuthContextType {
   relogin: (params: { email: string; password: string }) => Promise<void>;
 }
 
+// Product catalog props
 export interface ProductCatalogProps {
   categoryId?: string;
   propsLimit?: number;
@@ -78,8 +86,11 @@ export interface ProductCatalogProps {
   filterMinPrice?: string;
   filterMaxPrice?: string;
   filterDiscountOnly?: boolean;
+  itemsPerPage?: number;
+  onResetFilters?: () => void;
 }
 
+// Product representation
 export interface MyProductsData {
   id: string;
   key?: string;
@@ -93,15 +104,18 @@ export interface MyProductsData {
   variants?: ProductVariant[];
 }
 
+// Filters
 export interface MyProductFilter {
   minPrice: string;
   maxPrice: string;
   discountOnly: boolean;
 }
 
+// Sorting & searching
 export type SortDirection = "asc" | "desc";
 export type SearchTypes = "name" | "category";
 
+// Customer profile
 export interface CustomerAddress {
   id?: string;
   streetName: string;
@@ -122,6 +136,7 @@ export interface CustomerProfile {
   defaultShippingAddressId?: string;
 }
 
+// UI/UX types
 export interface ClickOutsideEvent extends MouseEvent {
   target: Node;
 }
@@ -142,4 +157,81 @@ export interface ValidatedInputProps {
   showToggle?: boolean;
   isShown?: boolean;
   onToggleShow?: () => void;
+}
+
+export interface CategoryDropdownProps {
+  onItemSelected?: () => void;
+}
+
+// Cart
+export interface CartItem {
+  id: string;
+  productId: string;
+  name: string;
+  price: number;
+  priceDiscounted?: number;
+  quantity: number;
+  image: string;
+  key: string;
+}
+
+// Cart context
+export interface CartContextType {
+  cart?: Cart | null;
+  cartItems: CartItem[];
+  addToCart: (
+    product: CartItem | string,
+    variantId?: number,
+  ) => void | Promise<void>;
+  removeFromCart: (productId: string, variantId?: number) => void;
+  isInCart?: (productId: string, variantId?: number) => boolean;
+  isLoadingAddToCart?: (productId: string) => boolean;
+  cartCount: number;
+  clearCart: () => void;
+  updateQuantity?: (id: string, newQuantity: number) => void;
+  incrementQuantity?: (id: string) => void;
+  decrementQuantity?: (id: string) => void;
+  reloadCart?: () => Promise<void>;
+  removeLineItem?: (lineItemId: string) => Promise<void>;
+  clearEntireCart?: () => Promise<void>;
+  totalItems?: number;
+  changeQuantity: (lineItemId: string, quantity: number) => Promise<void>;
+  applyPromoCode: (code: string) => Promise<void>;
+  removePromoCode: (code: string) => Promise<void>;
+  cartService: ICartService;
+  removeAllDiscountCodes: () => Promise<void>;
+  resetCartService: () => void;
+}
+
+// Quantity change
+interface QuantityChangeEvent extends React.ChangeEvent<HTMLInputElement> {
+  customProperty?: string;
+}
+
+export interface HandleQuantityChange {
+  (e: QuantityChangeEvent, id: string | number): void;
+}
+
+export type UpdateQuantityFn = (id: string, newQuantity: number) => void;
+
+export interface ChangeQuantityFn {
+  (id: string): void;
+}
+
+export interface ICartService {
+  getActiveCart(): Promise<Cart>;
+  createCart(customer?: Customer): Promise<Cart>;
+  updateCart(cartId: string, payload: MyCartUpdate): Promise<Cart>;
+  changeLineItemQuantity(
+    cartId: string,
+    version: number,
+    lineItemId: string,
+    quantity: number,
+  ): Promise<Cart>;
+  addDiscountCode(cartId: string, version: number, code: string): Promise<Cart>;
+  removeDiscountCode(
+    cartId: string,
+    version: number,
+    discountCodeId: string,
+  ): Promise<Cart>;
 }

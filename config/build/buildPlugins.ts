@@ -14,7 +14,7 @@ export function buildPlugins({
   paths,
   analyzer,
 }: BuildOptions): Configuration["plugins"] {
-  const isDev = mode === "development";
+  // const isDev = mode === "development";
   const isProd = mode === "production";
 
   const plugins: Configuration["plugins"] = [
@@ -22,17 +22,17 @@ export function buildPlugins({
       template: paths.html,
       favicon: path.resolve(paths.public, "favicon.ico"),
     }),
-    // new Dotenv({
-    //   path: `./.env`,
-    // }),
+    new Dotenv({
+      path: `./.env`,
+    }),
   ];
-  if (isDev) {
-    plugins.push(
-      new Dotenv({
-        path: `./.env`,
-      })
-    );
-  }
+  // if (isDev) {
+  //   plugins.push(
+  //     new Dotenv({
+  //       path: `./.env`,
+  //     })
+  //   );
+  // }
 
   if (isProd) {
     plugins.push(

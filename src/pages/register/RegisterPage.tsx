@@ -199,7 +199,7 @@ const RegisterPage = () => {
           });
         }
 
-        const result = await apiClient.registerCustomer({
+        await apiClient.registerCustomer({
           email: formData.email,
           password: formData.password,
           firstName: formData.firstName,
@@ -210,8 +210,6 @@ const RegisterPage = () => {
           defaultBillingAddress:
             showBillingAddress && defaultBillingAddress ? 1 : undefined,
         });
-
-        console.log("Registration successful:", result);
 
         // Auto login customer
         await login(formData.email, formData.password);

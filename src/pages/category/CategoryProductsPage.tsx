@@ -14,7 +14,6 @@ const CategoryProductsPage = () => {
     const fetchCategoryProducts = async () => {
       try {
         setLoading(true);
-        // First get the category details to get the name
         const categories = await apiClient.getAllCategories({
           where: `slug(en-US="${categorySlug}")`,
         });
