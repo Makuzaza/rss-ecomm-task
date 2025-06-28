@@ -37,10 +37,10 @@ export const mergeAnonymousCartWithCustomerCart =
         quantity: item.quantity,
       }));
 
-      console.log("Merging anonymous cart...");
-      console.log("Anonymous cart ID:", anonymousCartId);
-      console.log("Customer cart ID:", customerCart.id);
-      console.log("Line items to move:", newItems);
+      // console.log("Merging anonymous cart...");
+      // console.log("Anonymous cart ID:", anonymousCartId);
+      // console.log("Customer cart ID:", customerCart.id);
+      // console.log("Line items to move:", newItems);
 
       if (newItems.length > 0) {
         const { body: updatedCart } = await apiClient.publicApiRoot

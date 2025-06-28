@@ -62,7 +62,7 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           const response = await apiClient.searchData(
             "category",
             categoryId,
-            propsArgs
+            propsArgs,
           );
 
           const data: MyProductsData[] = response.products;
@@ -75,7 +75,8 @@ const ProductCatalog: React.FC<ProductCatalogProps> = ({
           setLoading(false);
         }
       } else if (propsProducts) {
-        setProducts(propsProducts);
+        setProducts(propsProducts.products);
+        setTotalProducts(propsProducts.total);
         setLoading(false);
       } else {
         try {

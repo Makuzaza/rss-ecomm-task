@@ -20,7 +20,7 @@ export const SearchInput = () => {
 
     try {
       const response = await apiClient.searchData("name", value);
-      setSearchResults(response || []);
+      setSearchResults(response.products || []);
       setIsDropdownOpen(true);
     } catch (error) {
       console.error("Search error:", error);

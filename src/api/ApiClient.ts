@@ -43,7 +43,7 @@ export class ApiClient extends CreateApiClient {
    */
   public async getCustomerWithPassword(
     email: string,
-    password: string
+    password: string,
   ): Promise<Customer> {
     try {
       this.client = this.buildClientWithPassword(email, password);
@@ -62,7 +62,7 @@ export class ApiClient extends CreateApiClient {
       if (
         error instanceof Error &&
         error.message.includes(
-          "Customer account with the given credentials not found"
+          "Customer account with the given credentials not found",
         )
       ) {
         throw new Error("Invalid email or password");
@@ -129,7 +129,7 @@ export class ApiClient extends CreateApiClient {
    * REGISTER CUSTOMER
    */
   public async registerCustomer(
-    customerData: MyCustomerDraft
+    customerData: MyCustomerDraft,
   ): Promise<CustomerSignInResult> {
     const client = this.buildDefaultClient(false);
     this.apiRoot = this.getApiRoot(client);
@@ -149,7 +149,7 @@ export class ApiClient extends CreateApiClient {
       const err = error as CommerceToolsError;
 
       const duplicateEmail = err.body.errors?.find(
-        (e) => e.code === "DuplicateField" && e.field === "email"
+        (e) => e.code === "DuplicateField" && e.field === "email",
       );
 
       if (duplicateEmail) {
@@ -220,13 +220,13 @@ export class ApiClient extends CreateApiClient {
 
     if (typeof args?.minPrice === "number") {
       filterArgs.push(
-        `variants.price.centAmount:range(${args.minPrice * 100} to *)`
+        `variants.price.centAmount:range(${args.minPrice * 100} to *)`,
       );
     }
 
     if (typeof args?.maxPrice === "number") {
       filterArgs.push(
-        `variants.price.centAmount:range(* to ${args.maxPrice * 100})`
+        `variants.price.centAmount:range(* to ${args.maxPrice * 100})`,
       );
     }
 
@@ -292,7 +292,7 @@ export class ApiClient extends CreateApiClient {
       limit?: number;
       offset?: number;
       sort?: string | string[];
-    }
+    },
   ): Promise<{ products: MyProductsData[]; total: number }> {
     const apiRoot = this.getApiRoot(this.defaultClient);
 
@@ -333,7 +333,7 @@ export class ApiClient extends CreateApiClient {
    * UPDATE CUSTOMER
    */
   public async updateCustomer(
-    updatePayload: MyCustomerUpdate
+    updatePayload: MyCustomerUpdate,
   ): Promise<Customer> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -354,7 +354,7 @@ export class ApiClient extends CreateApiClient {
   public async changePassword(
     currentPassword: string,
     newPassword: string,
-    version: number
+    version: number,
   ) {
     const apiRoot = this.getApiRoot(this.client);
 
@@ -411,7 +411,7 @@ export class ApiClient extends CreateApiClient {
     if (!apiRoot) throw new Error("Unauthorized action");
 
     const shippingAddress = customer?.addresses?.find(
-      (addr) => addr.id === customer.defaultShippingAddressId
+      (addr) => addr.id === customer.defaultShippingAddressId,
     );
 
     const countryFromCustomer = shippingAddress?.country;
@@ -445,7 +445,7 @@ export class ApiClient extends CreateApiClient {
   public async addProductToCart(
     productId: string,
     variantId: number = 1,
-    customer?: Customer
+    customer?: Customer,
   ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -470,7 +470,7 @@ export class ApiClient extends CreateApiClient {
         ],
       };
 
-      console.log("Add to cart payload", JSON.stringify(payload, null, 2));
+      // console.log("Add to cart payload", JSON.stringify(payload, null, 2));
 
       const updatedCart = await apiRoot
         .withProjectKey({ projectKey: this.PROJECT_KEY })
@@ -569,7 +569,7 @@ export class ApiClient extends CreateApiClient {
   async removeLineItemFromCart(
     cartId: string,
     version: number,
-    lineItemId: string
+    lineItemId: string,
   ) {
     const apiRoot = this.getApiRoot(this.client);
     if (!apiRoot) throw new Error("Unauthorized action");
@@ -598,7 +598,7 @@ export class ApiClient extends CreateApiClient {
   public async clearMyCart(
     cartId: string,
     version: number,
-    lineItemIds: string[]
+    lineItemIds: string[],
   ): Promise<Cart> {
     const apiRoot = this.getApiRoot(this.client);
     const body: MyCartUpdate = {

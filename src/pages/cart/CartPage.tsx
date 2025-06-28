@@ -60,10 +60,10 @@ const CartPage = () => {
 
       try {
         await applyPromoCode(promoCode.trim());
-        setPromoMessage("Promo code applied successfully!");
+        setPromoMessage(`Promo code applied! ${newDiscount * 100}% discount`);
         setPromoApplied(true);
       } catch {
-        setPromoMessage(`Promo code applied! ${newDiscount * 100}% discount`);
+        setPromoMessage("Failed to add promo code");
         setPromoApplied(false);
       }
     } else {

@@ -93,7 +93,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/products",
-        element: <ProductsPage />,
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <ProductsPage />
+          </Suspense>
+        ),
       },
       {
         path: "/product/:id",
@@ -105,15 +109,27 @@ const router = createBrowserRouter([
       },
       {
         path: "/category",
-        element: <CategoryPage />,
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <CategoryPage />
+          </Suspense>
+        ),
       },
       {
         path: "/category/:categorySlug",
-        element: <CategoryProductsPage />,
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <CategoryProductsPage />
+          </Suspense>
+        ),
       },
       {
         path: "/search",
-        element: <SearchResultsPage />,
+        element: (
+          <Suspense fallback={"Loading..."}>
+            <SearchResultsPage />
+          </Suspense>
+        ),
       },
       {
         path: "*",

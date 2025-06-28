@@ -7,7 +7,10 @@ import "./SearchResultsPage.css";
 
 const SearchResultsPage = () => {
   const location = useLocation();
-  const [results, setResults] = useState<MyProductsData[]>([]);
+  const [results, setResults] = useState<{
+    products: MyProductsData[];
+    total: number;
+  }>({ products: [], total: undefined });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -29,7 +32,7 @@ const SearchResultsPage = () => {
           setLoading(false);
         });
     } else {
-      setResults([]);
+      setResults({ products: [], total: undefined });
       setLoading(false);
     }
   }, [location.search]);
@@ -42,15 +45,17 @@ const SearchResultsPage = () => {
     <div className="main-container">
       <div className="search-results-container">
         <h2 className="search-results-title">
-          {results.length === 0
+          {results.total === 0
             ? `No results found for "${searchQuery}"`
-            : `Search Results for "${searchQuery}" (${results.length})`}
+            : `Search Results for "${searchQuery}" (${results.total})`}
         </h2>
 
         <ProductCatalog
-          propsLimit={results.length}
-          propsSort="name-asc"
           propsProducts={results}
+          propsArgs={{
+            limit: 10,
+            sort: "createdAt desc",
+          }}
         />
       </div>
     </div>
